@@ -2,18 +2,29 @@ package entity
 
 import (
 	"context"
+
 	"github.com/evrone/go-service-template/domain"
 )
 
-type UseCase struct {
+type useCase struct {
 	repository domain.EntityRepository
+	publisher  domain.EntityPublisher
 }
 
-func NewUsecase(repository domain.EntityRepository) domain.EntityUsecase {
-	return &UseCase{repository}
+func NewUseCase(repository domain.EntityRepository, publisher domain.EntityPublisher) domain.EntityUseCase {
+	return &useCase{repository, publisher}
 }
 
-func (u *UseCase) Get(ctx context.Context, ID int) (string, error) {
-	msg, err := u.repository.GetByID(ctx, ID)
-	return msg, err
+func (u *useCase) Do(ctx context.Context, entity domain.Entity) error {
+	entity, err := u.repository.Get(ctx, entity)
+	if err != nil {
+		return err
+	}
+
+	err = u.publisher.Publish(context.Background(), entity)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }

@@ -2,15 +2,19 @@ package main
 
 import (
 	"github.com/evrone/go-service-template/entity"
-	"github.com/evrone/go-service-template/entity/repository/postgres"
-	"github.com/evrone/go-service-template/internal/ebus/rmq"
+	"github.com/evrone/go-service-template/entity/publisher"
+	"github.com/evrone/go-service-template/entity/repository"
+	"github.com/evrone/go-service-template/internal/consumer"
 )
 
 func main() {
 	connectDB := "OpenPostgresWithConfig"
-	entityRepository := postgres.NewEntityRepository(connectDB)
-	entityUsecase := entity.NewUsecase(entityRepository)
+	entityRepository := repository.NewPostgresEntityRepository(connectDB)
 
-	ebus := rmq.NewRabbitMQ(entityUsecase)
-	ebus.Start(41)
+	connectRmq := "RabbitMQ"
+	rmqPublisher := publisher.NewRmqPublisher(connectRmq)
+
+	entityUseCase := entity.NewUseCase(entityRepository, rmqPublisher)
+	rmqConsumer := consumer.NewRmqConsumer(connectRmq, entityUseCase)
+	rmqConsumer.Start()
 }

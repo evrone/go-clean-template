@@ -2,12 +2,18 @@ package domain
 
 import "context"
 
-type Entity struct{}
+type Entity struct {
+	Msg string
+}
 
-type EntityUsecase interface {
-	Get(ctx context.Context, ID int) (string, error)
+type EntityUseCase interface {
+	Do(ctx context.Context, entity Entity) error
 }
 
 type EntityRepository interface {
-	GetByID(ctx context.Context, ID int) (string, error)
+	Get(ctx context.Context, entity Entity) (Entity, error)
+}
+
+type EntityPublisher interface {
+	Publish(ctx context.Context, entity Entity) error
 }
