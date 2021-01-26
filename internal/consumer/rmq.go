@@ -16,6 +16,6 @@ func NewRmqConsumer(connect string, usecase domain.EntityUseCase) *RmqConsumer {
 }
 
 func (m *RmqConsumer) Start() {
-	entity := &domain.Entity{Msg: "41"}
+	entity := &domain.Entity{Message: "41"}
 	_ = m.useCase.Do(context.Background(), *entity)
 }

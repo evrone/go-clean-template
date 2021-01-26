@@ -3,15 +3,18 @@ package repository
 import (
 	"context"
 
+	"github.com/evrone/go-service-template/pkg/postgres"
+
 	"github.com/evrone/go-service-template/domain"
 )
 
 type postgresEntityRepository struct {
-	connect string
+	postgres.Postgres
+	tableName string
 }
 
-func NewPostgresEntityRepository(connect string) domain.EntityRepository {
-	return &postgresEntityRepository{connect}
+func NewPostgresEntityRepository(pg postgres.Postgres, tableName string) domain.EntityRepository {
+	return &postgresEntityRepository{pg, tableName}
 }
 
 func (r *postgresEntityRepository) Get(ctx context.Context, entity domain.Entity) (domain.Entity, error) {

@@ -3,7 +3,7 @@ package domain
 import "context"
 
 type Entity struct {
-	Msg string
+	Message string
 }
 
 type EntityUseCase interface {

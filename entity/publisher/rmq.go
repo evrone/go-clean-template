@@ -16,7 +16,7 @@ func NewRmqPublisher(connect string) domain.EntityPublisher {
 }
 
 func (p *rmqPublisher) Publish(ctx context.Context, entity domain.Entity) error {
-	fmt.Println(entity.Msg)
+	fmt.Println(entity.Message)
 
 	return nil
 }
