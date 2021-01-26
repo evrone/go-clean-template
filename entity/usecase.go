@@ -11,8 +11,8 @@ type useCase struct {
 	publisher  domain.EntityPublisher
 }
 
-func NewUseCase(repository domain.EntityRepository, publisher domain.EntityPublisher) domain.EntityUseCase {
-	return &useCase{repository, publisher}
+func NewUseCase(r domain.EntityRepository, p domain.EntityPublisher) domain.EntityUseCase {
+	return &useCase{r, p}
 }
 
 func (u *useCase) Do(ctx context.Context, entity domain.Entity) error {

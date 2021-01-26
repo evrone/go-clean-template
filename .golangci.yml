@@ -1,0 +1,125 @@
+linters-settings:
+  gci:
+    local-prefixes: github.com/neprja/app
+  govet:
+    check-shadowing: true
+    settings:
+      printf:
+        funcs:
+          - (github.com/golangci/golangci-lint/pkg/logutils.Log).Infof
+          - (github.com/golangci/golangci-lint/pkg/logutils.Log).Warnf
+          - (github.com/golangci/golangci-lint/pkg/logutils.Log).Errorf
+          - (github.com/golangci/golangci-lint/pkg/logutils.Log).Fatalf
+  misspell:
+    locale: US
+  gofumpt:
+    extra-rules: true
+  dupl:
+    threshold: 100
+  errorlint:
+    errorf: true
+  funlen:
+    lines: 60
+    statements: 40
+  gocognit:
+    min-complexity: 10
+  gocyclo:
+    min-complexity: 10
+  goconst:
+    min-len: 2
+    min-occurrences: 2
+  gocritic:
+    enabled-tags:
+      - diagnostic
+      - experimental
+      - opinionated
+      - performance
+      - style
+    disabled-checks:
+      - dupImport # https://github.com/go-critic/go-critic/issues/845
+  golint:
+    min-confidence: 0
+  lll:
+    line-length: 120
+  maligned:
+    suggest-new: true
+  nestif:
+    min-complexity: 4
+  nolintlint:
+    allow-leading-space: true
+    allow-unused: false
+    require-explanation: false
+    require-specific: false
+
+linters:
+  disable-all: true
+  enable:
+    - godot
+    - gofumpt
+    - gci
+    - misspell
+    - whitespace
+
+#    - asciicheck
+#    - bodyclose
+#    - deadcode
+#    - dogsled
+#    - dupl
+#    - errcheck
+#    - errorlint
+#    - exhaustive
+#    - exportloopref
+#    - funlen
+#    - gochecknoglobals
+#    - gochecknoinits
+#    - gocognit
+#    - goconst
+#    - gocritic
+#    - gocyclo
+#    - godox
+#    - goerr113
+#    - golint
+#    - gomnd
+#    - goprintffuncname
+#    - gosec
+#    - gosimple
+#    - govet
+#    - ineffassign
+#    - interfacer
+#    - lll
+#    - maligned
+#    - nakedret
+#    - nestif
+#    - nlreturn
+#    - noctx
+#    - nolintlint
+#    - paralleltest
+#    - prealloc
+#    - rowserrcheck
+#    - scopelint
+#    - sqlclosecheck
+#    - staticcheck
+#    - structcheck
+#    - stylecheck
+#    - testpackage
+#    - tparallel
+#    - unconvert
+#    - unparam
+#    - unused
+#    - varcheck
+#    - wrapcheck
+#    - wsl
+
+issues:
+  exclude-rules:
+    - path: _test\.go
+      linters:
+        - gomnd
+        - funlen
+
+#run:
+#  skip-dirs:
+#    - test/testdata_etc
+
+#  skip-files:
+#    - .*_test.go
