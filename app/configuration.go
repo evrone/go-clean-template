@@ -7,24 +7,24 @@ import (
 )
 
 type Conf struct {
-	AppProbePort string
-	PgURL        string
-	PgPoolMax    int
-	PgTableName  string
-	RmqURL       string
-	RmqQueueName string
+	HttpApiPort    string
+	HttpProbePort  string
+	PgURL          string
+	PgPoolMax      int
+	PgConnAttempts int
+	RmqURL         string
+	RmqQueueName   string
 }
 
 func NewConfig() Conf {
 	return Conf{
-		AppProbePort: strEnv("APP_PROBE_PORT"),
-
-		PgURL:       strEnv("PG_URL"),
-		PgPoolMax:   intEnv("PG_POOL_MAX"),
-		PgTableName: strEnv("PG_TABLE_NAME"),
-
-		RmqURL:       strEnv("RMQ_URL"),
-		RmqQueueName: strEnv("RMQ_QUEUE_NAME"),
+		HttpApiPort:    strEnv("HTTP_API_PORT"),
+		HttpProbePort:  strEnv("HTTP_PROBE_PORT"),
+		PgURL:          strEnv("PG_URL"),
+		PgPoolMax:      intEnv("PG_POOL_MAX"),
+		PgConnAttempts: intEnv("PG_CONN_ATTEMPTS"),
+		RmqURL:         strEnv("RMQ_URL"),
+		RmqQueueName:   strEnv("RMQ_QUEUE_NAME"),
 	}
 }
 

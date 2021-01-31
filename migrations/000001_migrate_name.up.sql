@@ -1,4 +1,5 @@
-CREATE TABLE IF NOT EXISTS entity(
+CREATE TABLE IF NOT EXISTS history(
     id serial PRIMARY KEY,
-    message VARCHAR(255)
+    original VARCHAR(255),
+    translation VARCHAR(255)
 );

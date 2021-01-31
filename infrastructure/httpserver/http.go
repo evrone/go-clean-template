@@ -1,12 +1,10 @@
-package server
+package httpserver
 
 import (
 	"context"
 	"net"
 	"net/http"
 	"time"
-
-	"github.com/evrone/go-service-template/internal/router"
 )
 
 type Server struct {
@@ -14,11 +12,11 @@ type Server struct {
 	errors chan error
 }
 
-func NewServer(router *router.ProbeRouter, port string) *Server {
+func NewServer(handler http.Handler, port string) *Server {
 	return &Server{
 		server: http.Server{
 			Addr:    net.JoinHostPort("", port),
-			Handler: router.ServeMux,
+			Handler: handler,
 		},
 		errors: make(chan error, 1),
 	}

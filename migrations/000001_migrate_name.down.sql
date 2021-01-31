@@ -1,1 +1,1 @@
-DROP TABLE IF EXISTS entity;
+DROP TABLE IF EXISTS history;

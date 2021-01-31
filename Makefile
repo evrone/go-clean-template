@@ -1,3 +1,9 @@
+include .env
+export
+
+run:
+	go mod download && GIN_MODE=debug CGO_ENABLED=0 go run ./app
+
 up:
 	docker-compose up --build -d --remove-orphans && docker-compose logs -f
 
@@ -11,9 +17,9 @@ mock:
 	mockery --all
 
 migrate:
-	migrate -path migrations -database 'postgres://user:pass@localhost:5432/postgres?sslmode=disable' up
+	migrate -path migrations -database '$(PG_URL)?sslmode=disable' up
 
 create:
 	migrate create -ext sql -dir migrations -seq 'migrate_name'
 
-.PHONY: build, up, down, test, mock, migrate, create
+.PHONY: run, up, down, test, mock, migrate, create

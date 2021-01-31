@@ -5,34 +5,36 @@ import (
 	"os"
 	"os/signal"
 	"syscall"
-	"time"
 
-	"github.com/evrone/go-service-template/internal/router"
-	"github.com/evrone/go-service-template/pkg/server"
+	"github.com/evrone/go-service-template/business-logic/entity"
+	"github.com/evrone/go-service-template/business-logic/entity/repository"
+	"github.com/evrone/go-service-template/business-logic/entity/translator"
+	"github.com/evrone/go-service-template/entrypoints/http/api/v1"
+	"github.com/evrone/go-service-template/infrastructure/postgres"
 
-	"github.com/evrone/go-service-template/entity"
-	"github.com/evrone/go-service-template/entity/publisher"
-	"github.com/evrone/go-service-template/entity/repository"
-	"github.com/evrone/go-service-template/internal/consumer"
-	"github.com/evrone/go-service-template/pkg/postgres"
+	"github.com/evrone/go-service-template/infrastructure/httpserver"
+
+	"github.com/evrone/go-service-template/entrypoints/http/probe"
+
+	_ "github.com/golang-migrate/migrate/v4/database/postgres"
+	_ "github.com/golang-migrate/migrate/v4/source/file"
 )
 
 func main() {
-	time.Sleep(time.Second * 3)
-
 	conf := NewConfig()
-	db := postgres.NewPostgres(conf.PgURL, conf.PgPoolMax)
-	entityRepository := repository.NewPostgresEntityRepository(db, conf.PgTableName)
+	pg := postgres.NewPostgres(conf.PgURL, conf.PgPoolMax, conf.PgConnAttempts)
+	pgRepository := repository.NewPostgresEntityRepository(pg)
 
-	connectRmq := "RabbitMQ"
-	rmqPublisher := publisher.NewRmqPublisher(connectRmq)
+	translateApi := translator.NewGoogleTranslator()
 
-	entityUseCase := entity.NewUseCase(entityRepository, rmqPublisher)
-	rmqConsumer := consumer.NewRmqConsumer(connectRmq, entityUseCase)
-	rmqConsumer.Start()
+	entityUseCase := entity.NewUseCase(pgRepository, translateApi)
 
-	probeRouter := router.NewProbeRouter()
-	probeServer := server.NewServer(probeRouter, conf.AppProbePort)
+	apiRouter := v1.NewApiRouter(entityUseCase)
+	apiServer := httpserver.NewServer(apiRouter, conf.HttpApiPort)
+	apiServer.Start()
+
+	probeRouter := probe.NewHealthRouter()
+	probeServer := httpserver.NewServer(probeRouter, conf.HttpProbePort)
 	probeServer.Start()
 
 	// Graceful shutdown
@@ -44,10 +46,19 @@ func main() {
 		log.Println("main - Interrupt signal", s.String()) // TODO
 	case err := <-probeServer.Notify():
 		log.Println("main - probeServer.Notify error", err.Error()) // TODO
+	case err := <-apiServer.Notify():
+		log.Println("main - apiServer.Notify error", err.Error()) // TODO
 	}
 
 	err := probeServer.Stop()
 	if err != nil {
 		log.Println("main - probeServer.Stop error") // TODO
 	}
+
+	err = apiServer.Stop()
+	if err != nil {
+		log.Println("main - apiServer.Stop error") // TODO
+	}
+
+	pg.Close()
 }
