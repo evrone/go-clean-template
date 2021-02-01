@@ -1,0 +1,31 @@
+version: '3.9'
+services:
+
+#  app:
+#    build: .
+#    container_name: app
+#    image: app
+#    env_file:
+#      - ./.env
+#    environment:
+#      PG_URL: 'postgres://user:pass@db:5432/postgres'
+#    ports:
+#      - 8080:8080 # api
+#      - 8081:8081 # K8s probe
+#    depends_on:
+#      - db
+
+  db:
+    container_name: postgres
+    image: postgres
+    volumes:
+      - pg-data:/var/lib/postgresql/data
+    environment:
+      POSTGRES_USER: 'user'
+      POSTGRES_PASSWORD: 'pass'
+      POSTGRES_DB: 'postgres'
+    ports:
+      - 5432:5432
+
+volumes:
+  pg-data:
