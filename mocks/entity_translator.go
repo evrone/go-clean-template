@@ -3,7 +3,7 @@
 package mocks
 
 import (
-	domain "github.com/evrone/go-service-template/business-logic/domain"
+	domain "github.com/evrone/go-service-template/internal/business-logic/domain"
 	mock "github.com/stretchr/testify/mock"
 )
 
@@ -12,20 +12,20 @@ type EntityTranslator struct {
 	mock.Mock
 }
 
-// Translate provides a mock function with given fields: _a0
-func (_m *EntityTranslator) Translate(_a0 domain.Entity) (domain.Entity, error) {
-	ret := _m.Called(_a0)
+// Translate provides a mock function with given fields: entity
+func (_m *EntityTranslator) Translate(entity domain.Entity) (domain.Entity, error) {
+	ret := _m.Called(entity)
 
 	var r0 domain.Entity
 	if rf, ok := ret.Get(0).(func(domain.Entity) domain.Entity); ok {
-		r0 = rf(_a0)
+		r0 = rf(entity)
 	} else {
 		r0 = ret.Get(0).(domain.Entity)
 	}
 
 	var r1 error
 	if rf, ok := ret.Get(1).(func(domain.Entity) error); ok {
-		r1 = rf(_a0)
+		r1 = rf(entity)
 	} else {
 		r1 = ret.Error(1)
 	}

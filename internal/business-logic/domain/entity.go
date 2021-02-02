@@ -1,6 +1,8 @@
 package domain
 
-import "context"
+import (
+	"context"
+)
 
 type Entity struct {
 	Original    string `json:"original" binding:"required"`

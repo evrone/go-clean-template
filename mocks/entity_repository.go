@@ -5,7 +5,7 @@ package mocks
 import (
 	context "context"
 
-	domain "github.com/evrone/go-service-template/business-logic/domain"
+	domain "github.com/evrone/go-service-template/internal/business-logic/domain"
 	mock "github.com/stretchr/testify/mock"
 )
 
@@ -37,13 +37,13 @@ func (_m *EntityRepository) GetHistory(_a0 context.Context) ([]domain.Entity, er
 	return r0, r1
 }
 
-// Store provides a mock function with given fields: _a0, _a1
-func (_m *EntityRepository) Store(_a0 context.Context, _a1 domain.Entity) error {
-	ret := _m.Called(_a0, _a1)
+// Store provides a mock function with given fields: ctx, entity
+func (_m *EntityRepository) Store(ctx context.Context, entity domain.Entity) error {
+	ret := _m.Called(ctx, entity)
 
 	var r0 error
 	if rf, ok := ret.Get(0).(func(context.Context, domain.Entity) error); ok {
-		r0 = rf(_a0, _a1)
+		r0 = rf(ctx, entity)
 	} else {
 		r0 = ret.Error(0)
 	}

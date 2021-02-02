@@ -3,7 +3,7 @@ package v1
 import (
 	"net/http"
 
-	"github.com/evrone/go-service-template/business-logic/domain"
+	"github.com/evrone/go-service-template/internal/business-logic/domain"
 
 	"github.com/gin-gonic/gin"
 )

@@ -1,7 +1,6 @@
 package probe
 
 import (
-	"log"
 	"net/http"
 )
 
@@ -19,6 +18,5 @@ func NewHealthRouter() http.Handler {
 }
 
 func (h *healthRouter) liveness(w http.ResponseWriter, r *http.Request) {
-	log.Println("It's alive!")
 	w.WriteHeader(http.StatusOK)
 }

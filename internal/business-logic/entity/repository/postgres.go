@@ -3,9 +3,9 @@ package repository
 import (
 	"context"
 
-	"github.com/evrone/go-service-template/infrastructure/postgres"
+	"github.com/evrone/go-service-template/pkg/postgres"
 
-	"github.com/evrone/go-service-template/business-logic/domain"
+	"github.com/evrone/go-service-template/internal/business-logic/domain"
 )
 
 type postgresEntityRepository struct {
