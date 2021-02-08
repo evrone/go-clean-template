@@ -3,7 +3,7 @@ package translator
 import (
 	translator "github.com/Conight/go-googletrans"
 
-	"github.com/evrone/go-service-template/business-logic/domain"
+	"github.com/evrone/go-service-template/internal/business-logic/domain"
 )
 
 type GoogleTranslator struct{}

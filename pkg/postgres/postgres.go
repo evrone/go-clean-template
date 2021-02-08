@@ -2,8 +2,9 @@ package postgres
 
 import (
 	"context"
-	"log"
 	"time"
+
+	"github.com/evrone/go-service-template/internal/business-logic/domain"
 
 	"github.com/Masterminds/squirrel"
 	"github.com/jackc/pgx/v4/pgxpool"
@@ -17,7 +18,7 @@ type Postgres struct {
 func NewPostgres(url string, maxPoolSize, connAttempts int) Postgres {
 	poolConfig, err := pgxpool.ParseConfig(url)
 	if err != nil {
-		log.Fatalf("postgres connect error: %s", err)
+		domain.Logger.Fatal(err, "postgres connect error")
 	}
 
 	poolConfig.MaxConns = int32(maxPoolSize)
@@ -30,19 +31,20 @@ func NewPostgres(url string, maxPoolSize, connAttempts int) Postgres {
 		if errConn == nil {
 			break
 		}
+		domain.Logger.Debug("postgres is trying to connect",
+			domain.Field{Key: "attempts left", Val: connAttempts},
+		)
 
-		log.Printf("postgres is trying to connect, attempts left: %d", connAttempts)
-
-		time.Sleep(time.Second)
+		time.Sleep(time.Second * 2)
 
 		connAttempts--
 	}
 
 	if errConn != nil {
-		log.Fatalf("postgres connect error: %s", errConn)
+		domain.Logger.Fatal(errConn, "postgres connect error")
 	}
 
-	log.Print("postgres connected")
+	domain.Logger.Info("postgres connected")
 
 	builder := squirrel.StatementBuilder.PlaceholderFormat(squirrel.Dollar)
 

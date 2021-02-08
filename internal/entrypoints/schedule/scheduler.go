@@ -3,7 +3,7 @@ package schedule
 import (
 	"time"
 
-	"github.com/evrone/go-service-template/business-logic/domain"
+	"github.com/evrone/go-service-template/internal/business-logic/domain"
 )
 
 type Scheduler struct {
@@ -30,7 +30,7 @@ func (s *Scheduler) Start() {
 			default:
 			}
 
-			s.useCase.DoTranslate()
+			// s.useCase.DoTranslate()
 		}
 	}()
 }
