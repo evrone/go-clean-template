@@ -4,7 +4,7 @@ import (
 	"context"
 	"time"
 
-	"github.com/evrone/go-service-template/internal/business-logic/domain"
+	"github.com/evrone/go-service-template/internal/domain"
 
 	"github.com/Masterminds/squirrel"
 	"github.com/jackc/pgx/v4/pgxpool"

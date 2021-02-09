@@ -1,0 +1,96 @@
+basePath: /api/v1/
+definitions:
+  domain.Translation:
+    properties:
+      destination:
+        example: en
+        type: string
+      original:
+        example: текст для перевода
+        type: string
+      source:
+        example: auto
+        type: string
+      translation:
+        example: text for translation
+        type: string
+    type: object
+  v1.errorResponse:
+    properties:
+      error:
+        example: message
+        type: string
+    type: object
+  v1.translationInput:
+    properties:
+      destination:
+        example: en
+        type: string
+      original:
+        example: текст для перевода
+        type: string
+      source:
+        example: auto
+        type: string
+    required:
+    - destination
+    - original
+    - source
+    type: object
+host: localhost:8080
+info:
+  contact: {}
+  description: Using a translation service as an example
+  title: Go Service Template API
+  version: "1.0"
+paths:
+  /translation/do-translate:
+    post:
+      consumes:
+      - application/json
+      description: Translate a text
+      operationId: do-translate
+      parameters:
+      - description: Set up translation
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/v1.translationInput'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/domain.Translation'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/v1.errorResponse'
+      summary: Translate
+      tags:
+      - translation
+  /translation/history:
+    get:
+      consumes:
+      - application/json
+      description: Show all translation history
+      operationId: history
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/domain.Translation'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/v1.errorResponse'
+      summary: Show history
+      tags:
+      - translation
+swagger: "2.0"

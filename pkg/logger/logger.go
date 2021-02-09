@@ -3,7 +3,7 @@ package logger
 import (
 	"fmt"
 
-	"github.com/evrone/go-service-template/internal/business-logic/domain"
+	"github.com/evrone/go-service-template/internal/domain"
 
 	"github.com/rollbar/rollbar-go"
 
@@ -21,23 +21,19 @@ func NewAppLogger(zap *ZapLogger, rollbar *RollbarLogger) domain.Log {
 
 func (l *appLogger) Debug(msg string, fields ...domain.Field) {
 	if fields == nil {
-		l.rollbar.Message(rollbar.DEBUG, msg)
 		l.zap.Debug(msg)
 		return
 	}
 
-	l.rollbar.MessageWithExtras(rollbar.DEBUG, msg, rollbarMap(fields))
 	l.zap.Debug(msg, zapFields(fields)...)
 }
 
 func (l *appLogger) Info(msg string, fields ...domain.Field) {
 	if fields == nil {
-		l.rollbar.Message(rollbar.INFO, msg)
 		l.zap.Info(msg)
 		return
 	}
 
-	l.rollbar.MessageWithExtras(rollbar.INFO, msg, rollbarMap(fields))
 	l.zap.Info(msg, zapFields(fields)...)
 }
 
