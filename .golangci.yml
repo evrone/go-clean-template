@@ -47,7 +47,6 @@ linters-settings:
 linters:
   disable-all: true
   enable:
-    - godot
     - gofumpt
     - gci
     - misspell
@@ -102,6 +101,7 @@ linters:
 #    - varcheck
 #    - wrapcheck
 #    - wsl
+#    - godot
 
 issues:
   exclude-rules:

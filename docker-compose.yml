@@ -11,7 +11,6 @@ services:
 #      PG_URL: 'postgres://user:pass@db:5432/postgres'
 #    ports:
 #      - 8080:8080 # api
-#      - 8081:8081 # K8s probe
 #    depends_on:
 #      - db
 

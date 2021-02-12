@@ -1,13 +1,13 @@
 include .env
 export
 
-run:
+run: swag
 	go mod download && GIN_MODE=debug CGO_ENABLED=0 go run ./cmd/app
 
-up:
+compose-up:
 	docker-compose up --build -d --remove-orphans && docker-compose logs -f
 
-down:
+compose-down:
 	docker-compose down --remove-orphans
 
 test:
@@ -16,10 +16,13 @@ test:
 mock:
 	mockery --all -r --case snake
 
+migrate-create:
+	migrate create -ext sql -dir migrations 'migrate_name'
+
 migrate:
 	migrate -path migrations -database '$(PG_URL)?sslmode=disable' up
 
-create:
-	migrate create -ext sql -dir migrations 'migrate_name'
+swag:
+	swag init -g internal/app/app.go
 
-.PHONY: run, up, down, test, mock, migrate, create
+.PHONY: run, compose-up, compose-down, test, mock, migrate-create, migrate, swag

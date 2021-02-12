@@ -11,7 +11,6 @@ type Conf struct {
 	RollbarAccessToken string
 	RollbarEnvironment string
 	HttpApiPort        string
-	HttpProbePort      string
 	PgURL              string
 	PgPoolMax          int
 	PgConnAttempts     int
@@ -25,7 +24,6 @@ func NewConfig() Conf {
 		RollbarAccessToken: strEnv("ROLLBAR_ACCESS_TOKEN"),
 		RollbarEnvironment: strEnv("ROLLBAR_ENVIRONMENT"),
 		HttpApiPort:        strEnv("HTTP_API_PORT"),
-		HttpProbePort:      strEnv("HTTP_PROBE_PORT"),
 		PgURL:              strEnv("PG_URL"),
 		PgPoolMax:          intEnv("PG_POOL_MAX"),
 		PgConnAttempts:     intEnv("PG_CONN_ATTEMPTS"),
