@@ -1,0 +1,11 @@
+# Step 1: Builder
+FROM golang:1.15.7-alpine3.13 as builder
+COPY . /app
+WORKDIR /app
+RUN go mod download -x && \
+    CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -x -o /bin/app ./cmd/app
+
+# Step 2: Final
+FROM alpine:3.13
+COPY --from=builder /bin/app /app
+CMD ["/app"]

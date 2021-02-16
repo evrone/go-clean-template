@@ -1,18 +1,18 @@
 version: '3.9'
 services:
 
-#  app:
-#    build: .
-#    container_name: app
-#    image: app
-#    env_file:
-#      - ./.env
-#    environment:
-#      PG_URL: 'postgres://user:pass@db:5432/postgres'
-#    ports:
-#      - 8080:8080 # api
-#    depends_on:
-#      - db
+  app:
+    build: .
+    container_name: app
+    image: app
+    env_file:
+      - .env
+    environment:
+      PG_URL: 'postgres://user:pass@db:5432/postgres'
+    ports:
+      - 8080:8080
+    depends_on:
+      - db
 
   db:
     container_name: postgres

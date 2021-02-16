@@ -41,11 +41,11 @@ var doc = `{
                 "parameters": [
                     {
                         "description": "Set up translation",
-                        "name": "input",
+                        "name": "request",
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/v1.translationInput"
+                            "$ref": "#/definitions/v1.doTranslateRequest"
                         }
                     }
                 ],
@@ -59,7 +59,7 @@ var doc = `{
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/v1.errorResponse"
+                            "$ref": "#/definitions/v1.response"
                         }
                     }
                 }
@@ -83,16 +83,13 @@ var doc = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/domain.Translation"
-                            }
+                            "$ref": "#/definitions/v1.historyResponse"
                         }
                     },
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/v1.errorResponse"
+                            "$ref": "#/definitions/v1.response"
                         }
                     }
                 }
@@ -121,16 +118,7 @@ var doc = `{
                 }
             }
         },
-        "v1.errorResponse": {
-            "type": "object",
-            "properties": {
-                "error": {
-                    "type": "string",
-                    "example": "message"
-                }
-            }
-        },
-        "v1.translationInput": {
+        "v1.doTranslateRequest": {
             "type": "object",
             "required": [
                 "destination",
@@ -149,6 +137,26 @@ var doc = `{
                 "source": {
                     "type": "string",
                     "example": "auto"
+                }
+            }
+        },
+        "v1.historyResponse": {
+            "type": "object",
+            "properties": {
+                "history": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/domain.Translation"
+                    }
+                }
+            }
+        },
+        "v1.response": {
+            "type": "object",
+            "properties": {
+                "error": {
+                    "type": "string",
+                    "example": "message"
                 }
             }
         }

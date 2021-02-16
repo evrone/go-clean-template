@@ -6,18 +6,16 @@ import (
 	"os/signal"
 	"syscall"
 
+	v2 "github.com/evrone/go-service-template/internal/delivery/http/v2"
+
 	"github.com/gin-gonic/gin"
 
 	"github.com/evrone/go-service-template/internal/delivery/http/v1"
-	"github.com/evrone/go-service-template/internal/delivery/http/v2"
-
-	"github.com/evrone/go-service-template/internal/domain"
-
 	"github.com/evrone/go-service-template/pkg/logger"
 
+	"github.com/evrone/go-service-template/internal/repository"
 	"github.com/evrone/go-service-template/internal/service"
-	"github.com/evrone/go-service-template/internal/subservice/repository"
-	"github.com/evrone/go-service-template/internal/subservice/webapi"
+	"github.com/evrone/go-service-template/internal/webapi"
 	"github.com/evrone/go-service-template/pkg/postgres"
 
 	"github.com/evrone/go-service-template/pkg/httpserver"
@@ -40,26 +38,26 @@ func Run() {
 	defer zap.Close()
 	rollbar := logger.NewRollbarLogger(conf.RollbarAccessToken, conf.RollbarEnvironment)
 	defer rollbar.Close()
-	domain.Logger = logger.NewAppLogger(zap, rollbar)
+	logger.NewAppLogger(zap, rollbar, conf.ServiceName, conf.ServiceVersion)
 
 	// Repository
-	pg := postgres.NewPostgres(conf.PgURL, conf.PgPoolMax, conf.PgConnAttempts)
-	pgRepository := repository.NewPostgresEntityRepository(pg)
-	defer pg.Close()
+	postgresDB := postgres.NewPostgres(conf.PgURL, conf.PgPoolMax, conf.PgConnAttempts)
+	translationRepository := repository.NewTranslationRepository(postgresDB)
+	defer postgresDB.Close()
 
 	// WebAPI
-	googleTranslateAPI := webapi.NewGoogleTranslator()
+	translationWebAPI := webapi.NewTranslationWebAPI()
 
 	// Service
-	entityUseCase := service.NewUseCase(pgRepository, googleTranslateAPI)
+	translationService := service.NewTranslationService(translationRepository, translationWebAPI)
 
-	// Router
+	// REST
 	handler := gin.Default()
 	handler.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler)) // Swagger
 	handler.GET("/health", func(c *gin.Context) { c.Status(http.StatusOK) })   // K8s probe
 
-	v1.NewAPIRouter(handler, entityUseCase)
-	v2.NewAPIRouter(handler)
+	v1.NewRouter(handler, translationService)
+	v2.NewRouter(handler)
 
 	server := httpserver.NewServer(handler, conf.HttpApiPort)
 	server.Start()
@@ -70,13 +68,13 @@ func Run() {
 
 	select {
 	case s := <-interrupt:
-		domain.Logger.Info("main - signal: " + s.String())
+		logger.Info("app - Run - signal: " + s.String())
 	case err := <-server.Notify():
-		domain.Logger.Error(err, "main - server.Notify")
+		logger.Error(err, "app - Run - server.Notify")
 	}
 
 	err := server.Stop()
 	if err != nil {
-		domain.Logger.Error(err, "main - server.Stop")
+		logger.Error(err, "app - Run - server.Stop")
 	}
 }

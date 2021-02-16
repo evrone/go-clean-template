@@ -1,0 +1,95 @@
+version: 2.1
+
+parameters:
+  service_name:
+    type: string
+    default: "go-service-template"
+  image:
+    type: string
+    default: "evrone/go-service-template"
+
+orbs:
+  docker: circleci/docker@0.5.20
+
+executors:
+  default:
+    docker:
+      - image: circleci/golang:1.15
+
+aliases:
+  - &restore-mod-cache
+    keys:
+      - go-modules-v1-{{ checksum "go.sum" }}
+      - go-modules-v1-
+
+  - &save-mod-cache
+    key: go-modules-v1-{{ checksum "go.sum" }}
+    paths:
+      - "/go/pkg/mod"
+
+jobs:
+  linters:
+    executor:
+      name: default
+    steps:
+      - checkout
+      - run:
+          name: Install tools
+          command: .circleci/bin/install_tools.sh
+      - run:
+          name: Run Reviewdog
+          command: .circleci/bin/reviewdog.sh
+      - run:
+          name: Run Hadolint
+          command: .circleci/bin/hadolint.sh
+  tests:
+    executor:
+      name: default
+    steps:
+      - checkout
+      - restore_cache: *restore-mod-cache
+      - run:
+          name: Tests
+          command: go test ./...
+      - save_cache: *save-mod-cache
+
+workflows:
+  ci:
+    jobs:
+      - linters
+      - tests
+      # Build staging image
+      - docker/publish:
+          context: evrone-erp
+          image: << pipeline.parameters.image >>
+          tag: "staging-${CIRCLE_SHA1}"
+          requires:
+            - linters
+            - tests
+          filters:
+            branches:
+              only:
+                - develop
+      # Build QA image
+      - docker/publish:
+          context: evrone-erp
+          image: << pipeline.parameters.image >>
+          tag: "qa-${CIRCLE_SHA1}"
+          requires:
+            - linters
+            - tests
+          filters:
+            branches:
+              only:
+                - master
+                - /release\/.*/
+      # Build production image
+      - docker/publish:
+          context: evrone-erp
+          image: << pipeline.parameters.image >>
+          tag: "$CIRCLE_TAG"
+          filters:
+            tags:
+              only: /^v.*/
+            branches:
+              ignore: /.*/

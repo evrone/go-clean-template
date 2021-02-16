@@ -7,6 +7,8 @@ import (
 )
 
 type Conf struct {
+	ServiceName        string
+	ServiceVersion     string
 	ZapLogLevel        string
 	RollbarAccessToken string
 	RollbarEnvironment string
@@ -20,6 +22,8 @@ type Conf struct {
 
 func NewConfig() Conf {
 	return Conf{
+		ServiceName:        strEnv("SERVICE_NAME"),
+		ServiceVersion:     strEnv("SERVICE_VERSION"),
 		ZapLogLevel:        strEnv("ZAP_LOG_LEVEL"),
 		RollbarAccessToken: strEnv("ROLLBAR_ACCESS_TOKEN"),
 		RollbarEnvironment: strEnv("ROLLBAR_ENVIRONMENT"),
