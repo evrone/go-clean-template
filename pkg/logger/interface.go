@@ -1,3 +1,4 @@
+// Package logger implements abstract logger.
 package logger
 
 type Logger interface {

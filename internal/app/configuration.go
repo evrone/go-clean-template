@@ -12,7 +12,7 @@ type Conf struct {
 	ZapLogLevel        string
 	RollbarAccessToken string
 	RollbarEnvironment string
-	HttpApiPort        string
+	HTTPAPIPort        string
 	PgURL              string
 	PgPoolMax          int
 	PgConnAttempts     int
@@ -27,7 +27,7 @@ func NewConfig() Conf {
 		ZapLogLevel:        strEnv("ZAP_LOG_LEVEL"),
 		RollbarAccessToken: strEnv("ROLLBAR_ACCESS_TOKEN"),
 		RollbarEnvironment: strEnv("ROLLBAR_ENVIRONMENT"),
-		HttpApiPort:        strEnv("HTTP_API_PORT"),
+		HTTPAPIPort:        strEnv("HTTP_API_PORT"),
 		PgURL:              strEnv("PG_URL"),
 		PgPoolMax:          intEnv("PG_POOL_MAX"),
 		PgConnAttempts:     intEnv("PG_CONN_ATTEMPTS"),
@@ -41,8 +41,6 @@ func strEnv(env string) string {
 	if !ok || len(value) == 0 {
 		log.Fatalf("environment variable not declared: %s", env)
 	}
-
-	log.Println(env, "=", value)
 
 	return value
 }
@@ -59,8 +57,6 @@ func intEnv(env string) int {
 	if err != nil {
 		log.Fatalf("typecast error to integer: %s", err)
 	}
-
-	log.Println(env, "=", intValue)
 
 	return intValue
 }

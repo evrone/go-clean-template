@@ -8,7 +8,7 @@ run: swag
 	go mod download && GIN_MODE=debug CGO_ENABLED=0 go run ./cmd/app
 
 run-with-migrate:
-	go mod download && GIN_MODE=debug CGO_ENABLED=0 go run -tags migrate ./cmd/app
+	go mod download && CGO_ENABLED=0 go run -tags migrate ./cmd/app
 
 compose-up-db:
 	docker-compose up --build -d --remove-orphans db && docker-compose logs -f

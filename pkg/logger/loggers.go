@@ -4,7 +4,6 @@ import (
 	"fmt"
 
 	"github.com/rollbar/rollbar-go"
-
 	"go.uber.org/zap"
 )
 
@@ -32,6 +31,7 @@ func (l *loggers) warn(msg string, fields ...Field) {
 
 func (l *loggers) error(err error, msg string, fields ...Field) {
 	err = fmt.Errorf("%s: %w", msg, err)
+
 	fields = append(l.defaultFields, fields...)
 	l.rollbar.ErrorWithStackSkipWithExtras(rollbar.ERR, err, 3, rollbarMap(fields))
 	l.zap.Error(err.Error(), zapFields(fields)...)
@@ -39,6 +39,7 @@ func (l *loggers) error(err error, msg string, fields ...Field) {
 
 func (l *loggers) fatal(err error, msg string, fields ...Field) {
 	err = fmt.Errorf("%s: %w", msg, err)
+
 	fields = append(l.defaultFields, fields...)
 	l.rollbar.ErrorWithStackSkipWithExtras(rollbar.CRIT, err, 3, rollbarMap(fields))
 	l.rollbar.Close()
@@ -50,6 +51,7 @@ func rollbarMap(fields []Field) map[string]interface{} {
 	for _, field := range fields {
 		m[field.Key] = field.Val
 	}
+
 	return m
 }
 
@@ -58,5 +60,6 @@ func zapFields(fields []Field) []zap.Field {
 	for _, field := range fields {
 		s = append(s, zap.Reflect(field.Key, field.Val))
 	}
+
 	return s
 }

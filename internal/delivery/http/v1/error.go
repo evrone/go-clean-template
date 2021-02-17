@@ -1,8 +1,9 @@
 package v1
 
 import (
-	"github.com/evrone/go-service-template/pkg/logger"
 	"github.com/gin-gonic/gin"
+
+	"github.com/evrone/go-service-template/pkg/logger"
 )
 
 type response struct {

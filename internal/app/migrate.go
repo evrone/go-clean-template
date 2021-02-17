@@ -24,7 +24,7 @@ func init() {
 			break
 		}
 		log.Printf("Migrate: postgres is trying to connect, attempts left: %d", attempts)
-		time.Sleep(time.Second * 1)
+		time.Sleep(time.Second)
 		attempts--
 	}
 

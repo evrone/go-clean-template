@@ -1,3 +1,4 @@
+// Package app configures and runs application.
 package app
 
 import (
@@ -6,22 +7,18 @@ import (
 	"os/signal"
 	"syscall"
 
-	v2 "github.com/evrone/go-service-template/internal/delivery/http/v2"
-
 	"github.com/gin-gonic/gin"
+	swaggerFiles "github.com/swaggo/files"
+	ginSwagger "github.com/swaggo/gin-swagger"
 
-	"github.com/evrone/go-service-template/internal/delivery/http/v1"
-	"github.com/evrone/go-service-template/pkg/logger"
-
+	v1 "github.com/evrone/go-service-template/internal/delivery/http/v1"
+	v2 "github.com/evrone/go-service-template/internal/delivery/http/v2"
 	"github.com/evrone/go-service-template/internal/repository"
 	"github.com/evrone/go-service-template/internal/service"
 	"github.com/evrone/go-service-template/internal/webapi"
-	"github.com/evrone/go-service-template/pkg/postgres"
-
 	"github.com/evrone/go-service-template/pkg/httpserver"
-
-	swaggerFiles "github.com/swaggo/files"
-	ginSwagger "github.com/swaggo/gin-swagger"
+	"github.com/evrone/go-service-template/pkg/logger"
+	"github.com/evrone/go-service-template/pkg/postgres"
 )
 
 // @title       Go Service Template API
@@ -30,20 +27,25 @@ import (
 
 // @host        localhost:8080
 // @BasePath    /api/v1/
+
+// Run like main, runs application.
 func Run() {
 	conf := NewConfig()
 
 	// Logger
 	zap := logger.NewZapLogger(conf.ZapLogLevel)
 	defer zap.Close()
+
 	rollbar := logger.NewRollbarLogger(conf.RollbarAccessToken, conf.RollbarEnvironment)
 	defer rollbar.Close()
+
 	logger.NewAppLogger(zap, rollbar, conf.ServiceName, conf.ServiceVersion)
 
 	// Repository
 	postgresDB := postgres.NewPostgres(conf.PgURL, conf.PgPoolMax, conf.PgConnAttempts)
-	translationRepository := repository.NewTranslationRepository(postgresDB)
 	defer postgresDB.Close()
+
+	translationRepository := repository.NewTranslationRepository(postgresDB)
 
 	// WebAPI
 	translationWebAPI := webapi.NewTranslationWebAPI()
@@ -59,7 +61,7 @@ func Run() {
 	v1.NewRouter(handler, translationService)
 	v2.NewRouter(handler)
 
-	server := httpserver.NewServer(handler, conf.HttpApiPort)
+	server := httpserver.NewServer(handler, conf.HTTPAPIPort)
 	server.Start()
 
 	// Graceful shutdown

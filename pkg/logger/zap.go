@@ -34,5 +34,5 @@ func NewZapLogger(logLevel string) *ZapLogger {
 }
 
 func (z *ZapLogger) Close() {
-	_ = z.Logger.Sync()
+	_ = z.Logger.Sync() //nolint:errcheck //can't log it
 }

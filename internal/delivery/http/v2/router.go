@@ -1,3 +1,4 @@
+// Package v2 is example version 2 HTTP API
 package v2
 
 import (
@@ -5,8 +6,6 @@ import (
 
 	"github.com/gin-gonic/gin"
 )
-
-type router struct{}
 
 func NewRouter(handler *gin.Engine) {
 	api := handler.Group("/api/test")
