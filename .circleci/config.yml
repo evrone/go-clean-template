@@ -52,7 +52,7 @@ jobs:
           command: .circleci/bin/hadolint.sh
   tests:
     executor:
-      name: with-services
+      name: default
     steps:
       - checkout
       - restore_cache: *restore-mod-cache
