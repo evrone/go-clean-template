@@ -8,6 +8,7 @@ type RollbarLogger struct {
 
 func NewRollbarLogger(token, env string) *RollbarLogger {
 	client := rollbar.NewAsync(token, env, "", "", "")
+
 	return &RollbarLogger{client}
 }
 

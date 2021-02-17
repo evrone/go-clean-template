@@ -5,7 +5,6 @@ import (
 	"fmt"
 
 	"github.com/evrone/go-service-template/internal/domain"
-
 	"github.com/evrone/go-service-template/pkg/postgres"
 )
 
@@ -33,12 +32,15 @@ func (p *translationRepository) GetHistory(ctx context.Context) ([]domain.Transl
 	defer rows.Close()
 
 	entities := make([]domain.Translation, 0, 64)
+
 	for rows.Next() {
 		e := domain.Translation{}
+
 		err = rows.Scan(&e.Source, &e.Destination, &e.Original, &e.Translation)
 		if err != nil {
 			return nil, fmt.Errorf("translationRepository - GetHistory - rows.Scan: %w", err)
 		}
+
 		entities = append(entities, e)
 	}
 

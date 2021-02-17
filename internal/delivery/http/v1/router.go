@@ -1,8 +1,10 @@
+// Package v1 implements routing paths. Each services in own file.
 package v1
 
 import (
-	"github.com/evrone/go-service-template/internal/service"
 	"github.com/gin-gonic/gin"
+
+	"github.com/evrone/go-service-template/internal/service"
 )
 
 type router struct {

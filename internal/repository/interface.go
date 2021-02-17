@@ -1,3 +1,4 @@
+// Package repository implements databases for services. For each service in its own file.
 package repository
 
 import (

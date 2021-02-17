@@ -1,3 +1,4 @@
+// Package webapi implements google translator API.
 package webapi
 
 import "github.com/evrone/go-service-template/internal/domain"

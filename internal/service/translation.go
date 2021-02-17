@@ -4,11 +4,9 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/evrone/go-service-template/internal/repository"
-
-	"github.com/evrone/go-service-template/internal/webapi"
-
 	"github.com/evrone/go-service-template/internal/domain"
+	"github.com/evrone/go-service-template/internal/repository"
+	"github.com/evrone/go-service-template/internal/webapi"
 )
 
 type translationService struct {

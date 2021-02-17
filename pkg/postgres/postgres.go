@@ -1,13 +1,14 @@
+// Package postgres implements postgres connection.
 package postgres
 
 import (
 	"context"
 	"time"
 
-	"github.com/evrone/go-service-template/pkg/logger"
-
 	"github.com/Masterminds/squirrel"
 	"github.com/jackc/pgx/v4/pgxpool"
+
+	"github.com/evrone/go-service-template/pkg/logger"
 )
 
 type Postgres struct {
@@ -23,14 +24,17 @@ func NewPostgres(url string, maxPoolSize, connAttempts int) *Postgres {
 
 	poolConfig.MaxConns = int32(maxPoolSize)
 
-	var errConn error
-	var pool *pgxpool.Pool
+	var (
+		errConn error
+		pool    *pgxpool.Pool
+	)
 
 	for connAttempts > 0 {
 		pool, errConn = pgxpool.ConnectConfig(context.Background(), poolConfig)
 		if errConn == nil {
 			break
 		}
+
 		logger.Info("postgres is trying to connect",
 			logger.Field{Key: "attempts left", Val: connAttempts},
 		)

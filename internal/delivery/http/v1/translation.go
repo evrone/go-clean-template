@@ -3,10 +3,11 @@ package v1
 import (
 	"net/http"
 
-	"github.com/evrone/go-service-template/internal/domain"
-
-	_ "github.com/evrone/go-service-template/docs"
 	"github.com/gin-gonic/gin"
+
+	// Swagger docs.
+	_ "github.com/evrone/go-service-template/docs"
+	"github.com/evrone/go-service-template/internal/domain"
 )
 
 func (r *router) translationRouts(api *gin.RouterGroup) {
@@ -29,11 +30,12 @@ type historyResponse struct {
 // @Produce     json
 // @Success     200 {object} historyResponse
 // @Failure     400 {object} response
-// @Router      /translation/history [get]
+// @Router      /translation/history [get].
 func (r *router) history(c *gin.Context) {
 	translations, err := r.translationService.History()
 	if err != nil {
 		errorResponse(c, http.StatusBadRequest, err, "database problems")
+
 		return
 	}
 
@@ -55,11 +57,12 @@ type doTranslateRequest struct {
 // @Param       request body doTranslateRequest true "Set up translation"
 // @Success     200 {object} domain.Translation
 // @Failure     400 {object} response
-// @Router      /translation/do-translate [post]
+// @Router      /translation/do-translate [post].
 func (r *router) doTranslate(c *gin.Context) {
 	var request doTranslateRequest
 	if err := c.ShouldBindJSON(&request); err != nil {
 		errorResponse(c, http.StatusBadRequest, err, "invalid request body")
+
 		return
 	}
 
@@ -70,6 +73,7 @@ func (r *router) doTranslate(c *gin.Context) {
 	})
 	if err != nil {
 		errorResponse(c, http.StatusBadRequest, err, "translation service problems")
+
 		return
 	}
 
