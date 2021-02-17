@@ -1,7 +1,7 @@
 {
     "swagger": "2.0",
     "info": {
-        "description": "Using a translation service as an example.",
+        "description": "Using a translation service as an example",
         "title": "Go Service Template API",
         "contact": {},
         "version": "1.0"

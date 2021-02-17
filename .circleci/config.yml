@@ -15,14 +15,14 @@ executors:
   default:
     docker:
       - image: circleci/golang:1.15
-  with-services:
-    docker:
-      - image: circleci/golang:1.15
-      - image: circleci/postgres:11-alpine
-        environment:
-          POSTGRES_USER: postgres
-          POSTGRES_DB: template_test
-          POSTGRES_PASSWORD: ''
+#  with-services:
+#    docker:
+#      - image: circleci/golang:1.15
+#      - image: circleci/postgres:11-alpine
+#        environment:
+#          POSTGRES_USER: postgres
+#          POSTGRES_DB: template_test
+#          POSTGRES_PASSWORD: ''
 
 aliases:
   - &restore-mod-cache
@@ -57,7 +57,7 @@ jobs:
       - checkout
       - restore_cache: *restore-mod-cache
       # Wait for database
-      - run: dockerize -wait tcp://localhost:5432 -timeout 1m
+#      - run: dockerize -wait tcp://localhost:5432 -timeout 1m
       # APP DB init
       - run:
           name: Tests
