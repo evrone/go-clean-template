@@ -17,7 +17,9 @@ func (r *router) translationRouts(api *gin.RouterGroup) {
 	}
 }
 
-// TODO
+type historyResponse struct {
+	History []domain.Translation `json:"history"`
+}
 
 // @Summary     Show history
 // @Description Show all translation history
@@ -25,20 +27,20 @@ func (r *router) translationRouts(api *gin.RouterGroup) {
 // @Tags  	    translation
 // @Accept      json
 // @Produce     json
-// @Success     200 {array} domain.Translation
-// @Failure     400 {object} errorResponse
+// @Success     200 {object} historyResponse
+// @Failure     400 {object} response
 // @Router      /translation/history [get]
 func (r *router) history(c *gin.Context) {
-	entities, err := r.translationService.History()
+	translations, err := r.translationService.History()
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		errorResponse(c, http.StatusBadRequest, err, "database problems")
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"history": entities})
+	c.JSON(http.StatusOK, historyResponse{translations})
 }
 
-type translationInput struct {
+type doTranslateRequest struct {
 	Source      string `json:"source"       binding:"required"  example:"auto"`
 	Destination string `json:"destination"  binding:"required"  example:"en"`
 	Original    string `json:"original"     binding:"required"  example:"текст для перевода"`
@@ -50,26 +52,26 @@ type translationInput struct {
 // @Tags  	    translation
 // @Accept      json
 // @Produce     json
-// @Param       input body translationInput true "Set up translation"
+// @Param       request body doTranslateRequest true "Set up translation"
 // @Success     200 {object} domain.Translation
-// @Failure     400 {object} errorResponse
+// @Failure     400 {object} response
 // @Router      /translation/do-translate [post]
 func (r *router) doTranslate(c *gin.Context) {
-	var input translationInput
-	if err := c.ShouldBindJSON(&input); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+	var request doTranslateRequest
+	if err := c.ShouldBindJSON(&request); err != nil {
+		errorResponse(c, http.StatusBadRequest, err, "invalid request body")
 		return
 	}
 
-	translationResponse, err := r.translationService.DoTranslate(domain.Translation{
-		Source:      input.Source,
-		Destination: input.Destination,
-		Original:    input.Original,
+	translation, err := r.translationService.Translate(domain.Translation{
+		Source:      request.Source,
+		Destination: request.Destination,
+		Original:    request.Original,
 	})
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		errorResponse(c, http.StatusBadRequest, err, "translation service problems")
 		return
 	}
 
-	c.JSON(http.StatusOK, translationResponse)
+	c.JSON(http.StatusOK, translation)
 }

@@ -15,13 +15,7 @@ definitions:
         example: text for translation
         type: string
     type: object
-  v1.errorResponse:
-    properties:
-      error:
-        example: message
-        type: string
-    type: object
-  v1.translationInput:
+  v1.doTranslateRequest:
     properties:
       destination:
         example: en
@@ -36,6 +30,19 @@ definitions:
     - destination
     - original
     - source
+    type: object
+  v1.historyResponse:
+    properties:
+      history:
+        items:
+          $ref: '#/definitions/domain.Translation'
+        type: array
+    type: object
+  v1.response:
+    properties:
+      error:
+        example: message
+        type: string
     type: object
 host: localhost:8080
 info:
@@ -53,10 +60,10 @@ paths:
       parameters:
       - description: Set up translation
         in: body
-        name: input
+        name: request
         required: true
         schema:
-          $ref: '#/definitions/v1.translationInput'
+          $ref: '#/definitions/v1.doTranslateRequest'
       produces:
       - application/json
       responses:
@@ -67,7 +74,7 @@ paths:
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/v1.errorResponse'
+            $ref: '#/definitions/v1.response'
       summary: Translate
       tags:
       - translation
@@ -83,13 +90,11 @@ paths:
         "200":
           description: OK
           schema:
-            items:
-              $ref: '#/definitions/domain.Translation'
-            type: array
+            $ref: '#/definitions/v1.historyResponse'
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/v1.errorResponse'
+            $ref: '#/definitions/v1.response'
       summary: Show history
       tags:
       - translation

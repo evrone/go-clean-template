@@ -9,7 +9,7 @@ type router struct {
 	translationService service.Translation
 }
 
-func NewAPIRouter(handler *gin.Engine, translationService service.Translation) {
+func NewRouter(handler *gin.Engine, translationService service.Translation) {
 	r := &router{translationService}
 
 	api := handler.Group("/api/v1")

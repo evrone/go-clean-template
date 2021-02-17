@@ -2,50 +2,46 @@ package service
 
 import (
 	"context"
+	"fmt"
 
-	"github.com/evrone/go-service-template/internal/subservice/repository"
+	"github.com/evrone/go-service-template/internal/repository"
 
-	"github.com/evrone/go-service-template/internal/subservice/webapi"
+	"github.com/evrone/go-service-template/internal/webapi"
 
 	"github.com/evrone/go-service-template/internal/domain"
 )
 
-type useCase struct {
-	translationRepo   repository.Translation
-	translationWebAPI webapi.Translation
+type translationService struct {
+	repository repository.Translation
+	webAPI     webapi.Translation
 }
 
-func NewUseCase(repo repository.Translation, api webapi.Translation) Translation {
-	return &useCase{
-		translationRepo:   repo,
-		translationWebAPI: api,
+func NewTranslationService(repository repository.Translation, webAPI webapi.Translation) Translation {
+	return &translationService{
+		repository: repository,
+		webAPI:     webAPI,
 	}
 }
 
-func (u *useCase) History() ([]domain.Translation, error) {
-	entities, err := u.translationRepo.GetHistory(context.Background())
+func (u *translationService) History() ([]domain.Translation, error) {
+	translations, err := u.repository.GetHistory(context.Background())
 	if err != nil {
-		domain.Logger.Error(err, "History - translationRepo.GetHistory",
-			domain.Field{Key: "key", Val: "value"},
-		)
-		return nil, err
+		return nil, fmt.Errorf("translationService - History - u.repository.GetHistory: %w", err)
 	}
 
-	return entities, nil
+	return translations, nil
 }
 
-func (u *useCase) DoTranslate(entity domain.Translation) (domain.Translation, error) {
-	entity, err := u.translationWebAPI.Translate(entity)
+func (u *translationService) Translate(translation domain.Translation) (domain.Translation, error) {
+	translation, err := u.webAPI.Translate(translation)
 	if err != nil {
-		domain.Logger.Error(err, "DoTranslate - translationWebAPI.Translate")
-		return domain.Translation{}, err
+		return domain.Translation{}, fmt.Errorf("translationService - Translate - u.webAPI.Translate: %w", err)
 	}
 
-	err = u.translationRepo.Store(context.Background(), entity)
+	err = u.repository.Store(context.Background(), translation)
 	if err != nil {
-		domain.Logger.Error(err, "DoTranslate - translationRepo.Store")
-		return domain.Translation{}, err
+		return domain.Translation{}, fmt.Errorf("translationService - Translate - u.repository.Store: %w", err)
 	}
 
-	return entity, nil
+	return translation, nil
 }
