@@ -15,20 +15,11 @@ executors:
   default:
     docker:
       - image: circleci/golang:1.15
-#  with-services:
-#    docker:
-#      - image: circleci/golang:1.15
-#      - image: circleci/postgres:11-alpine
-#        environment:
-#          POSTGRES_USER: postgres
-#          POSTGRES_DB: template_test
-#          POSTGRES_PASSWORD: ''
 
 aliases:
   - &restore-mod-cache
     keys:
       - go-modules-v1-{{ checksum "go.sum" }}
-      - go-modules-v1-
 
   - &save-mod-cache
     key: go-modules-v1-{{ checksum "go.sum" }}
@@ -43,32 +34,60 @@ jobs:
       - checkout
       - run:
           name: Install tools
-          command: .circleci/bin/install_tools.sh
+          command: .circleci/bin/install.sh
       - run:
-          name: Run Reviewdog
-          command: .circleci/bin/reviewdog.sh
+          name: PATH for working without a relative path
+          command: echo "export PATH=$PATH:/home/circleci/project/bin" >> $BASH_ENV
       - run:
-          name: Run Hadolint
-          command: .circleci/bin/hadolint.sh
+          name: Dotenv > Reviewdog
+          command: .circleci/bin/reviewdog_dotenv.sh
+      - run:
+          name: Hadolint > Reviewdog
+          command: .circleci/bin/reviewdog_hadolint.sh
+      - run:
+          name: Golangci-lint > Reviewdog
+          command: .circleci/bin/reviewdog_golangci-lint.sh
+      - run:
+          name: Dotenv
+          command: dotenv-linter
+      - run:
+          name: Hadolint
+          command: git ls-files --exclude='Dockerfile*' --ignored | xargs hadolint
+      - run:
+          name: Golangci-lint
+          command: golangci-lint run
+
   tests:
     executor:
       name: default
     steps:
       - checkout
       - restore_cache: *restore-mod-cache
-      # Wait for database
-#      - run: dockerize -wait tcp://localhost:5432 -timeout 1m
-      # APP DB init
       - run:
           name: Tests
-          command: go test -v -cover -race ./internal/...
+          command: go test -v -race ./internal/...
       - save_cache: *save-mod-cache
+
+  integration-tests:
+    executor:
+      name: default
+    steps:
+      - checkout
+      - setup_remote_docker:
+          version: 19.03.13
+      - run:
+          name: Integration tests
+          command: docker-compose up --build -d && docker attach integration
+      - run:
+          name: Logs
+          command: docker-compose logs
 
 workflows:
   ci:
     jobs:
       - linters
       - tests
+      - integration-tests
       # # Build staging image
       # - docker/publish:
       #     context: evrone-erp

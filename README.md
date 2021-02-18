@@ -1,4 +1,4 @@
-Шаблон микросервиса на Go
+Шаблон сервиса на Go
 ===========================================
 С развитием любого проекта, логика работы приложения усложняется и запутывается.
 Разработка новых фич замедляется. Если не планировать архитектуру, довольно быстро
@@ -16,25 +16,23 @@ Quick start
 ```sh
 # DB container
 $ make compose-up-db
-# App local
+# Run app with migrations
 $ make run
 ```
 
-В контейнерах:
+В контейнерах (можно запускать в ci):
 ```sh
-# DB and app containers
+# DB + app + migrations + integration tests
 $ make compose-up
 ```
 
-Линтеры, тесты:
-```sh
-# Linters
-$ make lint
-# Unit tests
-$ make test
-# REST API tests
-$ make integration-test
+Для работы RollBar нужно установить переменные в .env:
 ```
+GOT_ROLLBAR_ACCESS_TOKEN=<TOKEN>
+GOT_ROLLBAR_ENVIRONMENT=<ENVIRONMENT>
+```
+
+
 
 Clean Architecture
 ----

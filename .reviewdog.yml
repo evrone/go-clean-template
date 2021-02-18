@@ -1,6 +1,0 @@
-runner:
-  dotenv-linter:
-    cmd: "./bin/dotenv-linter"
-
-  golangci-lint:
-    cmd: "./bin/golangci-lint run --out-format=line-number -c .golangci.yml ./..."

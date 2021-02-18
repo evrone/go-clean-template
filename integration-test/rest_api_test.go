@@ -1,16 +1,54 @@
 package rest_api_test
 
 import (
+	"log"
 	"net/http"
 	"os"
 	"testing"
+	"time"
 
 	. "github.com/Eun/go-hit"
 )
 
+var basePath string
+
 func TestMain(m *testing.M) {
+	host, ok := os.LookupEnv("HOST")
+	if !ok || len(host) == 0 {
+		log.Fatalf("environment variable not declared: HOST")
+	}
+
+	err := healthCheck(host, 20)
+	if err != nil {
+		log.Fatalf("Integration tests: host %s is not available: %s", host, err)
+	}
+
+	log.Printf("Integration tests: host %s is available", host)
+
+	basePath = "http://" + host + "/api/v1"
+
 	code := m.Run()
 	os.Exit(code)
+}
+
+func healthCheck(host string, attempts int) error {
+	var err error
+	healthPath := "http://" + host + "/health"
+
+	for attempts > 0 {
+		err = Do(Get(healthPath), Expect().Status().Equal(http.StatusOK))
+		if err == nil {
+			return nil
+		}
+
+		log.Printf("Integration tests: url %s is not available, attempts left: %d", healthPath, attempts)
+
+		time.Sleep(time.Second)
+
+		attempts--
+	}
+
+	return err
 }
 
 func TestDoTranslate(t *testing.T) {
@@ -21,7 +59,7 @@ func TestDoTranslate(t *testing.T) {
 	}`
 	Test(t,
 		Description("DoTranslate Success"),
-		Post("http://localhost:8080/api/v1/translation/do-translate"),
+		Post(basePath+"/translation/do-translate"),
 		Send().Headers("Content-Type").Add("application/json"),
 		Send().Body().String(body),
 		Expect().Status().Equal(http.StatusOK),
@@ -29,12 +67,12 @@ func TestDoTranslate(t *testing.T) {
 	)
 
 	body = `{
-			"destination": "en",
-			"original": "текст для перевода",
+		"destination": "en",
+		"original": "текст для перевода"
 	}`
 	Test(t,
 		Description("DoTranslate Fail"),
-		Post("http://localhost:8080/api/v1/translation/do-translate"),
+		Post(basePath+"/translation/do-translate"),
 		Send().Headers("Content-Type").Add("application/json"),
 		Send().Body().String(body),
 		Expect().Status().Equal(http.StatusBadRequest),
@@ -45,7 +83,7 @@ func TestDoTranslate(t *testing.T) {
 func TestHistory(t *testing.T) {
 	Test(t,
 		Description("History Success"),
-		Get("http://localhost:8080/api/v1/translation/history"),
+		Get(basePath+"/translation/history"),
 		Expect().Status().Equal(http.StatusOK),
 		Expect().Body().String().Contains(`{"history":[{`),
 	)

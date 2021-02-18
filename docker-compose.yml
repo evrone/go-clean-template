@@ -1,6 +1,18 @@
 version: '3.9'
 services:
 
+  db:
+    container_name: postgres
+    image: postgres
+    volumes:
+      - pg-data:/var/lib/postgresql/data
+    environment:
+      POSTGRES_USER: 'user'
+      POSTGRES_PASSWORD: 'pass'
+      POSTGRES_DB: 'postgres'
+    ports:
+      - 5432:5432
+
   app:
     build: .
     container_name: app
@@ -14,17 +26,16 @@ services:
     depends_on:
       - db
 
-  db:
-    container_name: postgres
-    image: postgres
-    volumes:
-      - pg-data:/var/lib/postgresql/data
+  integration:
+    build:
+      context: .
+      dockerfile: integration-test/Dockerfile
+    container_name: integration
+    image: integration
     environment:
-      GOT_POSTGRES_USER: 'user'
-      GOT_POSTGRES_PASSWORD: 'pass'
-      GOT_POSTGRES_DB: 'postgres'
-    ports:
-      - 5432:5432
+      HOST: 'app:8080'
+    depends_on:
+      - app
 
 volumes:
   pg-data:

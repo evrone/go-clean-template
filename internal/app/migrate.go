@@ -5,6 +5,7 @@ package app
 import (
 	"errors"
 	"log"
+	"os"
 	"time"
 
 	"github.com/golang-migrate/migrate/v4"
@@ -13,16 +14,25 @@ import (
 )
 
 func init() {
-	var err error
-	var m *migrate.Migrate
+	databaseURL, ok := os.LookupEnv("GOT_PG_URL")
+	if !ok || len(databaseURL) == 0 {
+		log.Fatalf("migrate: environment variable not declared: GOT_PG_URL")
+	}
 
-	attempts := 10
+	databaseURL += "?sslmode=disable"
+
+	var (
+		attempts = 20
+		err      error
+		m        *migrate.Migrate
+	)
+
 	for attempts > 0 {
-		m, err = migrate.New("file://migrations",
-			"postgres://user:pass@db:5432/postgres?sslmode=disable")
+		m, err = migrate.New("file://migrations", databaseURL)
 		if err == nil {
 			break
 		}
+
 		log.Printf("Migrate: postgres is trying to connect, attempts left: %d", attempts)
 		time.Sleep(time.Second)
 		attempts--
@@ -33,8 +43,15 @@ func init() {
 	}
 
 	err = m.Up()
+	defer m.Close()
 	if err != nil && !errors.Is(err, migrate.ErrNoChange) {
 		log.Fatalf("Migrate: up error: %s", err)
 	}
-	m.Close()
+
+	if errors.Is(err, migrate.ErrNoChange) {
+		log.Printf("Migrate: no change")
+		return
+	}
+
+	log.Printf("Migrate: up success")
 }
