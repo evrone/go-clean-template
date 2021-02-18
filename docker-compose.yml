@@ -20,9 +20,9 @@ services:
     volumes:
       - pg-data:/var/lib/postgresql/data
     environment:
-      GOT_POSTGRES_USER: 'user'
-      GOT_POSTGRES_PASSWORD: 'pass'
-      GOT_POSTGRES_DB: 'postgres'
+      POSTGRES_USER: 'user'
+      POSTGRES_PASSWORD: 'pass'
+      POSTGRES_DB: 'postgres'
     ports:
       - 5432:5432
 
