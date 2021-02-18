@@ -61,7 +61,7 @@ jobs:
       # APP DB init
       - run:
           name: Tests
-          command: go test ./...
+          command: go test -v -cover -race ./internal/...
       - save_cache: *save-mod-cache
 
 workflows:
