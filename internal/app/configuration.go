@@ -16,23 +16,19 @@ type Conf struct {
 	PgURL              string
 	PgPoolMax          int
 	PgConnAttempts     int
-	RmqURL             string
-	RmqQueueName       string
 }
 
 func NewConfig() Conf {
 	return Conf{
-		ServiceName:        strEnv("SERVICE_NAME"),
-		ServiceVersion:     strEnv("SERVICE_VERSION"),
-		ZapLogLevel:        strEnv("ZAP_LOG_LEVEL"),
-		RollbarAccessToken: strEnv("ROLLBAR_ACCESS_TOKEN"),
-		RollbarEnvironment: strEnv("ROLLBAR_ENVIRONMENT"),
-		HTTPAPIPort:        strEnv("HTTP_API_PORT"),
-		PgURL:              strEnv("PG_URL"),
-		PgPoolMax:          intEnv("PG_POOL_MAX"),
-		PgConnAttempts:     intEnv("PG_CONN_ATTEMPTS"),
-		RmqURL:             strEnv("RMQ_URL"),
-		RmqQueueName:       strEnv("RMQ_QUEUE_NAME"),
+		ServiceName:        strEnv("GOT_SERVICE_NAME"),
+		ServiceVersion:     strEnv("GOT_SERVICE_VERSION"),
+		ZapLogLevel:        strEnv("GOT_ZAP_LOG_LEVEL"),
+		RollbarAccessToken: strEnv("GOT_ROLLBAR_ACCESS_TOKEN"),
+		RollbarEnvironment: strEnv("GOT_ROLLBAR_ENVIRONMENT"),
+		HTTPAPIPort:        strEnv("GOT_HTTP_API_PORT"),
+		PgURL:              strEnv("GOT_PG_URL"),
+		PgPoolMax:          intEnv("GOT_PG_POOL_MAX"),
+		PgConnAttempts:     intEnv("GOT_PG_CONN_ATTEMPTS"),
 	}
 }
 

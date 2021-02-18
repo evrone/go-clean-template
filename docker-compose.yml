@@ -8,7 +8,7 @@ services:
     env_file:
       - .env
     environment:
-      PG_URL: 'postgres://user:pass@db:5432/postgres'
+      GOT_PG_URL: 'postgres://user:pass@db:5432/postgres'
     ports:
       - 8080:8080
     depends_on:
@@ -20,9 +20,9 @@ services:
     volumes:
       - pg-data:/var/lib/postgresql/data
     environment:
-      POSTGRES_USER: 'user'
-      POSTGRES_PASSWORD: 'pass'
-      POSTGRES_DB: 'postgres'
+      GOT_POSTGRES_USER: 'user'
+      GOT_POSTGRES_PASSWORD: 'pass'
+      GOT_POSTGRES_DB: 'postgres'
     ports:
       - 5432:5432
 

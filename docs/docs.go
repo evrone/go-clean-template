@@ -179,7 +179,7 @@ var SwaggerInfo = swaggerInfo{
 	BasePath:    "/api/v1/",
 	Schemes:     []string{},
 	Title:       "Go Service Template API",
-	Description: "Using a translation service as an example.",
+	Description: "Using a translation service as an example",
 }
 
 type s struct{}
