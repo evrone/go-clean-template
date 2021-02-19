@@ -58,12 +58,10 @@ jobs:
 #      - run:
 #          name: Run hadolint
 #          command: git ls-files --exclude='Dockerfile*' --ignored | xargs hadolint
-#      - run:
-#          name: Run golangci-lint
-#          command: golangci-lint run
       - run:
-          name: Bash
-          command: echo $PATH
+          name: Run golangci-lint
+          command: golangci-lint run
+
 
   tests:
     executor:
