@@ -48,13 +48,13 @@ jobs:
           name: Setup PATH for working without a relative path
           command: echo "export PATH=$PATH:/home/circleci/project/bin" >> $BASH_ENV
       - run:
-          name: Run Reviewdog - dotenv
+          name: Run dotenv > Reviewdog
           command: .circleci/bin/reviewdog_dotenv.sh
       - run:
-          name: Run Reviewdog - hadolint
+          name: Run hadolint > Reviewdog
           command: .circleci/bin/reviewdog_hadolint.sh
       - run:
-          name: Run Reviewdog - golangci-lint
+          name: Run golangci-lint > Reviewdog
           command: .circleci/bin/reviewdog_golangci-lint.sh
       - run:
           name: Run dotenv
