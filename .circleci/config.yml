@@ -42,25 +42,26 @@ jobs:
       - checkout
       - run:
           name: Install tools
-          command: .circleci/bin/install.sh
+          command: |
+            .circleci/bin/install.sh
       - run:
-          name: Setup Environment Variables
+          name: Setup PATH for working without a relative path
           command: echo "export PATH=$PATH:/home/circleci/project/bin" >> $BASH_ENV
-#      - run:
-#          name: Run Reviewdog - dotenv
-#          command: .circleci/bin/reviewdog_dotenv.sh
-#      - run:
-#          name: Run Reviewdog - hadolint
-#          command: .circleci/bin/reviewdog_hadolint.sh
-#      - run:
-#          name: Run Reviewdog - golangci-lint
-#          command: .circleci/bin/reviewdog_golangci-lint.sh
-#      - run:
-#          name: Run dotenv
-#          command: dotenv-linter
-#      - run:
-#          name: Run hadolint
-#          command: git ls-files --exclude='Dockerfile*' --ignored | xargs hadolint
+      - run:
+          name: Run Reviewdog - dotenv
+          command: .circleci/bin/reviewdog_dotenv.sh
+      - run:
+          name: Run Reviewdog - hadolint
+          command: .circleci/bin/reviewdog_hadolint.sh
+      - run:
+          name: Run Reviewdog - golangci-lint
+          command: .circleci/bin/reviewdog_golangci-lint.sh
+      - run:
+          name: Run dotenv
+          command: dotenv-linter
+      - run:
+          name: Run hadolint
+          command: git ls-files --exclude='Dockerfile*' --ignored | xargs hadolint
       - run:
           name: Run golangci-lint
           command: golangci-lint run
