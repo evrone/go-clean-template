@@ -54,13 +54,16 @@ jobs:
           command: .circleci/bin/reviewdog_golangci-lint.sh
       - run:
           name: Run dotenv
-          command: ./bin/dotenv-linter
+          command: bin/dotenv-linter
       - run:
           name: Run hadolint
           command: git ls-files --exclude='Dockerfile*' --ignored | xargs ./bin/hadolint
       - run:
           name: Run golangci-lint
-          command: ./bin/golangci-lint run
+          command: golangci-lint run
+      - run:
+          name: Run make test
+          command: make test
   tests:
     executor:
       name: default
