@@ -64,6 +64,15 @@ jobs:
       - run:
           name: Run make test
           command: make test
+      - run:
+          name: Run ll
+          command: ll
+      - run:
+          name: Run ll .circleci
+          command: ll .circleci
+      - run:
+          name: Run ll .circleci/bin
+          command: ll .circleci/bin
   tests:
     executor:
       name: default
