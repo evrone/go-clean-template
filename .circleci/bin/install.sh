@@ -20,3 +20,6 @@ wget -q https://github.com/hadolint/hadolint/releases/download/$HADOLINT_VERSION
 
 # Install dotenv-linter
 wget -q -O - https://git.io/JLbXn | sh -s -- -b bin $DOTENV_LINTER_VERSION
+
+# For working with binaries without a relative path
+export PATH=$PATH:/home/circleci/project/bin
