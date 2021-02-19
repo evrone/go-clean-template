@@ -63,7 +63,7 @@ jobs:
 #          command: bin/golangci-lint run
       - run:
           name: Bash
-          command: echo $PATH
+          command: pwd && echo $PATH
 
   tests:
     executor:
