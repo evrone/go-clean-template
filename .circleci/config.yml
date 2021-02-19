@@ -63,7 +63,7 @@ jobs:
 #          command: bin/golangci-lint run
       - run:
           name: Bash
-          command: pwd && echo $PATH
+          command: export PATH=$PATH:/home/circleci/project/bin && echo $PATH && golangci-lint version
 
   tests:
     executor:
