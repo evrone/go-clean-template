@@ -68,11 +68,8 @@ jobs:
           name: Run ls
           command: ls -al
       - run:
-          name: Run ls .circleci
-          command: ls -al .circleci
-      - run:
-          name: Run ll .circleci/bin
-          command: ls -al .circleci/bin
+          name: Run ll bin
+          command: ls -al bin
   tests:
     executor:
       name: default
