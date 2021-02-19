@@ -40,27 +40,27 @@ jobs:
       name: default
     steps:
       - checkout
-      - run:
-          name: Install tools
-          command: .circleci/bin/install.sh
-      - run:
-          name: Run Reviewdog - dotenv
-          command: .circleci/bin/reviewdog_dotenv.sh
-      - run:
-          name: Run Reviewdog - hadolint
-          command: .circleci/bin/reviewdog_hadolint.sh
-      - run:
-          name: Run Reviewdog - golangci-lint
-          command: .circleci/bin/reviewdog_golangci-lint.sh
+#      - run:
+#          name: Install tools
+#          command: .circleci/bin/install.sh
+#      - run:
+#          name: Run Reviewdog - dotenv
+#          command: .circleci/bin/reviewdog_dotenv.sh
+#      - run:
+#          name: Run Reviewdog - hadolint
+#          command: .circleci/bin/reviewdog_hadolint.sh
+#      - run:
+#          name: Run Reviewdog - golangci-lint
+#          command: .circleci/bin/reviewdog_golangci-lint.sh
       - run:
           name: Run dotenv
           command: bin/dotenv-linter
       - run:
           name: Run hadolint
-          command: git ls-files --exclude='Dockerfile*' --ignored | xargs ./bin/hadolint
+          command: git ls-files --exclude='Dockerfile*' --ignored | xargs bin/hadolint
       - run:
           name: Run golangci-lint
-          command: golangci-lint run
+          command: bin/golangci-lint run
       - run:
           name: Run make test
           command: make test
