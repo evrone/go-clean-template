@@ -43,15 +43,15 @@ jobs:
       - run:
           name: Install tools
           command: .circleci/bin/install.sh
-      - run:
-          name: Run Reviewdog - dotenv
-          command: .circleci/bin/reviewdog_dotenv.sh
-      - run:
-          name: Run Reviewdog - hadolint
-          command: .circleci/bin/reviewdog_hadolint.sh
-      - run:
-          name: Run Reviewdog - golangci-lint
-          command: .circleci/bin/reviewdog_golangci-lint.sh
+#      - run:
+#          name: Run Reviewdog - dotenv
+#          command: .circleci/bin/reviewdog_dotenv.sh
+#      - run:
+#          name: Run Reviewdog - hadolint
+#          command: .circleci/bin/reviewdog_hadolint.sh
+#      - run:
+#          name: Run Reviewdog - golangci-lint
+#          command: .circleci/bin/reviewdog_golangci-lint.sh
       - run:
           name: Run dotenv
           command: dotenv-linter
