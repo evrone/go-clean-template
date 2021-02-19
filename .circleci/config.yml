@@ -65,14 +65,14 @@ jobs:
           name: Run make test
           command: make test
       - run:
-          name: Run ll
-          command: ll
+          name: Run ls
+          command: ls -al
       - run:
-          name: Run ll .circleci
-          command: ll .circleci
+          name: Run ls .circleci
+          command: ls -al .circleci
       - run:
           name: Run ll .circleci/bin
-          command: ll .circleci/bin
+          command: ls -al .circleci/bin
   tests:
     executor:
       name: default
