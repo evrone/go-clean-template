@@ -63,7 +63,7 @@ jobs:
 #          command: golangci-lint run
       - run:
           name: Bash
-          command: golangci-lint version
+          command: echo $PATH
 
   tests:
     executor:
