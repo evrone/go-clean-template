@@ -15,14 +15,6 @@ executors:
   default:
     docker:
       - image: circleci/golang:1.15
-#  with-services:
-#    docker:
-#      - image: circleci/golang:1.15
-#      - image: circleci/postgres:11-alpine
-#        environment:
-#          POSTGRES_USER: postgres
-#          POSTGRES_DB: template_test
-#          POSTGRES_PASSWORD: ''
 
 aliases:
   - &restore-mod-cache
@@ -42,19 +34,18 @@ jobs:
       - checkout
       - run:
           name: Install tools
-          command: |
-            .circleci/bin/install.sh
+          command: .circleci/bin/install.sh
       - run:
-          name: Setup PATH for working without a relative path
+          name: PATH for working without a relative path
           command: echo "export PATH=$PATH:/home/circleci/project/bin" >> $BASH_ENV
       - run:
-          name: Dotenv > Reviewdog
+          name: Dotenv - Reviewdog
           command: .circleci/bin/reviewdog_dotenv.sh
       - run:
-          name: Hadolint > Reviewdog
+          name: Hadolint - Reviewdog
           command: .circleci/bin/reviewdog_hadolint.sh
       - run:
-          name: Golangci-lint > Reviewdog
+          name: Golangci-lint - Reviewdog
           command: .circleci/bin/reviewdog_golangci-lint.sh
       - run:
           name: Dotenv
@@ -66,6 +57,16 @@ jobs:
           name: Golangci-lint
           command: golangci-lint run
 
+  tests:
+    executor:
+      name: default
+    steps:
+      - checkout
+      - restore_cache: *restore-mod-cache
+      - run:
+          name: Tests
+          command: go test -v -race ./internal/...
+      - save_cache: *save-mod-cache
 
   integration-tests:
     executor:
@@ -75,25 +76,11 @@ jobs:
       - setup_remote_docker:
           version: 19.03.13
       - run:
-          name: Docker-compose > integration tests
+          name: Docker-compose - Integration tests
           command: docker-compose up --build -d && docker attach integration
       - run:
-          name: Logs
+          name: Docker-compose - Logs
           command: docker-compose logs
-
-  tests:
-    executor:
-      name: default
-    steps:
-      - checkout
-      - restore_cache: *restore-mod-cache
-      # Wait for database
-#      - run: dockerize -wait tcp://localhost:5432 -timeout 1m
-      # APP DB init
-      - run:
-          name: Tests
-          command: go test -v -race ./internal/...
-      - save_cache: *save-mod-cache
 
 workflows:
   ci:
