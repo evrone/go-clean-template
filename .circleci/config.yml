@@ -48,22 +48,22 @@ jobs:
           name: Setup PATH for working without a relative path
           command: echo "export PATH=$PATH:/home/circleci/project/bin" >> $BASH_ENV
       - run:
-          name: Run dotenv > Reviewdog
+          name: Dotenv > Reviewdog
           command: .circleci/bin/reviewdog_dotenv.sh
       - run:
-          name: Run hadolint > Reviewdog
+          name: Hadolint > Reviewdog
           command: .circleci/bin/reviewdog_hadolint.sh
       - run:
-          name: Run golangci-lint > Reviewdog
+          name: Golangci-lint > Reviewdog
           command: .circleci/bin/reviewdog_golangci-lint.sh
       - run:
-          name: Run dotenv
+          name: Dotenv
           command: dotenv-linter
       - run:
-          name: Run hadolint
+          name: Hadolint
           command: git ls-files --exclude='Dockerfile*' --ignored | xargs hadolint
       - run:
-          name: Run golangci-lint
+          name: Golangci-lint
           command: golangci-lint run
 
 
@@ -75,11 +75,11 @@ jobs:
       - setup_remote_docker:
           version: 19.03.13
       - run:
-          name: Run docker-compose
+          name: Docker-compose > integration tests
           command: docker-compose up --build -d
       - run:
-          name: Run logs
-          command: docker logs integration
+          name: Logs
+          command: docker-compose logs
 
   tests:
     executor:
