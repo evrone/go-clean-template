@@ -40,39 +40,43 @@ jobs:
       name: default
     steps:
       - checkout
-#      - run:
-#          name: Install tools
-#          command: |
-#            .circleci/bin/install.sh
-#      - run:
-#          name: Setup PATH for working without a relative path
-#          command: echo "export PATH=$PATH:/home/circleci/project/bin" >> $BASH_ENV
-#      - run:
-#          name: Run dotenv > Reviewdog
-#          command: .circleci/bin/reviewdog_dotenv.sh
-#      - run:
-#          name: Run hadolint > Reviewdog
-#          command: .circleci/bin/reviewdog_hadolint.sh
-#      - run:
-#          name: Run golangci-lint > Reviewdog
-#          command: .circleci/bin/reviewdog_golangci-lint.sh
-#      - run:
-#          name: Run dotenv
-#          command: dotenv-linter
-#      - run:
-#          name: Run hadolint
-#          command: git ls-files --exclude='Dockerfile*' --ignored | xargs hadolint
-#      - run:
-#          name: Run golangci-lint
-#          command: golangci-lint run
+      - run:
+          name: Install tools
+          command: |
+            .circleci/bin/install.sh
+      - run:
+          name: Setup PATH for working without a relative path
+          command: echo "export PATH=$PATH:/home/circleci/project/bin" >> $BASH_ENV
+      - run:
+          name: Run dotenv > Reviewdog
+          command: .circleci/bin/reviewdog_dotenv.sh
+      - run:
+          name: Run hadolint > Reviewdog
+          command: .circleci/bin/reviewdog_hadolint.sh
+      - run:
+          name: Run golangci-lint > Reviewdog
+          command: .circleci/bin/reviewdog_golangci-lint.sh
+      - run:
+          name: Run dotenv
+          command: dotenv-linter
+      - run:
+          name: Run hadolint
+          command: git ls-files --exclude='Dockerfile*' --ignored | xargs hadolint
+      - run:
+          name: Run golangci-lint
+          command: golangci-lint run
+
+
+  integration_tests:
+    executor:
+      name: default
+    steps:
+      - checkout
       - setup_remote_docker:
           version: 19.03.13
       - run:
           name: Run docker-compose
-          command: docker-compose up --build -d && go test -v ./integration_test/...
-      - run:
-          name: Run integration-test
-          command: go test -v ./integration_test/...
+          command: docker-compose up --build -d
 
   tests:
     executor:
