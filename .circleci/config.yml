@@ -67,9 +67,7 @@ jobs:
 #          command: golangci-lint run
       - run:
           name: Run docker-compose
-          command: |
-            set -x
-            docker-compose up -d
+          command: docker version
 #      - run:
 #          name: Run integration-test
 #          command: make integration-test
