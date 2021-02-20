@@ -10,4 +10,4 @@ RUN apk --no-cache add bash=5.1.0-r0
 COPY --from=modules /go/pkg /go/pkg
 COPY . /app
 WORKDIR /app
-CMD ["./integration-test/build/wait.sh"]
+CMD ["./integration-test/build/run_after_wait.sh"]
