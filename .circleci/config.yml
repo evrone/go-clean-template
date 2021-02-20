@@ -76,7 +76,10 @@ jobs:
           version: 19.03.13
       - run:
           name: Run docker-compose
-          command: docker-compose up --build -d && docker-compose logs -f
+          command: docker-compose up --build -d
+      - run:
+          name: Run logs
+          command: docker logs integration
 
   tests:
     executor:
