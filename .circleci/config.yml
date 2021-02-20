@@ -69,10 +69,10 @@ jobs:
           version: 19.03.13
       - run:
           name: Run docker-compose
-          command: docker-compose up --build -d
+          command: docker-compose up --build -d && docker-compose logs -f && go test -v ./integration_test/...
       - run:
           name: Run integration-test
-          command: make integration-test
+          command: go test -v ./integration_test/...
 
   tests:
     executor:
