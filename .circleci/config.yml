@@ -67,7 +67,7 @@ jobs:
           command: golangci-lint run
 
 
-  integration_tests:
+  integration-tests:
     executor:
       name: default
     steps:
@@ -97,6 +97,7 @@ workflows:
     jobs:
       - linters
       - tests
+      - integration-tests
       # # Build staging image
       # - docker/publish:
       #     context: evrone-erp
