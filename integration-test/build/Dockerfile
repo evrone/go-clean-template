@@ -6,7 +6,7 @@ RUN go mod download
 
 # Step 2: Builder
 FROM golang:1.15.7-alpine3.13 as builder
-RUN apk add bash
+RUN apk --no-cache add bash=5.1.0-r0
 COPY --from=modules /go/pkg /go/pkg
 COPY . /app
 WORKDIR /app
