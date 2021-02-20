@@ -76,7 +76,7 @@ jobs:
           version: 19.03.13
       - run:
           name: Docker-compose > integration tests
-          command: docker-compose up --build -d
+          command: docker-compose up --build -d && docker attach integration
       - run:
           name: Logs
           command: docker-compose logs
