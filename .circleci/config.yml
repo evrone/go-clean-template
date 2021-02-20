@@ -65,6 +65,8 @@ jobs:
 #      - run:
 #          name: Run golangci-lint
 #          command: golangci-lint run
+      - setup_remote_docker:
+          version: 19.03.13
       - run:
           name: Run docker-compose
           command: docker build -t my-app .
