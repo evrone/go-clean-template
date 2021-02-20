@@ -67,7 +67,10 @@ jobs:
 #          command: golangci-lint run
       - run:
           name: Run docker-compose
-          command: docker version
+          command: docker build -t my-app .
+      - run:
+          name: Run docker-compose
+          command: docker images
 #      - run:
 #          name: Run integration-test
 #          command: make integration-test
