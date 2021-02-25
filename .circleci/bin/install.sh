@@ -2,12 +2,10 @@
 
 set -ex
 
-HADOLINT_VERSION=v1.22.1
 REVIEWDOG_VERSION=v0.11.0
 GOLANGCILINT_VERSION=v1.37.0
+HADOLINT_VERSION=v1.22.1
 DOTENV_LINTER_VERSION=v3.0.0
-
-go get -u golang.org/x/lint/golint
 
 # Install reviewdog
 wget -O - -q https://raw.githubusercontent.com/reviewdog/reviewdog/master/install.sh \
