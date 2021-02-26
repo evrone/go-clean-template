@@ -34,7 +34,7 @@ func NewConfig() Conf {
 
 func strEnv(env string) string {
 	value, ok := os.LookupEnv(env)
-	if !ok || len(value) == 0 {
+	if !ok || value == "" {
 		log.Fatalf("environment variable not declared: %s", env)
 	}
 
@@ -45,7 +45,7 @@ func intEnv(env string) int {
 	var intValue int
 
 	value, ok := os.LookupEnv(env)
-	if !ok || len(value) == 0 {
+	if !ok || value == "" {
 		log.Fatalf("environment variable not declared: %s", env)
 	}
 

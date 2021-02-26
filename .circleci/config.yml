@@ -14,7 +14,7 @@ orbs:
 executors:
   default:
     docker:
-      - image: circleci/golang:1.15
+      - image: circleci/golang:1.16
 
 aliases:
   - &restore-mod-cache

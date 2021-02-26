@@ -47,7 +47,7 @@ func (l *loggers) fatal(err error, msg string, fields ...Field) {
 }
 
 func rollbarMap(fields []Field) map[string]interface{} {
-	m := make(map[string]interface{}, len(fields)*2)
+	m := make(map[string]interface{}, len(fields)*2) //nolint:gomnd // fields number always 2
 	for _, field := range fields {
 		m[field.Key] = field.Val
 	}

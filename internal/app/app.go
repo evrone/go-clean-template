@@ -54,7 +54,9 @@ func Run() {
 	translationService := service.NewTranslationService(translationRepository, translationWebAPI)
 
 	// REST
-	handler := gin.Default()
+	handler := gin.New()
+	handler.Use(gin.Logger())
+	handler.Use(gin.Recovery())
 	handler.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler)) // Swagger
 	handler.GET("/health", func(c *gin.Context) { c.Status(http.StatusOK) })   // K8s probe
 

@@ -10,11 +10,11 @@ import (
 	. "github.com/Eun/go-hit"
 )
 
-var basePath string
+var basePath string //nolint:gochecknoglobals // it's necessary
 
 func TestMain(m *testing.M) {
 	host, ok := os.LookupEnv("HOST")
-	if !ok || len(host) == 0 {
+	if !ok || host == "" {
 		log.Fatalf("environment variable not declared: HOST")
 	}
 
@@ -33,6 +33,7 @@ func TestMain(m *testing.M) {
 
 func healthCheck(host string, attempts int) error {
 	var err error
+
 	healthPath := "http://" + host + "/health"
 
 	for attempts > 0 {
