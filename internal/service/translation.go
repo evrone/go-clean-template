@@ -14,9 +14,9 @@ type translationService struct {
 	webAPI     webapi.Translation
 }
 
-func NewTranslationService(repository repository.Translation, webAPI webapi.Translation) Translation {
+func NewTranslationService(repo repository.Translation, webAPI webapi.Translation) Translation {
 	return &translationService{
-		repository: repository,
+		repository: repo,
 		webAPI:     webAPI,
 	}
 }
