@@ -10,31 +10,35 @@ import (
 
 type Server struct {
 	server http.Server
-	errors chan error
+	notify chan error
 }
 
 func NewServer(handler http.Handler, port string) *Server {
-	return &Server{
+	s := &Server{
 		server: http.Server{
 			Addr:    net.JoinHostPort("", port),
 			Handler: handler,
 		},
-		errors: make(chan error, 1),
+		notify: make(chan error, 1),
 	}
+
+	s.start()
+
+	return s
 }
 
-func (s *Server) Start() {
+func (s *Server) start() {
 	go func() {
-		s.errors <- s.server.ListenAndServe()
-		close(s.errors)
+		s.notify <- s.server.ListenAndServe()
+		close(s.notify)
 	}()
 }
 
 func (s *Server) Notify() <-chan error {
-	return s.errors
+	return s.notify
 }
 
-func (s *Server) Stop() error {
+func (s *Server) Shutdown() error {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second) //nolint:gomnd // it's magic
 	defer cancel()
 

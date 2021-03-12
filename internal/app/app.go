@@ -11,6 +11,7 @@ import (
 	swaggerFiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
 
+	amqprpc "github.com/evrone/go-service-template/internal/delivery/amqp_rpc"
 	v1 "github.com/evrone/go-service-template/internal/delivery/http/v1"
 	v2 "github.com/evrone/go-service-template/internal/delivery/http/v2"
 	"github.com/evrone/go-service-template/internal/repository"
@@ -19,6 +20,7 @@ import (
 	"github.com/evrone/go-service-template/pkg/httpserver"
 	"github.com/evrone/go-service-template/pkg/logger"
 	"github.com/evrone/go-service-template/pkg/postgres"
+	"github.com/evrone/go-service-template/pkg/rmq"
 )
 
 // @title       Go Service Template API
@@ -29,7 +31,7 @@ import (
 // @BasePath    /api/v1/
 
 // Run like main, runs application.
-func Run() {
+func Run() { //nolint:funlen // it's ok
 	conf := NewConfig()
 
 	// Logger
@@ -53,18 +55,41 @@ func Run() {
 	// Service
 	translationService := service.NewTranslationService(translationRepository, translationWebAPI)
 
+	// RabbitMQ Client
+	rmqClient := rmq.NewClient("rpc_client", "rpc_server")
+
+	// RabbitMQ Server
+	rmqRouter := amqprpc.NewRouter(translationService)
+	rmqServer := rmq.NewServer(rmqRouter, "rpc_server")
+
+	//nolint:gocritic // example
+	// Example RabbitMQ - RemoteCall
+	//go func() {
+	//	type historyResponse struct {
+	//		History []domain.Translation `json:"history"`
+	//	}
+	//
+	//	for i := 0; i < 100; i++ {
+	//		var history historyResponse
+	//
+	//		err := rmqClient.RemoteCall("getHistory", nil, &history)
+	//		if err != nil {
+	//			log.Println("Error!", err)
+	//		}
+	//	}
+	//}()
+
 	// REST
 	handler := gin.New()
 	handler.Use(gin.Logger())
 	handler.Use(gin.Recovery())
 	handler.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler)) // Swagger
-	handler.GET("/health", func(c *gin.Context) { c.Status(http.StatusOK) })   // K8s probe
+	handler.GET("/healthz", func(c *gin.Context) { c.Status(http.StatusOK) })  // K8s probe
 
 	v1.NewRouter(handler, translationService)
 	v2.NewRouter(handler)
 
-	server := httpserver.NewServer(handler, conf.HTTPAPIPort)
-	server.Start()
+	httpServer := httpserver.NewServer(handler, conf.HTTPAPIPort)
 
 	// Graceful shutdown
 	interrupt := make(chan os.Signal, 1)
@@ -73,12 +98,26 @@ func Run() {
 	select {
 	case s := <-interrupt:
 		logger.Info("app - Run - signal: " + s.String())
-	case err := <-server.Notify():
-		logger.Error(err, "app - Run - server.Notify")
+	case err := <-httpServer.Notify():
+		logger.Error(err, "app - Run - httpServer.Notify")
+	case err := <-rmqClient.Notify():
+		logger.Error(err, "app - Run - rmqClient.Notify")
+	case err := <-rmqServer.Notify():
+		logger.Error(err, "app - Run - rmqServer.Notify")
 	}
 
-	err := server.Stop()
+	err := httpServer.Shutdown()
 	if err != nil {
-		logger.Error(err, "app - Run - server.Stop")
+		logger.Error(err, "app - Run - httpServer.Shutdown")
+	}
+
+	err = rmqClient.Shutdown()
+	if err != nil {
+		logger.Error(err, "app - Run - rmqClient.Shutdown")
+	}
+
+	err = rmqServer.Shutdown()
+	if err != nil {
+		logger.Error(err, "app - Run - rmqServer.Shutdown")
 	}
 }

@@ -9,36 +9,36 @@ import (
 	"github.com/evrone/go-service-template/internal/webapi"
 )
 
-type translationService struct {
+type TranslationService struct {
 	repository repository.Translation
 	webAPI     webapi.Translation
 }
 
-func NewTranslationService(repo repository.Translation, webAPI webapi.Translation) Translation {
-	return &translationService{
+func NewTranslationService(repo repository.Translation, webAPI webapi.Translation) *TranslationService {
+	return &TranslationService{
 		repository: repo,
 		webAPI:     webAPI,
 	}
 }
 
-func (u *translationService) History() ([]domain.Translation, error) {
-	translations, err := u.repository.GetHistory(context.Background())
+func (s *TranslationService) History() ([]domain.Translation, error) {
+	translations, err := s.repository.GetHistory(context.Background())
 	if err != nil {
-		return nil, fmt.Errorf("translationService - History - u.repository.GetHistory: %w", err)
+		return nil, fmt.Errorf("TranslationService - History - s.repository.GetHistory: %w", err)
 	}
 
 	return translations, nil
 }
 
-func (u *translationService) Translate(translation domain.Translation) (domain.Translation, error) {
-	translation, err := u.webAPI.Translate(translation)
+func (s *TranslationService) Translate(translation domain.Translation) (domain.Translation, error) {
+	translation, err := s.webAPI.Translate(translation)
 	if err != nil {
-		return domain.Translation{}, fmt.Errorf("translationService - Translate - u.webAPI.Translate: %w", err)
+		return domain.Translation{}, fmt.Errorf("TranslationService - Translate - s.webAPI.Translate: %w", err)
 	}
 
-	err = u.repository.Store(context.Background(), translation)
+	err = s.repository.Store(context.Background(), translation)
 	if err != nil {
-		return domain.Translation{}, fmt.Errorf("translationService - Translate - u.repository.Store: %w", err)
+		return domain.Translation{}, fmt.Errorf("TranslationService - Translate - s.repository.Store: %w", err)
 	}
 
 	return translation, nil

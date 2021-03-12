@@ -34,7 +34,7 @@ func TestMain(m *testing.M) {
 func healthCheck(host string, attempts int) error {
 	var err error
 
-	healthPath := "http://" + host + "/health"
+	healthPath := "http://" + host + "/healthz"
 
 	for attempts > 0 {
 		err = Do(Get(healthPath), Expect().Status().Equal(http.StatusOK))

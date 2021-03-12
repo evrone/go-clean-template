@@ -14,22 +14,22 @@ Quick start
 ----
 Локальная разработка:
 ```sh
-# DB container
-$ make compose-up-db
+# Postgres, RabbitMQ
+$ make compose-up
 # Run app with migrations
 $ make run
 ```
 
-В контейнерах (можно запускать в ci):
+Интеграционные тесты (можно запускать в ci):
 ```sh
-# DB + app + migrations + integration tests
-$ make compose-up
+# DB, app + migrations, integration tests
+$ make compose-up-integration-test
 ```
 
-Для работы RollBar нужно установить переменные в .env:
+Для работы RollBar установить переменные в .env:
 ```
-GOT_ROLLBAR_ACCESS_TOKEN=<TOKEN>
-GOT_ROLLBAR_ENVIRONMENT=<ENVIRONMENT>
+ROLLBAR_ACCESS_TOKEN=<TOKEN>
+ROLLBAR_ENVIRONMENT=<ENVIRONMENT>
 ```
 
 

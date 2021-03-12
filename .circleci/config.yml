@@ -20,6 +20,7 @@ aliases:
   - &restore-mod-cache
     keys:
       - go-modules-v1-{{ checksum "go.sum" }}
+      - go-modules-v1-
 
   - &save-mod-cache
     key: go-modules-v1-{{ checksum "go.sum" }}
@@ -77,10 +78,7 @@ jobs:
           version: 19.03.13
       - run:
           name: Integration tests
-          command: docker-compose up --build -d && docker attach integration
-      - run:
-          name: Logs
-          command: docker-compose logs
+          command: docker-compose up --build --abort-on-container-exit --exit-code-from integration
 
 workflows:
   ci:

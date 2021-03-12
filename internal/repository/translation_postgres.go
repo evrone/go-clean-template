@@ -8,26 +8,26 @@ import (
 	"github.com/evrone/go-service-template/pkg/postgres"
 )
 
-type translationRepository struct {
+type TranslationRepository struct {
 	*postgres.Postgres
 }
 
-func NewTranslationRepository(pg *postgres.Postgres) Translation {
-	return &translationRepository{pg}
+func NewTranslationRepository(pg *postgres.Postgres) *TranslationRepository {
+	return &TranslationRepository{pg}
 }
 
-func (p *translationRepository) GetHistory(ctx context.Context) ([]domain.Translation, error) {
-	sql, _, err := p.Builder.
+func (r *TranslationRepository) GetHistory(ctx context.Context) ([]domain.Translation, error) {
+	sql, _, err := r.Builder.
 		Select("source, destination, original, translation").
 		From("history").
 		ToSql()
 	if err != nil {
-		return nil, fmt.Errorf("translationRepository - GetHistory - p.Builder: %w", err)
+		return nil, fmt.Errorf("TranslationRepository - GetHistory - r.Builder: %w", err)
 	}
 
-	rows, err := p.Pool.Query(ctx, sql)
+	rows, err := r.Pool.Query(ctx, sql)
 	if err != nil {
-		return nil, fmt.Errorf("translationRepository - GetHistory - p.Pool.Query: %w", err)
+		return nil, fmt.Errorf("TranslationRepository - GetHistory - r.Pool.Query: %w", err)
 	}
 	defer rows.Close()
 
@@ -38,7 +38,7 @@ func (p *translationRepository) GetHistory(ctx context.Context) ([]domain.Transl
 
 		err = rows.Scan(&e.Source, &e.Destination, &e.Original, &e.Translation)
 		if err != nil {
-			return nil, fmt.Errorf("translationRepository - GetHistory - rows.Scan: %w", err)
+			return nil, fmt.Errorf("TranslationRepository - GetHistory - rows.Scan: %w", err)
 		}
 
 		entities = append(entities, e)
@@ -47,19 +47,19 @@ func (p *translationRepository) GetHistory(ctx context.Context) ([]domain.Transl
 	return entities, nil
 }
 
-func (p *translationRepository) Store(ctx context.Context, entity domain.Translation) error {
-	sql, args, err := p.Builder.
+func (r *TranslationRepository) Store(ctx context.Context, entity domain.Translation) error {
+	sql, args, err := r.Builder.
 		Insert("history").
 		Columns("source, destination, original, translation").
 		Values(entity.Source, entity.Destination, entity.Original, entity.Translation).
 		ToSql()
 	if err != nil {
-		return fmt.Errorf("translationRepository - Store - p.Builder: %w", err)
+		return fmt.Errorf("TranslationRepository - Store - r.Builder: %w", err)
 	}
 
-	_, err = p.Pool.Exec(ctx, sql, args...)
+	_, err = r.Pool.Exec(ctx, sql, args...)
 	if err != nil {
-		return fmt.Errorf("translationRepository - Store - p.Pool.Exec: %w", err)
+		return fmt.Errorf("TranslationRepository - Store - r.Pool.Exec: %w", err)
 	}
 
 	return nil

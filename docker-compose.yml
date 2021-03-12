@@ -1,7 +1,7 @@
 version: '3.9'
 services:
 
-  db:
+  postgres:
     container_name: postgres
     image: postgres
     volumes:
@@ -13,6 +13,13 @@ services:
     ports:
       - 5432:5432
 
+  rabbitmq:
+    container_name: rabbitmq
+    image: rabbitmq:3.8.12-management
+    ports:
+      - 5672:5672
+      - 15672:15672
+
   app:
     build: .
     container_name: app
@@ -20,11 +27,13 @@ services:
     env_file:
       - .env
     environment:
-      GOT_PG_URL: 'postgres://user:pass@db:5432/postgres'
+      PG_URL: 'postgres://user:pass@postgres:5432/postgres'
+      RMQ_URL: 'amqp://guest:guest@rabbitmq:5672/'
     ports:
       - 8080:8080
     depends_on:
-      - db
+      - postgres
+      - rabbitmq
 
   integration:
     build:

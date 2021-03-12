@@ -12,10 +12,10 @@ linters-settings:
     check-generated: false
     default-signifies-exhaustive: false
   funlen:
-    lines: 60
+    lines: 65
     statements: 40
   gocognit:
-    min-complexity: 10
+    min-complexity: 15
   gocyclo:
     min-complexity: 10
   goconst:
@@ -87,7 +87,6 @@ linters:
     - gosimple
     - govet
     - ineffassign
-    - interfacer
     - lll
     - makezero
     - misspell
