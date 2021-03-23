@@ -10,6 +10,7 @@ require (
 	github.com/gin-gonic/gin v1.6.3
 	github.com/golang-migrate/migrate/v4 v4.14.1
 	github.com/google/uuid v1.1.2
+	github.com/ilyakaznacheev/cleanenv v1.2.5
 	github.com/jackc/pgx/v4 v4.10.1
 	github.com/mattn/go-colorable v0.1.8 // indirect
 	github.com/pkg/errors v0.9.1
@@ -19,4 +20,6 @@ require (
 	github.com/swaggo/gin-swagger v1.3.0
 	github.com/swaggo/swag v1.7.0
 	go.uber.org/zap v1.16.0
+	gopkg.in/yaml.v2 v2.4.0 // indirect
+	olympos.io/encoding/edn v0.0.0-20201019073823-d3554ca0b0a3 // indirect
 )

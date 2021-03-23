@@ -41,8 +41,6 @@ services:
       dockerfile: integration-test/Dockerfile
     container_name: integration
     image: integration
-    environment:
-      HOST: 'app:8080'
     depends_on:
       - app
 

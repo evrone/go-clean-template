@@ -1,4 +1,4 @@
-package rmq
+package client
 
 import (
 	"encoding/json"
@@ -9,6 +9,8 @@ import (
 	"github.com/google/uuid"
 	"github.com/pkg/errors"
 	"github.com/streadway/amqp"
+
+	rmqrpc "github.com/evrone/go-service-template/pkg/rabbitmq/rmq_rpc"
 )
 
 type Message struct {
@@ -27,30 +29,49 @@ type pendingCall struct {
 }
 
 type Client struct {
-	conn           *Connection
+	conn           *rmqrpc.Connection
 	serverExchange string
-	timeout        time.Duration
 	error          chan error
 	stop           chan struct{}
 
 	mx    *sync.RWMutex
 	calls map[string]*pendingCall
+
+	timeout time.Duration
 }
 
-func NewClient(clientExchange, serverExchange string) *Client {
+func NewClient(url, serverExchange, clientExchange string, opts ...Option) (*Client, error) {
+	cfg := rmqrpc.Config{
+		URL: url,
+		// Default
+		WaitTime: 5 * time.Second,
+		Attempts: 10,
+	}
+
 	c := &Client{
-		conn:           newConnection(clientExchange),
+		conn:           rmqrpc.NewConnection(clientExchange, cfg),
 		serverExchange: serverExchange,
-		timeout:        2 * time.Second, //nolint:gomnd // will be config
 		error:          make(chan error),
 		stop:           make(chan struct{}),
 		mx:             &sync.RWMutex{},
 		calls:          make(map[string]*pendingCall),
+		// Default
+		timeout: 2 * time.Second,
+	}
+
+	// Set options
+	for _, opt := range opts {
+		opt(c)
+	}
+
+	err := c.conn.AttemptConnect()
+	if err != nil {
+		return nil, errors.Wrap(err, "rmq_rpc client - NewClient - c.conn.AttemptConnect")
 	}
 
 	go c.consumer()
 
-	return c
+	return c, nil
 }
 
 func (c *Client) publish(corrID, handler string, request interface{}) error {
@@ -66,16 +87,16 @@ func (c *Client) publish(corrID, handler string, request interface{}) error {
 		}
 	}
 
-	err = c.conn.channel.Publish(c.serverExchange, "", false, false,
+	err = c.conn.Channel.Publish(c.serverExchange, "", false, false,
 		amqp.Publishing{
 			ContentType:   "application/json",
 			CorrelationId: corrID,
-			ReplyTo:       c.conn.consumerExchange,
+			ReplyTo:       c.conn.ConsumerExchange,
 			Type:          handler,
 			Body:          requestBody,
 		})
 	if err != nil {
-		return errors.Wrap(err, "c.channel.Publish")
+		return errors.Wrap(err, "c.Channel.Publish")
 	}
 
 	return nil
@@ -87,7 +108,7 @@ func (c *Client) RemoteCall(handler string, request, response interface{}) error
 		time.Sleep(c.timeout)
 		select {
 		case <-c.stop:
-			return errors.New("rmq - Client - RemoteCall - connection closed")
+			return errors.New("rmq_rpc client - Client - RemoteCall - Connection closed")
 		default:
 		}
 	default:
@@ -97,7 +118,7 @@ func (c *Client) RemoteCall(handler string, request, response interface{}) error
 
 	err := c.publish(corrID, handler, request)
 	if err != nil {
-		return errors.Wrap(err, "rmq - Client - RemoteCall - c.publish")
+		return errors.Wrap(err, "rmq_rpc client - Client - RemoteCall - c.publish")
 	}
 
 	call := &pendingCall{done: make(chan struct{})}
@@ -107,25 +128,25 @@ func (c *Client) RemoteCall(handler string, request, response interface{}) error
 
 	select {
 	case <-time.After(c.timeout):
-		return ErrTimeout
+		return rmqrpc.ErrTimeout
 	case <-call.done:
 	}
 
-	if call.status == Success {
+	if call.status == rmqrpc.Success {
 		err = json.Unmarshal(call.body, &response)
 		if err != nil {
-			return errors.Wrap(err, "rmq - Client - RemoteCall - json.Unmarshal")
+			return errors.Wrap(err, "rmq_rpc client - Client - RemoteCall - json.Unmarshal")
 		}
 
 		return nil
 	}
 
-	if call.status == ErrBadHandler.Error() {
-		return ErrBadHandler
+	if call.status == rmqrpc.ErrBadHandler.Error() {
+		return rmqrpc.ErrBadHandler
 	}
 
-	if call.status == ErrInternalServer.Error() {
-		return ErrInternalServer
+	if call.status == rmqrpc.ErrInternalServer.Error() {
+		return rmqrpc.ErrInternalServer
 	}
 
 	return nil
@@ -136,7 +157,7 @@ func (c *Client) consumer() {
 		select {
 		case <-c.stop:
 			return
-		case d, opened := <-c.conn.delivery:
+		case d, opened := <-c.conn.Delivery:
 			if !opened {
 				c.reconnect()
 
@@ -153,7 +174,7 @@ func (c *Client) consumer() {
 func (c *Client) reconnect() {
 	close(c.stop)
 
-	err := c.conn.attemptConnect()
+	err := c.conn.AttemptConnect()
 	if err != nil {
 		c.error <- err
 		close(c.error)
@@ -206,9 +227,9 @@ func (c *Client) Shutdown() error {
 	close(c.stop)
 	time.Sleep(c.timeout)
 
-	err := c.conn.connection.Close()
+	err := c.conn.Connection.Close()
 	if err != nil {
-		return fmt.Errorf("rmq - Client - Shutdown - c.connection.Close: %w", err)
+		return fmt.Errorf("rmq_rpc client - Client - Shutdown - c.Connection.Close: %w", err)
 	}
 
 	return nil

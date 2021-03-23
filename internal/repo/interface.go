@@ -1,5 +1,5 @@
-// Package repository implements databases for services. For each service in its own file.
-package repository
+// Package repo implements databases for services. For each service in its own file.
+package repo
 
 import (
 	"context"

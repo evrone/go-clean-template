@@ -12,6 +12,8 @@
 
 Quick start
 ----
+Скопировать и переименовать файл `.env.example` в `.env`.
+
 Локальная разработка:
 ```sh
 # Postgres, RabbitMQ
@@ -24,12 +26,6 @@ $ make run
 ```sh
 # DB, app + migrations, integration tests
 $ make compose-up-integration-test
-```
-
-Для работы RollBar установить переменные в .env:
-```
-ROLLBAR_ACCESS_TOKEN=<TOKEN>
-ROLLBAR_ENVIRONMENT=<ENVIRONMENT>
 ```
 
 
