@@ -35,6 +35,15 @@ linters-settings:
     min-confidence: 0.7
   gofumpt:
     extra-rules: true
+  gomnd:
+    settings:
+      mnd:
+        checks:
+        - argument
+        - case
+        - condition
+        - operation
+        - return
   govet:
     check-shadowing: true
   lll:
@@ -128,6 +137,7 @@ issues:
     - path: integration-test
       linters:
         - paralleltest
+        - godot
 
 run:
   skip-dirs:

@@ -176,7 +176,7 @@ type swaggerInfo struct {
 var SwaggerInfo = swaggerInfo{
 	Version:     "1.0",
 	Host:        "localhost:8080",
-	BasePath:    "/api/v1/",
+	BasePath:    "/api/v1",
 	Schemes:     []string{},
 	Title:       "Go Service Template API",
 	Description: "Using a translation service as an example",

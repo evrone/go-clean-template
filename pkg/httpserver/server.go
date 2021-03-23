@@ -3,23 +3,32 @@ package httpserver
 
 import (
 	"context"
-	"net"
 	"net/http"
 	"time"
 )
 
 type Server struct {
-	server http.Server
+	server *http.Server
 	notify chan error
 }
 
-func NewServer(handler http.Handler, port string) *Server {
+func NewServer(handler http.Handler, opts ...Option) *Server {
+	httpServer := &http.Server{
+		Handler: handler,
+		// Default
+		ReadTimeout:  5 * time.Second,
+		WriteTimeout: 5 * time.Second,
+		Addr:         ":80",
+	}
+
 	s := &Server{
-		server: http.Server{
-			Addr:    net.JoinHostPort("", port),
-			Handler: handler,
-		},
+		server: httpServer,
 		notify: make(chan error, 1),
+	}
+
+	// Set options
+	for _, opt := range opts {
+		opt(s)
 	}
 
 	s.start()
@@ -39,7 +48,7 @@ func (s *Server) Notify() <-chan error {
 }
 
 func (s *Server) Shutdown() error {
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second) //nolint:gomnd // it's magic
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second) //nolint:gomnd // it's magic
 	defer cancel()
 
 	return s.server.Shutdown(ctx)

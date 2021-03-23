@@ -5,8 +5,6 @@ import (
 
 	"github.com/gin-gonic/gin"
 
-	// Swagger docs.
-	_ "github.com/evrone/go-service-template/docs"
 	"github.com/evrone/go-service-template/internal/domain"
 )
 

@@ -3,59 +3,60 @@ package postgres
 
 import (
 	"context"
+	"log"
 	"time"
 
 	"github.com/Masterminds/squirrel"
 	"github.com/jackc/pgx/v4/pgxpool"
-
-	"github.com/evrone/go-service-template/pkg/logger"
+	"github.com/pkg/errors"
 )
 
 type Postgres struct {
-	Pool    *pgxpool.Pool
-	Builder squirrel.StatementBuilderType
+	maxPoolSize  int
+	connAttempts int
+	Builder      squirrel.StatementBuilderType
+	Pool         *pgxpool.Pool
 }
 
-func NewPostgres(url string, maxPoolSize, connAttempts int) *Postgres {
-	poolConfig, err := pgxpool.ParseConfig(url)
-	if err != nil {
-		logger.Fatal(err, "postgres connect error")
+func NewPostgres(url string, opts ...Option) (*Postgres, error) {
+	pg := &Postgres{
+		// Default
+		maxPoolSize:  1,
+		connAttempts: 10,
 	}
 
-	poolConfig.MaxConns = int32(maxPoolSize)
+	// Set options
+	for _, opt := range opts {
+		opt(pg)
+	}
 
-	var (
-		errConn error
-		pool    *pgxpool.Pool
-	)
+	pg.Builder = squirrel.StatementBuilder.PlaceholderFormat(squirrel.Dollar)
 
-	for connAttempts > 0 {
-		pool, errConn = pgxpool.ConnectConfig(context.Background(), poolConfig)
-		if errConn == nil {
+	poolConfig, err := pgxpool.ParseConfig(url)
+	if err != nil {
+		return nil, errors.Wrap(err, "postgres - NewPostgres - pgxpool.ParseConfig")
+	}
+
+	poolConfig.MaxConns = int32(pg.maxPoolSize)
+
+	for pg.connAttempts > 0 {
+		pg.Pool, err = pgxpool.ConnectConfig(context.Background(), poolConfig)
+		if err == nil {
 			break
 		}
 
-		logger.Info("postgres is trying to connect",
-			logger.Field{Key: "attempts left", Val: connAttempts},
-		)
+		log.Printf("Postgres is trying to connect, attempts left: %d", pg.connAttempts)
 
 		time.Sleep(time.Second)
 
-		connAttempts--
+		pg.connAttempts--
 	}
 
-	if errConn != nil {
-		logger.Fatal(errConn, "postgres connect error")
+	if err != nil {
+		return nil, errors.Wrap(err, "postgres - NewPostgres - connAttempts == 0")
 	}
 
-	logger.Info("postgres connected")
-
-	builder := squirrel.StatementBuilder.PlaceholderFormat(squirrel.Dollar)
-
-	return &Postgres{
-		Pool:    pool,
-		Builder: builder,
-	}
+	return pg, nil
 }
 
 func (p *Postgres) Close() {

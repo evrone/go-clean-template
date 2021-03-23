@@ -2,118 +2,69 @@
 package app
 
 import (
-	"net/http"
 	"os"
 	"os/signal"
 	"syscall"
 
 	"github.com/gin-gonic/gin"
-	swaggerFiles "github.com/swaggo/files"
-	ginSwagger "github.com/swaggo/gin-swagger"
 
+	"github.com/evrone/go-service-template/config"
 	amqprpc "github.com/evrone/go-service-template/internal/delivery/amqp_rpc"
 	v1 "github.com/evrone/go-service-template/internal/delivery/http/v1"
-	v2 "github.com/evrone/go-service-template/internal/delivery/http/v2"
-	"github.com/evrone/go-service-template/internal/repository"
+	"github.com/evrone/go-service-template/internal/repo"
 	"github.com/evrone/go-service-template/internal/service"
 	"github.com/evrone/go-service-template/internal/webapi"
 	"github.com/evrone/go-service-template/pkg/httpserver"
 	"github.com/evrone/go-service-template/pkg/logger"
 	"github.com/evrone/go-service-template/pkg/postgres"
-	"github.com/evrone/go-service-template/pkg/rmq"
+	"github.com/evrone/go-service-template/pkg/rabbitmq/rmq_rpc/server"
 )
 
-// @title       Go Service Template API
-// @version     1.0
-// @description Using a translation service as an example
-
-// @host        localhost:8080
-// @BasePath    /api/v1/
-
-// Run like main, runs application.
-func Run() { //nolint:funlen // it's ok
-	conf := NewConfig()
-
-	// Logger
-	zap := logger.NewZapLogger(conf.ZapLogLevel)
-	defer zap.Close()
-
-	rollbar := logger.NewRollbarLogger(conf.RollbarAccessToken, conf.RollbarEnvironment)
-	defer rollbar.Close()
-
-	logger.NewAppLogger(zap, rollbar, conf.ServiceName, conf.ServiceVersion)
-
+// Run creates objects via constructors.
+func Run(cfg *config.Config) {
 	// Repository
-	postgresDB := postgres.NewPostgres(conf.PgURL, conf.PgPoolMax, conf.PgConnAttempts)
-	defer postgresDB.Close()
-
-	translationRepository := repository.NewTranslationRepository(postgresDB)
-
-	// WebAPI
-	translationWebAPI := webapi.NewTranslationWebAPI()
+	pg, err := postgres.NewPostgres(cfg.PG.URL, postgres.MaxPoolSize(cfg.PG.PoolMax))
+	if err != nil {
+		logger.Fatal(err, "app - Run - postgres.NewPostgres")
+	}
+	defer pg.Close()
 
 	// Service
-	translationService := service.NewTranslationService(translationRepository, translationWebAPI)
+	translationService := service.NewTranslationService(
+		repo.NewTranslationRepo(pg),
+		webapi.NewTranslationWebAPI(),
+	)
 
-	// RabbitMQ Client
-	rmqClient := rmq.NewClient("rpc_client", "rpc_server")
-
-	// RabbitMQ Server
+	// RabbitMQ RPC Server
 	rmqRouter := amqprpc.NewRouter(translationService)
-	rmqServer := rmq.NewServer(rmqRouter, "rpc_server")
 
-	//nolint:gocritic // example
-	// Example RabbitMQ - RemoteCall
-	//go func() {
-	//	type historyResponse struct {
-	//		History []domain.Translation `json:"history"`
-	//	}
-	//
-	//	for i := 0; i < 100; i++ {
-	//		var history historyResponse
-	//
-	//		err := rmqClient.RemoteCall("getHistory", nil, &history)
-	//		if err != nil {
-	//			log.Println("Error!", err)
-	//		}
-	//	}
-	//}()
+	rmqServer, err := server.NewServer(cfg.RMQ.URL, cfg.RMQ.ServerExchange, rmqRouter)
+	if err != nil {
+		logger.Fatal(err, "app - Run - rmqServer - server.NewServer")
+	}
 
-	// REST
+	// HTTP
 	handler := gin.New()
-	handler.Use(gin.Logger())
-	handler.Use(gin.Recovery())
-	handler.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler)) // Swagger
-	handler.GET("/healthz", func(c *gin.Context) { c.Status(http.StatusOK) })  // K8s probe
-
 	v1.NewRouter(handler, translationService)
-	v2.NewRouter(handler)
+	httpServer := httpserver.NewServer(handler, httpserver.Port(cfg.HTTP.Port))
 
-	httpServer := httpserver.NewServer(handler, conf.HTTPAPIPort)
-
-	// Graceful shutdown
+	// Waiting signal
 	interrupt := make(chan os.Signal, 1)
 	signal.Notify(interrupt, os.Interrupt, syscall.SIGTERM)
 
 	select {
 	case s := <-interrupt:
 		logger.Info("app - Run - signal: " + s.String())
-	case err := <-httpServer.Notify():
+	case err = <-httpServer.Notify():
 		logger.Error(err, "app - Run - httpServer.Notify")
-	case err := <-rmqClient.Notify():
-		logger.Error(err, "app - Run - rmqClient.Notify")
-	case err := <-rmqServer.Notify():
+	case err = <-rmqServer.Notify():
 		logger.Error(err, "app - Run - rmqServer.Notify")
 	}
 
-	err := httpServer.Shutdown()
+	// Shutdown
+	err = httpServer.Shutdown()
 	if err != nil {
 		logger.Error(err, "app - Run - httpServer.Shutdown")
-	}
-
-	err = rmqClient.Shutdown()
-	if err != nil {
-		logger.Error(err, "app - Run - rmqClient.Shutdown")
 	}
 
 	err = rmqServer.Shutdown()

@@ -2,10 +2,10 @@ package logger
 
 var appLogger Logger //nolint:gochecknoglobals // it's necessary
 
-func NewAppLogger(zap *ZapLogger, rollbar *RollbarLogger, serviceName, serviceVersion string) {
+func NewAppLogger(zap *ZapLogger, rollbar *RollbarLogger, appName, appVersion string) {
 	fields := []Field{
-		{"service-name", serviceName},
-		{"service-version", serviceVersion},
+		{"app-name", appName},
+		{"app-version", appVersion},
 	}
 	appLogger = &loggers{zap, rollbar, fields}
 }

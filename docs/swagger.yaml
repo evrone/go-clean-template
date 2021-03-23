@@ -1,4 +1,4 @@
-basePath: /api/v1/
+basePath: /api/v1
 definitions:
   domain.Translation:
     properties:
