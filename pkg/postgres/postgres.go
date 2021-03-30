@@ -11,21 +11,29 @@ import (
 	"github.com/pkg/errors"
 )
 
+const (
+	defaultMaxPoolSize  = 1
+	defaultConnAttempts = 10
+	defaultConnTimeout  = time.Second
+)
+
 type Postgres struct {
 	maxPoolSize  int
 	connAttempts int
-	Builder      squirrel.StatementBuilderType
-	Pool         *pgxpool.Pool
+	connTimeout  time.Duration
+
+	Builder squirrel.StatementBuilderType
+	Pool    *pgxpool.Pool
 }
 
 func NewPostgres(url string, opts ...Option) (*Postgres, error) {
 	pg := &Postgres{
-		// Default
-		maxPoolSize:  1,
-		connAttempts: 10,
+		maxPoolSize:  defaultMaxPoolSize,
+		connAttempts: defaultConnAttempts,
+		connTimeout:  defaultConnTimeout,
 	}
 
-	// Set options
+	// Custom options
 	for _, opt := range opts {
 		opt(pg)
 	}
@@ -47,7 +55,7 @@ func NewPostgres(url string, opts ...Option) (*Postgres, error) {
 
 		log.Printf("Postgres is trying to connect, attempts left: %d", pg.connAttempts)
 
-		time.Sleep(time.Second)
+		time.Sleep(pg.connTimeout)
 
 		pg.connAttempts--
 	}

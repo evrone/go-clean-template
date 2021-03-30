@@ -13,6 +13,12 @@ import (
 	rmqrpc "github.com/evrone/go-service-template/pkg/rabbitmq/rmq_rpc"
 )
 
+const (
+	defaultWaitTime = 5 * time.Second
+	defaultAttempts = 10
+	defaultTimeout  = 2 * time.Second
+)
+
 type Message struct {
 	Queue         string
 	Priority      uint8
@@ -34,7 +40,7 @@ type Client struct {
 	error          chan error
 	stop           chan struct{}
 
-	mx    *sync.RWMutex
+	sync.RWMutex
 	calls map[string]*pendingCall
 
 	timeout time.Duration
@@ -42,10 +48,9 @@ type Client struct {
 
 func NewClient(url, serverExchange, clientExchange string, opts ...Option) (*Client, error) {
 	cfg := rmqrpc.Config{
-		URL: url,
-		// Default
-		WaitTime: 5 * time.Second,
-		Attempts: 10,
+		URL:      url,
+		WaitTime: defaultWaitTime,
+		Attempts: defaultAttempts,
 	}
 
 	c := &Client{
@@ -53,13 +58,11 @@ func NewClient(url, serverExchange, clientExchange string, opts ...Option) (*Cli
 		serverExchange: serverExchange,
 		error:          make(chan error),
 		stop:           make(chan struct{}),
-		mx:             &sync.RWMutex{},
 		calls:          make(map[string]*pendingCall),
-		// Default
-		timeout: 2 * time.Second,
+		timeout:        defaultTimeout,
 	}
 
-	// Set options
+	// Custom options
 	for _, opt := range opts {
 		opt(c)
 	}
@@ -188,9 +191,9 @@ func (c *Client) reconnect() {
 }
 
 func (c *Client) getCall(d *amqp.Delivery) {
-	c.mx.RLock()
+	c.RLock()
 	call, ok := c.calls[d.CorrelationId]
-	c.mx.RUnlock()
+	c.RUnlock()
 
 	if !ok {
 		return
@@ -202,15 +205,15 @@ func (c *Client) getCall(d *amqp.Delivery) {
 }
 
 func (c *Client) addCall(corrID string, call *pendingCall) {
-	c.mx.Lock()
+	c.Lock()
 	c.calls[corrID] = call
-	c.mx.Unlock()
+	c.Unlock()
 }
 
 func (c *Client) deleteCall(corrID string) {
-	c.mx.Lock()
+	c.Lock()
 	delete(c.calls, corrID)
-	c.mx.Unlock()
+	c.Unlock()
 }
 
 func (c *Client) Notify() <-chan error {

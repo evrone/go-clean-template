@@ -13,6 +13,11 @@ import (
 	_ "github.com/golang-migrate/migrate/v4/source/file"
 )
 
+const (
+	defaultAttempts = 20
+	defaultTimeout  = time.Second
+)
+
 func init() {
 	databaseURL, ok := os.LookupEnv("PG_URL")
 	if !ok || len(databaseURL) == 0 {
@@ -22,7 +27,7 @@ func init() {
 	databaseURL += "?sslmode=disable"
 
 	var (
-		attempts = 20
+		attempts = defaultAttempts
 		err      error
 		m        *migrate.Migrate
 	)
@@ -34,7 +39,7 @@ func init() {
 		}
 
 		log.Printf("Migrate: postgres is trying to connect, attempts left: %d", attempts)
-		time.Sleep(time.Second)
+		time.Sleep(defaultTimeout)
 		attempts--
 	}
 
