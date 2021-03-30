@@ -108,7 +108,6 @@ linters:
     - predeclared
     - revive
     - rowserrcheck
-    - scopelint
     - sqlclosecheck
     - staticcheck
     - structcheck
@@ -120,7 +119,6 @@ linters:
     - unparam
     - unused
     - varcheck
-    - wrapcheck
     - wsl
     - whitespace
 
@@ -131,6 +129,7 @@ linters:
 #    - maligned
 #    - prealloc
 #    - testpackage
+#    - wrapcheck
 
 issues:
   exclude-rules:

@@ -12,6 +12,12 @@ import (
 	rmqrpc "github.com/evrone/go-service-template/pkg/rabbitmq/rmq_rpc"
 )
 
+const (
+	defaultWaitTime = 5 * time.Second
+	defaultAttempts = 10
+	defaultTimeout  = 2 * time.Second
+)
+
 type CallHandler func(*amqp.Delivery) (interface{}, error)
 
 type Server struct {
@@ -25,22 +31,20 @@ type Server struct {
 
 func NewServer(url, serverExchange string, router map[string]CallHandler, opts ...Option) (*Server, error) {
 	cfg := rmqrpc.Config{
-		URL: url,
-		// Default
-		WaitTime: 5 * time.Second,
-		Attempts: 10,
+		URL:      url,
+		WaitTime: defaultWaitTime,
+		Attempts: defaultAttempts,
 	}
 
 	s := &Server{
-		conn:   rmqrpc.NewConnection(serverExchange, cfg),
-		error:  make(chan error),
-		stop:   make(chan struct{}),
-		router: router,
-		// Default
-		timeout: 2 * time.Second,
+		conn:    rmqrpc.NewConnection(serverExchange, cfg),
+		error:   make(chan error),
+		stop:    make(chan struct{}),
+		router:  router,
+		timeout: defaultTimeout,
 	}
 
-	// Set options
+	// Custom options
 	for _, opt := range opts {
 		opt(s)
 	}
