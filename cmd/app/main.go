@@ -23,10 +23,7 @@ func main() {
 	zap := logger.NewZapLogger(cfg.Log.ZapLevel)
 	defer zap.Close()
 
-	rollbar := logger.NewRollbarLogger(cfg.Log.RollbarToken, cfg.Log.RollbarEnv)
-	defer rollbar.Close()
-
-	logger.NewAppLogger(zap, rollbar, cfg.App.Name, cfg.App.Version)
+	logger.NewAppLogger(zap, cfg.App.Name, cfg.App.Version)
 
 	// Run
 	app.Run(&cfg)
