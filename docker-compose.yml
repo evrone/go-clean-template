@@ -24,8 +24,6 @@ services:
     build: .
     container_name: app
     image: app
-    env_file:
-      - .env
     environment:
       PG_URL: 'postgres://user:pass@postgres:5432/postgres'
       RMQ_URL: 'amqp://guest:guest@rabbitmq:5672/'

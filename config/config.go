@@ -18,9 +18,7 @@ type HTTP struct {
 }
 
 type Log struct {
-	ZapLevel     string `env-required:"true" yaml:"zap_level"   env:"LOG_ZAP_LEVEL"`
-	RollbarEnv   string `env-required:"true" yaml:"rollbar_env" env:"LOG_ROLLBAR_ENV"`
-	RollbarToken string `env-required:"true"                    env:"LOG_ROLLBAR_TOKEN"`
+	ZapLevel string `env-required:"true" yaml:"zap_level"   env:"LOG_ZAP_LEVEL"`
 }
 
 type PG struct {
