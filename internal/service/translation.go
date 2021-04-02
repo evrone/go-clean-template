@@ -5,19 +5,17 @@ import (
 	"fmt"
 
 	"github.com/evrone/go-service-template/internal/domain"
-	"github.com/evrone/go-service-template/internal/repo"
-	"github.com/evrone/go-service-template/internal/webapi"
 )
 
 type TranslationService struct {
-	repo   repo.Translation
-	webAPI webapi.Translation
+	repo   TranslationRepo
+	webAPI TranslationWebAPI
 }
 
-func NewTranslationService(repository repo.Translation, webAPI webapi.Translation) *TranslationService {
+func NewTranslationService(r TranslationRepo, w TranslationWebAPI) *TranslationService {
 	return &TranslationService{
-		repo:   repository,
-		webAPI: webAPI,
+		repo:   r,
+		webAPI: w,
 	}
 }
 
