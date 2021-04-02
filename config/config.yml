@@ -1,6 +1,6 @@
 app:
   name: 'go-service-template'
-  version: '0.0.0'
+  version: '1.0.0'
 
 http:
   port: '8080'
