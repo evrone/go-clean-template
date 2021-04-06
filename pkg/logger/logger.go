@@ -1,8 +1,7 @@
 package logger
 
 import (
-	"fmt"
-
+	"github.com/pkg/errors"
 	"go.uber.org/zap"
 )
 
@@ -57,14 +56,14 @@ func (l *logger) warn(msg string, fields ...Field) {
 }
 
 func (l *logger) error(err error, msg string, fields ...Field) {
-	err = fmt.Errorf("%s: %w", msg, err)
+	err = errors.Wrap(err, msg)
 
 	fields = append(l.defaultFields, fields...)
 	l.zap.Error(err.Error(), zapFields(fields)...)
 }
 
 func (l *logger) fatal(err error, msg string, fields ...Field) {
-	err = fmt.Errorf("%s: %w", msg, err)
+	err = errors.Wrap(err, msg)
 
 	fields = append(l.defaultFields, fields...)
 	l.zap.Fatal(err.Error(), zapFields(fields)...) // os.Exit()

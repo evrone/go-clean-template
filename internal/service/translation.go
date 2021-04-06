@@ -2,7 +2,8 @@ package service
 
 import (
 	"context"
-	"fmt"
+
+	"github.com/pkg/errors"
 
 	"github.com/evrone/go-service-template/internal/domain"
 )
@@ -22,7 +23,7 @@ func NewTranslationService(r TranslationRepo, w TranslationWebAPI) *TranslationS
 func (s *TranslationService) History() ([]domain.Translation, error) {
 	translations, err := s.repo.GetHistory(context.Background())
 	if err != nil {
-		return nil, fmt.Errorf("TranslationService - History - s.repo.GetHistory: %w", err)
+		return nil, errors.Wrap(err, "TranslationService - History - s.repo.GetHistory")
 	}
 
 	return translations, nil
@@ -31,12 +32,12 @@ func (s *TranslationService) History() ([]domain.Translation, error) {
 func (s *TranslationService) Translate(translation domain.Translation) (domain.Translation, error) {
 	translation, err := s.webAPI.Translate(translation)
 	if err != nil {
-		return domain.Translation{}, fmt.Errorf("TranslationService - Translate - s.webAPI.Translate: %w", err)
+		return domain.Translation{}, errors.Wrap(err, "TranslationService - Translate - s.webAPI.Translate")
 	}
 
 	err = s.repo.Store(context.Background(), translation)
 	if err != nil {
-		return domain.Translation{}, fmt.Errorf("TranslationService - Translate - s.repo.Store: %w", err)
+		return domain.Translation{}, errors.Wrap(err, "TranslationService - Translate - s.repo.Store")
 	}
 
 	return translation, nil
