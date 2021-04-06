@@ -6,13 +6,20 @@ import (
 	"github.com/gin-gonic/gin"
 
 	"github.com/evrone/go-service-template/internal/domain"
+	"github.com/evrone/go-service-template/internal/service"
 )
 
-func (r *router) translationRouts(api *gin.RouterGroup) {
-	translation := api.Group("/translation")
+type translationRoutes struct {
+	translationService service.Translation
+}
+
+func newTranslationRoutes(handler *gin.RouterGroup, ts service.Translation) {
+	r := &translationRoutes{ts}
+
+	h := handler.Group("/translation")
 	{
-		translation.GET("/history", r.history)
-		translation.POST("/do-translate", r.doTranslate)
+		h.GET("/history", r.history)
+		h.POST("/do-translate", r.doTranslate)
 	}
 }
 
@@ -29,7 +36,7 @@ type historyResponse struct {
 // @Success     200 {object} historyResponse
 // @Failure     400 {object} response
 // @Router      /translation/history [get].
-func (r *router) history(c *gin.Context) {
+func (r *translationRoutes) history(c *gin.Context) {
 	translations, err := r.translationService.History()
 	if err != nil {
 		errorResponse(c, http.StatusBadRequest, err, "database problems")
@@ -56,7 +63,7 @@ type doTranslateRequest struct {
 // @Success     200 {object} domain.Translation
 // @Failure     400 {object} response
 // @Router      /translation/do-translate [post].
-func (r *router) doTranslate(c *gin.Context) {
+func (r *translationRoutes) doTranslate(c *gin.Context) {
 	var request doTranslateRequest
 	if err := c.ShouldBindJSON(&request); err != nil {
 		errorResponse(c, http.StatusBadRequest, err, "invalid request body")

@@ -43,7 +43,7 @@ func Run(cfg *config.Config) {
 		logger.Fatal(err, "app - Run - rmqServer - server.NewServer")
 	}
 
-	// HTTP
+	// HTTP Server
 	handler := gin.New()
 	v1.NewRouter(handler, translationService)
 	httpServer := httpserver.NewServer(handler, httpserver.Port(cfg.HTTP.Port))
