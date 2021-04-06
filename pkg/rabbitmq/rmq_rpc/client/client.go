@@ -2,7 +2,6 @@ package client
 
 import (
 	"encoding/json"
-	"fmt"
 	"sync"
 	"time"
 
@@ -232,7 +231,7 @@ func (c *Client) Shutdown() error {
 
 	err := c.conn.Connection.Close()
 	if err != nil {
-		return fmt.Errorf("rmq_rpc client - Client - Shutdown - c.Connection.Close: %w", err)
+		return errors.Wrap(err, "rmq_rpc client - Client - Shutdown - c.Connection.Close")
 	}
 
 	return nil

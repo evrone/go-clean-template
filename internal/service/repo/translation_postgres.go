@@ -2,7 +2,8 @@ package repo
 
 import (
 	"context"
-	"fmt"
+
+	"github.com/pkg/errors"
 
 	"github.com/evrone/go-service-template/internal/domain"
 	"github.com/evrone/go-service-template/pkg/postgres"
@@ -22,12 +23,12 @@ func (r *TranslationRepo) GetHistory(ctx context.Context) ([]domain.Translation,
 		From("history").
 		ToSql()
 	if err != nil {
-		return nil, fmt.Errorf("TranslationRepo - GetHistory - r.Builder: %w", err)
+		return nil, errors.Wrap(err, "TranslationRepo - GetHistory - r.Builder")
 	}
 
 	rows, err := r.Pool.Query(ctx, sql)
 	if err != nil {
-		return nil, fmt.Errorf("TranslationRepo - GetHistory - r.Pool.Query: %w", err)
+		return nil, errors.Wrap(err, "TranslationRepo - GetHistory - r.Pool.Query")
 	}
 	defer rows.Close()
 
@@ -38,7 +39,7 @@ func (r *TranslationRepo) GetHistory(ctx context.Context) ([]domain.Translation,
 
 		err = rows.Scan(&e.Source, &e.Destination, &e.Original, &e.Translation)
 		if err != nil {
-			return nil, fmt.Errorf("TranslationRepo - GetHistory - rows.Scan: %w", err)
+			return nil, errors.Wrap(err, "TranslationRepo - GetHistory - rows.Scan")
 		}
 
 		entities = append(entities, e)
@@ -54,12 +55,12 @@ func (r *TranslationRepo) Store(ctx context.Context, entity domain.Translation) 
 		Values(entity.Source, entity.Destination, entity.Original, entity.Translation).
 		ToSql()
 	if err != nil {
-		return fmt.Errorf("TranslationRepo - Store - r.Builder: %w", err)
+		return errors.Wrap(err, "TranslationRepo - Store - r.Builder")
 	}
 
 	_, err = r.Pool.Exec(ctx, sql, args...)
 	if err != nil {
-		return fmt.Errorf("TranslationRepo - Store - r.Pool.Exec: %w", err)
+		return errors.Wrap(err, "TranslationRepo - Store - r.Pool.Exec")
 	}
 
 	return nil

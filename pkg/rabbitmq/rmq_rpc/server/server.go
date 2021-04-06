@@ -2,7 +2,6 @@ package server
 
 import (
 	"encoding/json"
-	"fmt"
 	"time"
 
 	"github.com/pkg/errors"
@@ -148,7 +147,7 @@ func (s *Server) Shutdown() error {
 
 	err := s.conn.Connection.Close()
 	if err != nil {
-		return fmt.Errorf("rmq_rpc server - Server - Shutdown - s.Connection.Close: %w", err)
+		return errors.Wrap(err, "rmq_rpc server - Server - Shutdown - s.Connection.Close")
 	}
 
 	return nil
