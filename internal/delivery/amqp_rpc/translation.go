@@ -28,7 +28,7 @@ func (r *translationRoutes) getHistory() server.CallHandler {
 	return func(d *amqp.Delivery) (interface{}, error) {
 		translations, err := r.translationService.History()
 		if err != nil {
-			return nil, errors.Wrap(err, "amqp_rpc - router - getHistory - r.translationService.History")
+			return nil, errors.Wrap(err, "amqp_rpc - translationRoutes - getHistory - r.translationService.History")
 		}
 
 		response := historyResponse{translations}
