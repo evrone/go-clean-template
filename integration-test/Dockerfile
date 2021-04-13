@@ -4,8 +4,8 @@ COPY go.mod go.sum /modules/
 WORKDIR /modules
 RUN go mod download
 
-# Step 2: Builder
-FROM golang:1.16.2-alpine3.13 as builder
+# Step 2: Tests
+FROM golang:1.16.2-alpine3.13
 COPY --from=modules /go/pkg /go/pkg
 COPY . /app
 WORKDIR /app
