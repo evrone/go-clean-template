@@ -31,8 +31,6 @@ linters-settings:
     disabled-checks:
       - dupImport
       - unnecessaryBlock
-  golint:
-    min-confidence: 0.7
   gofumpt:
     extra-rules: true
   gomnd:
@@ -88,7 +86,6 @@ linters:
     - gofmt
     - gofumpt
     - goimports
-    - golint
     - gomnd
     - gomodguard
     - goprintffuncname
