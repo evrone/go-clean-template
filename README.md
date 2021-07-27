@@ -253,7 +253,6 @@ You can choose how to call the entry points as you wish. The options are:
 - delivery (in our case)
 - controllers
 - transport
-- adaptors
 - gateways
 - entrypoints
 - primary
