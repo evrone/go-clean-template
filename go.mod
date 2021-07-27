@@ -7,7 +7,7 @@ require (
 	github.com/Eun/go-hit v0.5.20
 	github.com/Masterminds/squirrel v1.5.0
 	github.com/alecthomas/template v0.0.0-20190718012654-fb15b899a751
-	github.com/gin-gonic/gin v1.6.3
+	github.com/gin-gonic/gin v1.7.2
 	github.com/golang-migrate/migrate/v4 v4.14.1
 	github.com/google/uuid v1.1.2
 	github.com/ilyakaznacheev/cleanenv v1.2.5
