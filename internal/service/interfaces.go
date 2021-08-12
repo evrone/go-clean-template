@@ -8,8 +8,8 @@ import (
 )
 
 type Translation interface {
-	Translate(domain.Translation) (domain.Translation, error)
-	History() ([]domain.Translation, error)
+	Translate(context.Context, domain.Translation) (domain.Translation, error)
+	History(context.Context) ([]domain.Translation, error)
 }
 
 type TranslationRepo interface {

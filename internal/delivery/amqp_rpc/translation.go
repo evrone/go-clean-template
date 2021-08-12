@@ -1,6 +1,8 @@
 package amqprpc
 
 import (
+	"context"
+
 	"github.com/pkg/errors"
 	"github.com/streadway/amqp"
 
@@ -26,7 +28,7 @@ type historyResponse struct {
 
 func (r *translationRoutes) getHistory() server.CallHandler {
 	return func(d *amqp.Delivery) (interface{}, error) {
-		translations, err := r.translationService.History()
+		translations, err := r.translationService.History(context.Background())
 		if err != nil {
 			return nil, errors.Wrap(err, "amqp_rpc - translationRoutes - getHistory - r.translationService.History")
 		}

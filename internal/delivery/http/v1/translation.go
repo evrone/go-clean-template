@@ -37,7 +37,7 @@ type historyResponse struct {
 // @Failure     400 {object} response
 // @Router      /translation/history [get].
 func (r *translationRoutes) history(c *gin.Context) {
-	translations, err := r.translationService.History()
+	translations, err := r.translationService.History(c.Request.Context())
 	if err != nil {
 		errorResponse(c, http.StatusBadRequest, err, "database problems")
 
@@ -71,11 +71,14 @@ func (r *translationRoutes) doTranslate(c *gin.Context) {
 		return
 	}
 
-	translation, err := r.translationService.Translate(domain.Translation{
-		Source:      request.Source,
-		Destination: request.Destination,
-		Original:    request.Original,
-	})
+	translation, err := r.translationService.Translate(
+		c.Request.Context(),
+		domain.Translation{
+			Source:      request.Source,
+			Destination: request.Destination,
+			Original:    request.Original,
+		},
+	)
 	if err != nil {
 		errorResponse(c, http.StatusBadRequest, err, "translation service problems")
 
