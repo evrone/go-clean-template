@@ -9,8 +9,8 @@ import (
 	ginSwagger "github.com/swaggo/gin-swagger"
 
 	// Swagger docs.
-	_ "github.com/evrone/go-service-template/docs"
-	"github.com/evrone/go-service-template/internal/service"
+	_ "github.com/evrone/go-clean-template/docs"
+	"github.com/evrone/go-clean-template/internal/service"
 )
 
 // Swagger spec:

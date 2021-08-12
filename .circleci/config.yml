@@ -6,7 +6,7 @@ parameters:
     default: "go-service-template"
   image:
     type: string
-    default: "evrone/go-service-template"
+    default: "evrone/go-clean-template"
 
 orbs:
   docker: circleci/docker@0.5.20

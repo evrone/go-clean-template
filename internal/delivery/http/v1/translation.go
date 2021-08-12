@@ -5,8 +5,8 @@ import (
 
 	"github.com/gin-gonic/gin"
 
-	"github.com/evrone/go-service-template/internal/domain"
-	"github.com/evrone/go-service-template/internal/service"
+	"github.com/evrone/go-clean-template/internal/domain"
+	"github.com/evrone/go-clean-template/internal/service"
 )
 
 type translationRoutes struct {

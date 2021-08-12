@@ -5,8 +5,8 @@ import (
 
 	"github.com/pkg/errors"
 
-	"github.com/evrone/go-service-template/internal/domain"
-	"github.com/evrone/go-service-template/pkg/postgres"
+	"github.com/evrone/go-clean-template/internal/domain"
+	"github.com/evrone/go-clean-template/pkg/postgres"
 )
 
 type TranslationRepo struct {

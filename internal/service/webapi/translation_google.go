@@ -4,7 +4,7 @@ import (
 	translator "github.com/Conight/go-googletrans"
 	"github.com/pkg/errors"
 
-	"github.com/evrone/go-service-template/internal/domain"
+	"github.com/evrone/go-clean-template/internal/domain"
 )
 
 type TranslationWebAPI struct {

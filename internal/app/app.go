@@ -8,16 +8,16 @@ import (
 
 	"github.com/gin-gonic/gin"
 
-	"github.com/evrone/go-service-template/config"
-	amqprpc "github.com/evrone/go-service-template/internal/delivery/amqp_rpc"
-	v1 "github.com/evrone/go-service-template/internal/delivery/http/v1"
-	"github.com/evrone/go-service-template/internal/service"
-	"github.com/evrone/go-service-template/internal/service/repo"
-	"github.com/evrone/go-service-template/internal/service/webapi"
-	"github.com/evrone/go-service-template/pkg/httpserver"
-	"github.com/evrone/go-service-template/pkg/logger"
-	"github.com/evrone/go-service-template/pkg/postgres"
-	"github.com/evrone/go-service-template/pkg/rabbitmq/rmq_rpc/server"
+	"github.com/evrone/go-clean-template/config"
+	amqprpc "github.com/evrone/go-clean-template/internal/delivery/amqp_rpc"
+	v1 "github.com/evrone/go-clean-template/internal/delivery/http/v1"
+	"github.com/evrone/go-clean-template/internal/service"
+	"github.com/evrone/go-clean-template/internal/service/repo"
+	"github.com/evrone/go-clean-template/internal/service/webapi"
+	"github.com/evrone/go-clean-template/pkg/httpserver"
+	"github.com/evrone/go-clean-template/pkg/logger"
+	"github.com/evrone/go-clean-template/pkg/postgres"
+	"github.com/evrone/go-clean-template/pkg/rabbitmq/rmq_rpc/server"
 )
 
 // Run creates objects via constructors.

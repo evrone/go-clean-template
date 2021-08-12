@@ -4,9 +4,9 @@ import (
 	"github.com/pkg/errors"
 	"github.com/streadway/amqp"
 
-	"github.com/evrone/go-service-template/internal/domain"
-	"github.com/evrone/go-service-template/internal/service"
-	"github.com/evrone/go-service-template/pkg/rabbitmq/rmq_rpc/server"
+	"github.com/evrone/go-clean-template/internal/domain"
+	"github.com/evrone/go-clean-template/internal/service"
+	"github.com/evrone/go-clean-template/pkg/rabbitmq/rmq_rpc/server"
 )
 
 type translationRoutes struct {

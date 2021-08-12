@@ -1,4 +1,4 @@
-module github.com/evrone/go-service-template
+module github.com/evrone/go-clean-template
 
 go 1.16
 

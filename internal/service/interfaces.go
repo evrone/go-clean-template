@@ -4,7 +4,7 @@ package service
 import (
 	"context"
 
-	"github.com/evrone/go-service-template/internal/domain"
+	"github.com/evrone/go-clean-template/internal/domain"
 )
 
 type Translation interface {

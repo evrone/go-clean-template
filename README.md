@@ -4,9 +4,9 @@
 
 Clean Architecture template for Golang services
 
-[![Go Report Card](https://goreportcard.com/badge/github.com/evrone/go-service-template)](https://goreportcard.com/report/github.com/evrone/go-service-template)
-[![License](https://img.shields.io/github/license/evrone/go-service-template.svg)](https://github.com/evrone/go-service-template/blob/master/LICENSE)
-[![Release](https://img.shields.io/github/v/release/evrone/go-service-template.svg)](https://github.com/evrone/go-service-template/releases/)
+[![Go Report Card](https://goreportcard.com/badge/github.com/evrone/go-clean-template)](https://goreportcard.com/report/github.com/evrone/go-clean-template)
+[![License](https://img.shields.io/github/license/evrone/go-clean-template.svg)](https://github.com/evrone/go-clean-template/blob/master/LICENSE)
+[![Release](https://img.shields.io/github/v/release/evrone/go-clean-template.svg)](https://github.com/evrone/go-clean-template/releases/)
 
 ## Overview
 The purpose of the template is to show:
