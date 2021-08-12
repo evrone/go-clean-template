@@ -29,8 +29,8 @@ func (s *TranslationService) History(ctx context.Context) ([]domain.Translation,
 	return translations, nil
 }
 
-func (s *TranslationService) Translate(ctx context.Context, translation domain.Translation) (domain.Translation, error) {
-	translation, err := s.webAPI.Translate(translation)
+func (s *TranslationService) Translate(ctx context.Context, t domain.Translation) (domain.Translation, error) {
+	translation, err := s.webAPI.Translate(t)
 	if err != nil {
 		return domain.Translation{}, errors.Wrap(err, "TranslationService - Translate - s.webAPI.Translate")
 	}
