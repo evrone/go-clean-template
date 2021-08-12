@@ -62,13 +62,11 @@ func Run(cfg *config.Config) {
 	}
 
 	// Shutdown
-	err = httpServer.Shutdown()
-	if err != nil {
+	if err := httpServer.Shutdown(); err != nil {
 		logger.Error(err, "app - Run - httpServer.Shutdown")
 	}
 
-	err = rmqServer.Shutdown()
-	if err != nil {
+	if err := rmqServer.Shutdown(); err != nil {
 		logger.Error(err, "app - Run - rmqServer.Shutdown")
 	}
 }

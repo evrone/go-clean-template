@@ -58,8 +58,7 @@ func (r *TranslationRepo) Store(ctx context.Context, entity domain.Translation) 
 		return errors.Wrap(err, "TranslationRepo - Store - r.Builder")
 	}
 
-	_, err = r.Pool.Exec(ctx, sql, args...)
-	if err != nil {
+	if _, err = r.Pool.Exec(ctx, sql, args...); err != nil {
 		return errors.Wrap(err, "TranslationRepo - Store - r.Pool.Exec")
 	}
 
