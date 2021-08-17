@@ -17,15 +17,14 @@ func NewZapLogger(logLevel string) *ZapLogger {
 		logger *zap.Logger
 	)
 
-	err := level.UnmarshalText([]byte(logLevel))
-	if err != nil {
+	if err := level.UnmarshalText([]byte(logLevel)); err != nil {
 		log.Fatalf("zap init error: %s", err)
 	}
 
 	config := zap.NewProductionConfig()
 	config.Level = zap.NewAtomicLevelAt(level)
 
-	logger, err = config.Build()
+	logger, err := config.Build()
 	if err != nil {
 		log.Fatalf("zap init error: %s", err)
 	}

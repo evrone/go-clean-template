@@ -66,8 +66,7 @@ func NewClient(url, serverExchange, clientExchange string, opts ...Option) (*Cli
 		opt(c)
 	}
 
-	err := c.conn.AttemptConnect()
-	if err != nil {
+	if err := c.conn.AttemptConnect(); err != nil {
 		return nil, errors.Wrap(err, "rmq_rpc client - NewClient - c.conn.AttemptConnect")
 	}
 
@@ -118,8 +117,7 @@ func (c *Client) RemoteCall(handler string, request, response interface{}) error
 
 	corrID := uuid.New().String()
 
-	err := c.publish(corrID, handler, request)
-	if err != nil {
+	if err := c.publish(corrID, handler, request); err != nil {
 		return errors.Wrap(err, "rmq_rpc client - Client - RemoteCall - c.publish")
 	}
 
@@ -135,8 +133,7 @@ func (c *Client) RemoteCall(handler string, request, response interface{}) error
 	}
 
 	if call.status == rmqrpc.Success {
-		err = json.Unmarshal(call.body, &response)
-		if err != nil {
+		if err := json.Unmarshal(call.body, &response); err != nil {
 			return errors.Wrap(err, "rmq_rpc client - Client - RemoteCall - json.Unmarshal")
 		}
 
@@ -229,8 +226,7 @@ func (c *Client) Shutdown() error {
 	close(c.stop)
 	time.Sleep(c.timeout)
 
-	err := c.conn.Connection.Close()
-	if err != nil {
+	if err := c.conn.Connection.Close(); err != nil {
 		return errors.Wrap(err, "rmq_rpc client - Client - Shutdown - c.Connection.Close")
 	}
 

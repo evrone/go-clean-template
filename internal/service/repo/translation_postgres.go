@@ -39,8 +39,7 @@ func (r *TranslationRepo) GetHistory(ctx context.Context) ([]domain.Translation,
 	for rows.Next() {
 		e := domain.Translation{}
 
-		err = rows.Scan(&e.Source, &e.Destination, &e.Original, &e.Translation)
-		if err != nil {
+		if err := rows.Scan(&e.Source, &e.Destination, &e.Original, &e.Translation); err != nil {
 			return nil, errors.Wrap(err, "TranslationRepo - GetHistory - rows.Scan")
 		}
 

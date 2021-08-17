@@ -7,16 +7,18 @@ import (
 	"github.com/evrone/go-clean-template/internal/domain"
 )
 
-type Translation interface {
-	Translate(context.Context, domain.Translation) (domain.Translation, error)
-	History(context.Context) ([]domain.Translation, error)
-}
+type (
+	Translation interface {
+		Translate(context.Context, domain.Translation) (domain.Translation, error)
+		History(context.Context) ([]domain.Translation, error)
+	}
 
-type TranslationRepo interface {
-	Store(context.Context, domain.Translation) error
-	GetHistory(context.Context) ([]domain.Translation, error)
-}
+	TranslationRepo interface {
+		Store(context.Context, domain.Translation) error
+		GetHistory(context.Context) ([]domain.Translation, error)
+	}
 
-type TranslationWebAPI interface {
-	Translate(domain.Translation) (domain.Translation, error)
-}
+	TranslationWebAPI interface {
+		Translate(domain.Translation) (domain.Translation, error)
+	}
+)
