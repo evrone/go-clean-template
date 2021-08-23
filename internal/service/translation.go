@@ -35,7 +35,8 @@ func (s *TranslationService) Translate(ctx context.Context, t domain.Translation
 		return domain.Translation{}, errors.Wrap(err, "TranslationService - Translate - s.webAPI.Translate")
 	}
 
-	if err := s.repo.Store(ctx, translation); err != nil {
+	err = s.repo.Store(context.Background(), translation)
+	if err != nil {
 		return domain.Translation{}, errors.Wrap(err, "TranslationService - Translate - s.repo.Store")
 	}
 
