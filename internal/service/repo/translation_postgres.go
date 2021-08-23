@@ -5,9 +5,11 @@ import (
 
 	"github.com/pkg/errors"
 
-	"github.com/evrone/go-service-template/internal/domain"
-	"github.com/evrone/go-service-template/pkg/postgres"
+	"github.com/evrone/go-clean-template/internal/domain"
+	"github.com/evrone/go-clean-template/pkg/postgres"
 )
+
+const defaultEntityCap = 64
 
 type TranslationRepo struct {
 	*postgres.Postgres
@@ -32,7 +34,7 @@ func (r *TranslationRepo) GetHistory(ctx context.Context) ([]domain.Translation,
 	}
 	defer rows.Close()
 
-	entities := make([]domain.Translation, 0, 64)
+	entities := make([]domain.Translation, 0, defaultEntityCap)
 
 	for rows.Next() {
 		e := domain.Translation{}

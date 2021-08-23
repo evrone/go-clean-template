@@ -1,8 +1,8 @@
 package amqprpc
 
 import (
-	"github.com/evrone/go-service-template/internal/service"
-	"github.com/evrone/go-service-template/pkg/rabbitmq/rmq_rpc/server"
+	"github.com/evrone/go-clean-template/internal/service"
+	"github.com/evrone/go-clean-template/pkg/rabbitmq/rmq_rpc/server"
 )
 
 func NewRouter(translationService service.Translation) map[string]server.CallHandler {

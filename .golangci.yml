@@ -1,6 +1,6 @@
 linters-settings:
   gci:
-    local-prefixes: github.com/evrone/go-service-template
+    local-prefixes: github.com/evrone/go-clean-template
   dupl:
     threshold: 100
   errorlint:

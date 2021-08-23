@@ -5,7 +5,7 @@ import (
 
 	"github.com/pkg/errors"
 
-	"github.com/evrone/go-service-template/internal/domain"
+	"github.com/evrone/go-clean-template/internal/domain"
 )
 
 type TranslationService struct {
@@ -20,8 +20,8 @@ func NewTranslationService(r TranslationRepo, w TranslationWebAPI) *TranslationS
 	}
 }
 
-func (s *TranslationService) History() ([]domain.Translation, error) {
-	translations, err := s.repo.GetHistory(context.Background())
+func (s *TranslationService) History(ctx context.Context) ([]domain.Translation, error) {
+	translations, err := s.repo.GetHistory(ctx)
 	if err != nil {
 		return nil, errors.Wrap(err, "TranslationService - History - s.repo.GetHistory")
 	}
@@ -29,8 +29,8 @@ func (s *TranslationService) History() ([]domain.Translation, error) {
 	return translations, nil
 }
 
-func (s *TranslationService) Translate(translation domain.Translation) (domain.Translation, error) {
-	translation, err := s.webAPI.Translate(translation)
+func (s *TranslationService) Translate(ctx context.Context, t domain.Translation) (domain.Translation, error) {
+	translation, err := s.webAPI.Translate(t)
 	if err != nil {
 		return domain.Translation{}, errors.Wrap(err, "TranslationService - Translate - s.webAPI.Translate")
 	}

@@ -5,9 +5,9 @@ import (
 
 	"github.com/ilyakaznacheev/cleanenv"
 
-	"github.com/evrone/go-service-template/config"
-	"github.com/evrone/go-service-template/internal/app"
-	"github.com/evrone/go-service-template/pkg/logger"
+	"github.com/evrone/go-clean-template/config"
+	"github.com/evrone/go-clean-template/internal/app"
+	"github.com/evrone/go-clean-template/pkg/logger"
 )
 
 func main() {

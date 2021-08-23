@@ -1,12 +1,14 @@
 package amqprpc
 
 import (
+	"context"
+
 	"github.com/pkg/errors"
 	"github.com/streadway/amqp"
 
-	"github.com/evrone/go-service-template/internal/domain"
-	"github.com/evrone/go-service-template/internal/service"
-	"github.com/evrone/go-service-template/pkg/rabbitmq/rmq_rpc/server"
+	"github.com/evrone/go-clean-template/internal/domain"
+	"github.com/evrone/go-clean-template/internal/service"
+	"github.com/evrone/go-clean-template/pkg/rabbitmq/rmq_rpc/server"
 )
 
 type translationRoutes struct {
@@ -26,7 +28,7 @@ type historyResponse struct {
 
 func (r *translationRoutes) getHistory() server.CallHandler {
 	return func(d *amqp.Delivery) (interface{}, error) {
-		translations, err := r.translationService.History()
+		translations, err := r.translationService.History(context.Background())
 		if err != nil {
 			return nil, errors.Wrap(err, "amqp_rpc - translationRoutes - getHistory - r.translationService.History")
 		}
