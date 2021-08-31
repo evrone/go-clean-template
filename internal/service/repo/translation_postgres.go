@@ -50,11 +50,11 @@ func (r *TranslationRepo) GetHistory(ctx context.Context) ([]entity.Translation,
 	return entities, nil
 }
 
-func (r *TranslationRepo) Store(ctx context.Context, entity entity.Translation) error {
+func (r *TranslationRepo) Store(ctx context.Context, t entity.Translation) error {
 	sql, args, err := r.Builder.
 		Insert("history").
 		Columns("source, destination, original, translation").
-		Values(entity.Source, entity.Destination, entity.Original, entity.Translation).
+		Values(t.Source, t.Destination, t.Original, t.Translation).
 		ToSql()
 	if err != nil {
 		return errors.Wrap(err, "TranslationRepo - Store - r.Builder")
