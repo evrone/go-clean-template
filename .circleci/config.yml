@@ -3,7 +3,7 @@ version: 2.1
 parameters:
   service_name:
     type: string
-    default: "go-service-template"
+    default: "go-clean-template"
   image:
     type: string
     default: "evrone/go-clean-template"
