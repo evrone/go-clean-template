@@ -4,7 +4,7 @@ import (
 	translator "github.com/Conight/go-googletrans"
 	"github.com/pkg/errors"
 
-	"github.com/evrone/go-clean-template/internal/domain"
+	"github.com/evrone/go-clean-template/internal/entity"
 )
 
 type TranslationWebAPI struct {
@@ -20,12 +20,12 @@ func NewTranslationWebAPI() *TranslationWebAPI {
 	return &TranslationWebAPI{conf}
 }
 
-func (t *TranslationWebAPI) Translate(translation domain.Translation) (domain.Translation, error) {
+func (t *TranslationWebAPI) Translate(translation entity.Translation) (entity.Translation, error) {
 	trans := translator.New(t.conf)
 
 	result, err := trans.Translate(translation.Original, translation.Source, translation.Destination)
 	if err != nil {
-		return domain.Translation{}, errors.Wrap(err, "TranslationWebAPI - Translate - trans.Translate")
+		return entity.Translation{}, errors.Wrap(err, "TranslationWebAPI - Translate - trans.Translate")
 	}
 
 	translation.Translation = result.Text

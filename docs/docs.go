@@ -53,7 +53,7 @@ var doc = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/domain.Translation"
+                            "$ref": "#/definitions/entity.Translation"
                         }
                     },
                     "400": {
@@ -97,7 +97,7 @@ var doc = `{
         }
     },
     "definitions": {
-        "domain.Translation": {
+        "entity.Translation": {
             "type": "object",
             "properties": {
                 "destination": {
@@ -146,7 +146,7 @@ var doc = `{
                 "history": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/domain.Translation"
+                        "$ref": "#/definitions/entity.Translation"
                     }
                 }
             }

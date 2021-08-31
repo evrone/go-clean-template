@@ -5,7 +5,7 @@ import (
 
 	"github.com/pkg/errors"
 
-	"github.com/evrone/go-clean-template/internal/domain"
+	"github.com/evrone/go-clean-template/internal/entity"
 	"github.com/evrone/go-clean-template/pkg/postgres"
 )
 
@@ -19,7 +19,7 @@ func NewTranslationRepo(pg *postgres.Postgres) *TranslationRepo {
 	return &TranslationRepo{pg}
 }
 
-func (r *TranslationRepo) GetHistory(ctx context.Context) ([]domain.Translation, error) {
+func (r *TranslationRepo) GetHistory(ctx context.Context) ([]entity.Translation, error) {
 	sql, _, err := r.Builder.
 		Select("source, destination, original, translation").
 		From("history").
@@ -34,10 +34,10 @@ func (r *TranslationRepo) GetHistory(ctx context.Context) ([]domain.Translation,
 	}
 	defer rows.Close()
 
-	entities := make([]domain.Translation, 0, defaultEntityCap)
+	entities := make([]entity.Translation, 0, defaultEntityCap)
 
 	for rows.Next() {
-		e := domain.Translation{}
+		e := entity.Translation{}
 
 		err = rows.Scan(&e.Source, &e.Destination, &e.Original, &e.Translation)
 		if err != nil {
@@ -50,11 +50,11 @@ func (r *TranslationRepo) GetHistory(ctx context.Context) ([]domain.Translation,
 	return entities, nil
 }
 
-func (r *TranslationRepo) Store(ctx context.Context, entity domain.Translation) error {
+func (r *TranslationRepo) Store(ctx context.Context, t entity.Translation) error {
 	sql, args, err := r.Builder.
 		Insert("history").
 		Columns("source, destination, original, translation").
-		Values(entity.Source, entity.Destination, entity.Original, entity.Translation).
+		Values(t.Source, t.Destination, t.Original, t.Translation).
 		ToSql()
 	if err != nil {
 		return errors.Wrap(err, "TranslationRepo - Store - r.Builder")

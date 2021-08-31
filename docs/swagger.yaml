@@ -1,6 +1,6 @@
 basePath: /api/v1
 definitions:
-  domain.Translation:
+  entity.Translation:
     properties:
       destination:
         example: en
@@ -35,7 +35,7 @@ definitions:
     properties:
       history:
         items:
-          $ref: '#/definitions/domain.Translation'
+          $ref: '#/definitions/entity.Translation'
         type: array
     type: object
   v1.response:
@@ -70,7 +70,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/domain.Translation'
+            $ref: '#/definitions/entity.Translation'
         "400":
           description: Bad Request
           schema:

@@ -6,7 +6,7 @@ import (
 	"github.com/pkg/errors"
 	"github.com/streadway/amqp"
 
-	"github.com/evrone/go-clean-template/internal/domain"
+	"github.com/evrone/go-clean-template/internal/entity"
 	"github.com/evrone/go-clean-template/internal/service"
 	"github.com/evrone/go-clean-template/pkg/rabbitmq/rmq_rpc/server"
 )
@@ -23,7 +23,7 @@ func newTranslationRoutes(routes map[string]server.CallHandler, ts service.Trans
 }
 
 type historyResponse struct {
-	History []domain.Translation `json:"history"`
+	History []entity.Translation `json:"history"`
 }
 
 func (r *translationRoutes) getHistory() server.CallHandler {

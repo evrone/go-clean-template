@@ -110,7 +110,7 @@ Instead of Gin, you can use any other http framework or even the standard `net/h
 
 In `v1/router.go` and above the handler methods, there are comments for generating swagger documentation using [swag](https://github.com/swaggo/swag).
 
-### `internal/domain`
+### `internal/entity`
 Entities of business logic (models) can be used in any layer.
 There can also be methods, for example, for validation.
 
@@ -201,7 +201,7 @@ Business logic has an interface for working with an _abstract_ database or _abst
 **The outer layer** has other limitations:
 - All components of this layer are unaware of each other's existence. How to call another from one tool? Not directly, only through the inner layer of business logic.
 - All calls to the inner layer are made through the interface (!).
-- Data is transferred in a format that is convenient for business logic (`internal/domain`).
+- Data is transferred in a format that is convenient for business logic (`internal/entity`).
 
 For example, you need to access the database from HTTP (controller).
 Both HTTP and database are in the outer layer, which means they know nothing about each other.
@@ -237,8 +237,7 @@ Or more complex business logic:
 
 ### Clean Architecture Terminology
 - **Entities** are structures that business logic operates on.
-  They are located in the `internal/domain` folder.
-  Domain hints that we adhere to the principles of DDD (domain-driven design), and this is partly true.
+  They are located in the `internal/entity` folder.
   In MVC terms, entities are models.
   
 - **Use Cases** is business logic located in `internal/service`.

@@ -38,7 +38,7 @@
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/domain.Translation"
+                            "$ref": "#/definitions/entity.Translation"
                         }
                     },
                     "400": {
@@ -82,7 +82,7 @@
         }
     },
     "definitions": {
-        "domain.Translation": {
+        "entity.Translation": {
             "type": "object",
             "properties": {
                 "destination": {
@@ -131,7 +131,7 @@
                 "history": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/domain.Translation"
+                        "$ref": "#/definitions/entity.Translation"
                     }
                 }
             }

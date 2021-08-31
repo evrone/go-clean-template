@@ -5,7 +5,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 
-	"github.com/evrone/go-clean-template/internal/domain"
+	"github.com/evrone/go-clean-template/internal/entity"
 	"github.com/evrone/go-clean-template/internal/service"
 )
 
@@ -24,7 +24,7 @@ func newTranslationRoutes(handler *gin.RouterGroup, ts service.Translation) {
 }
 
 type historyResponse struct {
-	History []domain.Translation `json:"history"`
+	History []entity.Translation `json:"history"`
 }
 
 // @Summary     Show history
@@ -60,7 +60,7 @@ type doTranslateRequest struct {
 // @Accept      json
 // @Produce     json
 // @Param       request body doTranslateRequest true "Set up translation"
-// @Success     200 {object} domain.Translation
+// @Success     200 {object} entity.Translation
 // @Failure     400 {object} response
 // @Router      /translation/do-translate [post].
 func (r *translationRoutes) doTranslate(c *gin.Context) {
@@ -73,7 +73,7 @@ func (r *translationRoutes) doTranslate(c *gin.Context) {
 
 	translation, err := r.translationService.Translate(
 		c.Request.Context(),
-		domain.Translation{
+		entity.Translation{
 			Source:      request.Source,
 			Destination: request.Destination,
 			Original:    request.Original,
