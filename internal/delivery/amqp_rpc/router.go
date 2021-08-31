@@ -1,14 +1,14 @@
 package amqprpc
 
 import (
-	"github.com/evrone/go-clean-template/internal/service"
+	"github.com/evrone/go-clean-template/internal/usecase"
 	"github.com/evrone/go-clean-template/pkg/rabbitmq/rmq_rpc/server"
 )
 
-func NewRouter(translationService service.Translation) map[string]server.CallHandler {
+func NewRouter(t usecase.Translation) map[string]server.CallHandler {
 	routes := make(map[string]server.CallHandler)
 	{
-		newTranslationRoutes(routes, translationService)
+		newTranslationRoutes(routes, t)
 	}
 
 	return routes

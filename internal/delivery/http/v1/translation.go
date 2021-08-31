@@ -6,15 +6,15 @@ import (
 	"github.com/gin-gonic/gin"
 
 	"github.com/evrone/go-clean-template/internal/entity"
-	"github.com/evrone/go-clean-template/internal/service"
+	"github.com/evrone/go-clean-template/internal/usecase"
 )
 
 type translationRoutes struct {
-	translationService service.Translation
+	t usecase.Translation
 }
 
-func newTranslationRoutes(handler *gin.RouterGroup, ts service.Translation) {
-	r := &translationRoutes{ts}
+func newTranslationRoutes(handler *gin.RouterGroup, t usecase.Translation) {
+	r := &translationRoutes{t}
 
 	h := handler.Group("/translation")
 	{
@@ -37,7 +37,7 @@ type historyResponse struct {
 // @Failure     400 {object} response
 // @Router      /translation/history [get].
 func (r *translationRoutes) history(c *gin.Context) {
-	translations, err := r.translationService.History(c.Request.Context())
+	translations, err := r.t.History(c.Request.Context())
 	if err != nil {
 		errorResponse(c, http.StatusBadRequest, err, "database problems")
 
@@ -71,7 +71,7 @@ func (r *translationRoutes) doTranslate(c *gin.Context) {
 		return
 	}
 
-	translation, err := r.translationService.Translate(
+	translation, err := r.t.Translate(
 		c.Request.Context(),
 		entity.Translation{
 			Source:      request.Source,

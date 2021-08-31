@@ -10,7 +10,7 @@ import (
 
 	// Swagger docs.
 	_ "github.com/evrone/go-clean-template/docs"
-	"github.com/evrone/go-clean-template/internal/service"
+	"github.com/evrone/go-clean-template/internal/usecase"
 )
 
 // Swagger spec:
@@ -20,7 +20,7 @@ import (
 // @host        localhost:8080
 // @BasePath    /api/v1
 
-func NewRouter(handler *gin.Engine, translationService service.Translation) {
+func NewRouter(handler *gin.Engine, t usecase.Translation) {
 	// Options
 	handler.Use(gin.Logger())
 	handler.Use(gin.Recovery())
@@ -35,6 +35,6 @@ func NewRouter(handler *gin.Engine, translationService service.Translation) {
 	// Routers
 	h := handler.Group("/api/v1")
 	{
-		newTranslationRoutes(h, translationService)
+		newTranslationRoutes(h, t)
 	}
 }
