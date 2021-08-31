@@ -30,7 +30,7 @@ jobs:
         with:
           fail_on_error: true
           reporter: github-pr-review
-          yamllint_flags: "-d \'{extends: default, rules: {truthy: disable}}\' ."
+          yamllint_flags: "-d \\\'{extends: default, rules: {truthy: disable}}\\\' ."
 
   hadolint:
     name: runner / hadolint
