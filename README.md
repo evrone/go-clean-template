@@ -86,7 +86,7 @@ For example:
 $ go run -tags migrate ./cmd/app
 ```
 
-### `internal/delivery`
+### `internal/controller`
 Server handler layer (MVC controllers). The template shows 2 servers:
 - RPC (RabbitMQ as transport)
 - REST http (Gin framework)
@@ -96,7 +96,7 @@ Server routers are written in the same style:
 - For each group, its own router structure is created, the methods of which process paths
 - The structure of the business logic is injected into the router structure, which will be called by the handlers
 
-#### `internal/delivery/http`
+#### `internal/controller/http`
 Simple REST versioning.
 For v2, we will need to add the `http/v2` folder with the same content.
 And in the file `internal/app` add the line:
@@ -247,8 +247,7 @@ These can be repositories `internal/usecase/repo`, external webapi `internal/use
 In the template, the _infrastructure_ packages are located inside `internal/usecase`.
 
 You can choose how to call the entry points as you wish. The options are:
-- delivery (in our case)
-- controllers
+- controller (in our case)
 - transport
 - gateways
 - entrypoints
