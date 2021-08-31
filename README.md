@@ -140,9 +140,9 @@ RabbitMQ RPC pattern:
 ## Dependency Injection
 In order to remove the dependence of business logic on external packages, dependency injection is used.
 
-For example, through the NewService constructor, we inject the dependency into the structure of the business logic.
+For example, through the New constructor, we inject the dependency into the structure of the business logic.
 This makes the business logic independent (and portable).
-We can override the implementation of the interface without making changes to the `service` package.
+We can override the implementation of the interface without making changes to the `usecase` package.
 
 ```go
 package usecase
@@ -241,12 +241,10 @@ Or more complex business logic:
   In MVC terms, entities are models.
   
 - **Use Cases** is business logic located in `internal/usecase`.
-  Calling business logic with the word _service_ is not very idiomatic from the point of view of Clean Architecture,
-  but using one word _service_ is more convenient for a package name than two: _use case_.
 
 The layer with which business logic directly interacts is usually called the _infrastructure_ layer.
-These can be repositories `internal/service/repo`, external webapi `internal/service/webapi`, any pkg, and other microservices.
-In the template, the _infrastructure packages are located inside `internal/service`.
+These can be repositories `internal/usecase/repo`, external webapi `internal/usecase/webapi`, any pkg, and other microservices.
+In the template, the _infrastructure_ packages are located inside `internal/usecase`.
 
 You can choose how to call the entry points as you wish. The options are:
 - delivery (in our case)
