@@ -14,7 +14,7 @@ import (
 )
 
 // Swagger spec:
-// @title       Go Service Template API
+// @title       Go Clean Template API
 // @description Using a translation service as an example
 // @version     1.0
 // @host        localhost:8080
