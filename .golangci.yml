@@ -46,8 +46,6 @@ linters-settings:
     check-shadowing: true
   lll:
     line-length: 120
-  maligned:
-    suggest-new: true
   misspell:
     locale: US
   nestif:
@@ -123,7 +121,6 @@ linters:
 #    - exhaustivestruct
 #    - ifshort
 #    - goheader
-#    - maligned
 #    - prealloc
 #    - testpackage
 #    - wrapcheck
