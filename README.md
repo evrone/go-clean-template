@@ -102,8 +102,8 @@ For v2, we will need to add the `http/v2` folder with the same content.
 And in the file `internal/app` add the line:
 ```
 handler := gin.New()
-v1.NewRouter(handler, translationService)
-v2.NewRouter(handler, translationService)
+v1.NewRouter(handler, t)
+v2.NewRouter(handler, t)
 ```
 
 Instead of Gin, you can use any other http framework or even the standard `net/http` library.
@@ -114,7 +114,7 @@ In `v1/router.go` and above the handler methods, there are comments for generati
 Entities of business logic (models) can be used in any layer.
 There can also be methods, for example, for validation.
 
-### `internal/service`
+### `internal/usecase`
 Business logic.
 - Methods are grouped by area of application (on a common basis)
 - Each group has its own structure
@@ -123,10 +123,10 @@ Business logic.
 Repositories, webapi, rpc, and other business logic structures are injected into business logic structures
 (see [Dependency Injection](#dependency-injection)).
 
-#### `internal/service/repo`
+#### `internal/usecase/repo`
 A repository is an abstract storage (database) that business logic works with.
 
-#### `internal/service/webapi`
+#### `internal/usecase/webapi`
 It is an abstract web API that business logic works with.
 For example, it could be another microservice that business logic accesses via the REST API.
 The package name changes depending on the purpose.
@@ -145,7 +145,7 @@ This makes the business logic independent (and portable).
 We can override the implementation of the interface without making changes to the `service` package.
 
 ```go
-package service
+package usecase
 
 import (
     // Nothing!
@@ -155,16 +155,16 @@ type Repository interface {
     Get()
 }
 
-type Service struct {
+type UseCase struct {
     repo Repository
 }
 
-func NewService(r Repository) *Service{
-    return &Service{r}
+func New(r Repository) *UseCase{
+    return &UseCase{r}
 }
 
-func (s *Service) Do()  {
-    s.repo.Get()
+func (uc *UseCase) Do()  {
+    uc.repo.Get()
 }
 ```
 
@@ -205,13 +205,13 @@ Business logic has an interface for working with an _abstract_ database or _abst
 
 For example, you need to access the database from HTTP (controller).
 Both HTTP and database are in the outer layer, which means they know nothing about each other.
-The communication between them is carried out through `service` (business logic):
+The communication between them is carried out through `usecase` (business logic):
 
 ```
-    HTTP > service
-           service > repository (Postgres)
-           service < repository (Postgres)
-    HTTP < service
+    HTTP > usecase
+           usecase > repository (Postgres)
+           usecase < repository (Postgres)
+    HTTP < usecase
 ```
 The symbols > and < show the intersection of layer boundaries through Interfaces.
 The same is shown in the picture:
@@ -220,16 +220,16 @@ The same is shown in the picture:
 
 Or more complex business logic:
 ```
-    HTTP > service
-           service > repository
-           service < repository
-           service > webapi
-           service < webapi
-           service > RPC
-           service < RPC
-           service > repository
-           service < repository
-    HTTP < service
+    HTTP > usecase
+           usecase > repository
+           usecase < repository
+           usecase > webapi
+           usecase < webapi
+           usecase > RPC
+           usecase < RPC
+           usecase > repository
+           usecase < repository
+    HTTP < usecase
 ```
 
 ### Layers
@@ -240,7 +240,7 @@ Or more complex business logic:
   They are located in the `internal/entity` folder.
   In MVC terms, entities are models.
   
-- **Use Cases** is business logic located in `internal/service`.
+- **Use Cases** is business logic located in `internal/usecase`.
   Calling business logic with the word _service_ is not very idiomatic from the point of view of Clean Architecture,
   but using one word _service_ is more convenient for a package name than two: _use case_.
 

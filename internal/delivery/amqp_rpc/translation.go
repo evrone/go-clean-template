@@ -7,16 +7,16 @@ import (
 	"github.com/streadway/amqp"
 
 	"github.com/evrone/go-clean-template/internal/entity"
-	"github.com/evrone/go-clean-template/internal/service"
+	"github.com/evrone/go-clean-template/internal/usecase"
 	"github.com/evrone/go-clean-template/pkg/rabbitmq/rmq_rpc/server"
 )
 
 type translationRoutes struct {
-	translationService service.Translation
+	translationUseCase usecase.Translation
 }
 
-func newTranslationRoutes(routes map[string]server.CallHandler, ts service.Translation) {
-	r := &translationRoutes{ts}
+func newTranslationRoutes(routes map[string]server.CallHandler, t usecase.Translation) {
+	r := &translationRoutes{t}
 	{
 		routes["getHistory"] = r.getHistory()
 	}
@@ -28,9 +28,9 @@ type historyResponse struct {
 
 func (r *translationRoutes) getHistory() server.CallHandler {
 	return func(d *amqp.Delivery) (interface{}, error) {
-		translations, err := r.translationService.History(context.Background())
+		translations, err := r.translationUseCase.History(context.Background())
 		if err != nil {
-			return nil, errors.Wrap(err, "amqp_rpc - translationRoutes - getHistory - r.translationService.History")
+			return nil, errors.Wrap(err, "amqp_rpc - translationRoutes - getHistory - r.translationUseCase.History")
 		}
 
 		response := historyResponse{translations}

@@ -11,9 +11,9 @@ import (
 	"github.com/evrone/go-clean-template/config"
 	amqprpc "github.com/evrone/go-clean-template/internal/delivery/amqp_rpc"
 	v1 "github.com/evrone/go-clean-template/internal/delivery/http/v1"
-	"github.com/evrone/go-clean-template/internal/service"
-	"github.com/evrone/go-clean-template/internal/service/repo"
-	"github.com/evrone/go-clean-template/internal/service/webapi"
+	"github.com/evrone/go-clean-template/internal/usecase"
+	"github.com/evrone/go-clean-template/internal/usecase/repo"
+	"github.com/evrone/go-clean-template/internal/usecase/webapi"
 	"github.com/evrone/go-clean-template/pkg/httpserver"
 	"github.com/evrone/go-clean-template/pkg/logger"
 	"github.com/evrone/go-clean-template/pkg/postgres"
@@ -29,14 +29,14 @@ func Run(cfg *config.Config) {
 	}
 	defer pg.Close()
 
-	// Service
-	translationService := service.NewTranslationService(
+	// Use case
+	translationUseCase := usecase.New(
 		repo.NewTranslationRepo(pg),
 		webapi.NewTranslationWebAPI(),
 	)
 
 	// RabbitMQ RPC Server
-	rmqRouter := amqprpc.NewRouter(translationService)
+	rmqRouter := amqprpc.NewRouter(translationUseCase)
 
 	rmqServer, err := server.NewServer(cfg.RMQ.URL, cfg.RMQ.ServerExchange, rmqRouter)
 	if err != nil {
@@ -45,7 +45,7 @@ func Run(cfg *config.Config) {
 
 	// HTTP Server
 	handler := gin.New()
-	v1.NewRouter(handler, translationService)
+	v1.NewRouter(handler, translationUseCase)
 	httpServer := httpserver.NewServer(handler, httpserver.Port(cfg.HTTP.Port))
 
 	// Waiting signal

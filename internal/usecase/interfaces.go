@@ -1,5 +1,5 @@
-// Package service implements application business logic. Each logic group in own file.
-package service
+// Package usecase implements application business logic. Each logic group in own file.
+package usecase
 
 import (
 	"context"
