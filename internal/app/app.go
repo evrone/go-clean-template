@@ -9,8 +9,8 @@ import (
 	"github.com/gin-gonic/gin"
 
 	"github.com/evrone/go-clean-template/config"
-	amqprpc "github.com/evrone/go-clean-template/internal/delivery/amqp_rpc"
-	v1 "github.com/evrone/go-clean-template/internal/delivery/http/v1"
+	amqprpc "github.com/evrone/go-clean-template/internal/controller/amqp_rpc"
+	v1 "github.com/evrone/go-clean-template/internal/controller/http/v1"
 	"github.com/evrone/go-clean-template/internal/usecase"
 	"github.com/evrone/go-clean-template/internal/usecase/repo"
 	"github.com/evrone/go-clean-template/internal/usecase/webapi"

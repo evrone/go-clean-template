@@ -14,7 +14,7 @@ compose-down:
 .PHONY: compose-down
 
 swag-v1:
-	swag init -g internal/delivery/http/v1/router.go
+	swag init -g internal/controller/http/v1/router.go
 .PHONY: swag-v1
 
 run: swag-v1
