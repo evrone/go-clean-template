@@ -21,6 +21,7 @@ const (
 	_defaultTimeout  = 2 * time.Second
 )
 
+// Message -.
 type Message struct {
 	Queue         string
 	Priority      uint8
@@ -36,6 +37,7 @@ type pendingCall struct {
 	body   []byte
 }
 
+// Client -.
 type Client struct {
 	conn           *rmqrpc.Connection
 	serverExchange string
@@ -48,6 +50,7 @@ type Client struct {
 	timeout time.Duration
 }
 
+// NewClient -.
 func NewClient(url, serverExchange, clientExchange string, opts ...Option) (*Client, error) {
 	cfg := rmqrpc.Config{
 		URL:      url,
@@ -107,6 +110,7 @@ func (c *Client) publish(corrID, handler string, request interface{}) error {
 	return nil
 }
 
+// RemoteCall -.
 func (c *Client) RemoteCall(handler string, request, response interface{}) error { //nolint:cyclop // complex func
 	select {
 	case <-c.stop:
@@ -218,10 +222,12 @@ func (c *Client) deleteCall(corrID string) {
 	c.Unlock()
 }
 
+// Notify -.
 func (c *Client) Notify() <-chan error {
 	return c.error
 }
 
+// Shutdown -.
 func (c *Client) Shutdown() error {
 	select {
 	case <-c.error:
