@@ -46,6 +46,12 @@
                         "schema": {
                             "$ref": "#/definitions/v1.response"
                         }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/v1.response"
+                        }
                     }
                 }
             }
@@ -71,8 +77,8 @@
                             "$ref": "#/definitions/v1.historyResponse"
                         }
                     },
-                    "400": {
-                        "description": "Bad Request",
+                    "500": {
+                        "description": "Internal Server Error",
                         "schema": {
                             "$ref": "#/definitions/v1.response"
                         }
