@@ -60,6 +60,12 @@ var doc = `{
                         "schema": {
                             "$ref": "#/definitions/v1.response"
                         }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/v1.response"
+                        }
                     }
                 }
             }
@@ -85,8 +91,8 @@ var doc = `{
                             "$ref": "#/definitions/v1.historyResponse"
                         }
                     },
-                    "400": {
-                        "description": "Bad Request",
+                    "500": {
+                        "description": "Internal Server Error",
                         "schema": {
                             "$ref": "#/definitions/v1.response"
                         }

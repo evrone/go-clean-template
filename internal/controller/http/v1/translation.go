@@ -36,13 +36,13 @@ type historyResponse struct {
 // @Accept      json
 // @Produce     json
 // @Success     200 {object} historyResponse
-// @Failure     400 {object} response
+// @Failure     500 {object} response
 // @Router      /translation/history [get].
 func (r *translationRoutes) history(c *gin.Context) {
 	translations, err := r.t.History(c.Request.Context())
 	if err != nil {
 		r.l.Error(err, "http - v1 - history")
-		errorResponse(c, http.StatusBadRequest, "database problems")
+		errorResponse(c, http.StatusInternalServerError, "database problems")
 
 		return
 	}
@@ -65,6 +65,7 @@ type doTranslateRequest struct {
 // @Param       request body doTranslateRequest true "Set up translation"
 // @Success     200 {object} entity.Translation
 // @Failure     400 {object} response
+// @Failure     500 {object} response
 // @Router      /translation/do-translate [post].
 func (r *translationRoutes) doTranslate(c *gin.Context) {
 	var request doTranslateRequest
@@ -85,7 +86,7 @@ func (r *translationRoutes) doTranslate(c *gin.Context) {
 	)
 	if err != nil {
 		r.l.Error(err, "http - v1 - doTranslate")
-		errorResponse(c, http.StatusBadRequest, "translation service problems")
+		errorResponse(c, http.StatusInternalServerError, "translation service problems")
 
 		return
 	}
