@@ -8,10 +8,12 @@ import (
 	"github.com/evrone/go-clean-template/internal/entity"
 )
 
+// TranslationWebAPI -.
 type TranslationWebAPI struct {
 	conf translator.Config
 }
 
+// NewTranslationWebAPI -.
 func NewTranslationWebAPI() *TranslationWebAPI {
 	conf := translator.Config{
 		UserAgent:   []string{"Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:15.0) Gecko/20100101 Firefox/15.0.1"},
@@ -21,6 +23,7 @@ func NewTranslationWebAPI() *TranslationWebAPI {
 	return &TranslationWebAPI{conf}
 }
 
+// Translate -.
 func (t *TranslationWebAPI) Translate(translation entity.Translation) (entity.Translation, error) {
 	trans := translator.New(t.conf)
 
