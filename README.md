@@ -100,7 +100,7 @@ Server routers are written in the same style:
 Simple REST versioning.
 For v2, we will need to add the `http/v2` folder with the same content.
 And in the file `internal/app` add the line:
-```
+```go
 handler := gin.New()
 v1.NewRouter(handler, t)
 v2.NewRouter(handler, t)
