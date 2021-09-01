@@ -3,12 +3,12 @@ package postgres
 
 import (
 	"context"
+	"fmt"
 	"log"
 	"time"
 
 	"github.com/Masterminds/squirrel"
 	"github.com/jackc/pgx/v4/pgxpool"
-	"github.com/pkg/errors"
 )
 
 const (
@@ -42,7 +42,7 @@ func NewPostgres(url string, opts ...Option) (*Postgres, error) {
 
 	poolConfig, err := pgxpool.ParseConfig(url)
 	if err != nil {
-		return nil, errors.Wrap(err, "postgres - NewPostgres - pgxpool.ParseConfig")
+		return nil, fmt.Errorf("postgres - NewPostgres - pgxpool.ParseConfig: %w", err)
 	}
 
 	poolConfig.MaxConns = int32(pg.maxPoolSize)
@@ -61,7 +61,7 @@ func NewPostgres(url string, opts ...Option) (*Postgres, error) {
 	}
 
 	if err != nil {
-		return nil, errors.Wrap(err, "postgres - NewPostgres - connAttempts == 0")
+		return nil, fmt.Errorf("postgres - NewPostgres - connAttempts == 0: %w", err)
 	}
 
 	return pg, nil

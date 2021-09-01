@@ -1,8 +1,9 @@
 package webapi
 
 import (
+	"fmt"
+
 	translator "github.com/Conight/go-googletrans"
-	"github.com/pkg/errors"
 
 	"github.com/evrone/go-clean-template/internal/entity"
 )
@@ -25,7 +26,7 @@ func (t *TranslationWebAPI) Translate(translation entity.Translation) (entity.Tr
 
 	result, err := trans.Translate(translation.Original, translation.Source, translation.Destination)
 	if err != nil {
-		return entity.Translation{}, errors.Wrap(err, "TranslationWebAPI - Translate - trans.Translate")
+		return entity.Translation{}, fmt.Errorf("TranslationWebAPI - Translate - trans.Translate: %w", err)
 	}
 
 	translation.Translation = result.Text

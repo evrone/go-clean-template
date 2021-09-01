@@ -2,15 +2,18 @@ package client
 
 import (
 	"encoding/json"
+	"errors"
+	"fmt"
 	"sync"
 	"time"
 
 	"github.com/google/uuid"
-	"github.com/pkg/errors"
 	"github.com/streadway/amqp"
 
 	rmqrpc "github.com/evrone/go-clean-template/pkg/rabbitmq/rmq_rpc"
 )
+
+var ErrConnectionClosed = errors.New("rmq_rpc client - Client - RemoteCall - Connection closed")
 
 const (
 	_defaultWaitTime = 5 * time.Second
@@ -68,7 +71,7 @@ func NewClient(url, serverExchange, clientExchange string, opts ...Option) (*Cli
 
 	err := c.conn.AttemptConnect()
 	if err != nil {
-		return nil, errors.Wrap(err, "rmq_rpc client - NewClient - c.conn.AttemptConnect")
+		return nil, fmt.Errorf("rmq_rpc client - NewClient - c.conn.AttemptConnect: %w", err)
 	}
 
 	go c.consumer()
@@ -85,7 +88,7 @@ func (c *Client) publish(corrID, handler string, request interface{}) error {
 	if request != nil {
 		requestBody, err = json.Marshal(request)
 		if err != nil {
-			return errors.New("json.Marshal")
+			return err
 		}
 	}
 
@@ -98,7 +101,7 @@ func (c *Client) publish(corrID, handler string, request interface{}) error {
 			Body:          requestBody,
 		})
 	if err != nil {
-		return errors.Wrap(err, "c.Channel.Publish")
+		return fmt.Errorf("c.Channel.Publish: %w", err)
 	}
 
 	return nil
@@ -110,7 +113,7 @@ func (c *Client) RemoteCall(handler string, request, response interface{}) error
 		time.Sleep(c.timeout)
 		select {
 		case <-c.stop:
-			return errors.New("rmq_rpc client - Client - RemoteCall - Connection closed")
+			return ErrConnectionClosed
 		default:
 		}
 	default:
@@ -120,7 +123,7 @@ func (c *Client) RemoteCall(handler string, request, response interface{}) error
 
 	err := c.publish(corrID, handler, request)
 	if err != nil {
-		return errors.Wrap(err, "rmq_rpc client - Client - RemoteCall - c.publish")
+		return fmt.Errorf("rmq_rpc client - Client - RemoteCall - c.publish: %w", err)
 	}
 
 	call := &pendingCall{done: make(chan struct{})}
@@ -137,7 +140,7 @@ func (c *Client) RemoteCall(handler string, request, response interface{}) error
 	if call.status == rmqrpc.Success {
 		err = json.Unmarshal(call.body, &response)
 		if err != nil {
-			return errors.Wrap(err, "rmq_rpc client - Client - RemoteCall - json.Unmarshal")
+			return fmt.Errorf("rmq_rpc client - Client - RemoteCall - json.Unmarshal: %w", err)
 		}
 
 		return nil
@@ -231,7 +234,7 @@ func (c *Client) Shutdown() error {
 
 	err := c.conn.Connection.Close()
 	if err != nil {
-		return errors.Wrap(err, "rmq_rpc client - Client - Shutdown - c.Connection.Close")
+		return fmt.Errorf("rmq_rpc client - Client - Shutdown - c.Connection.Close: %w", err)
 	}
 
 	return nil

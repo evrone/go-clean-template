@@ -2,9 +2,9 @@ package server
 
 import (
 	"encoding/json"
+	"fmt"
 	"time"
 
-	"github.com/pkg/errors"
 	"github.com/streadway/amqp"
 
 	"github.com/evrone/go-clean-template/pkg/logger"
@@ -58,7 +58,7 @@ func NewServer(
 
 	err := s.conn.AttemptConnect()
 	if err != nil {
-		return nil, errors.Wrap(err, "rmq_rpc server - NewServer - s.conn.AttemptConnect")
+		return nil, fmt.Errorf("rmq_rpc server - NewServer - s.conn.AttemptConnect: %w", err)
 	}
 
 	go s.consumer()
@@ -155,7 +155,7 @@ func (s *Server) Shutdown() error {
 
 	err := s.conn.Connection.Close()
 	if err != nil {
-		return errors.Wrap(err, "rmq_rpc server - Server - Shutdown - s.Connection.Close")
+		return fmt.Errorf("rmq_rpc server - Server - Shutdown - s.Connection.Close: %w", err)
 	}
 
 	return nil

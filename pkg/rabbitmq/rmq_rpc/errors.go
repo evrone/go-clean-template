@@ -1,13 +1,11 @@
 package rmqrpc
 
-type Error string
+import "errors"
 
-func (e Error) Error() string { return string(e) }
-
-const (
-	ErrTimeout        = Error("timeout")
-	ErrInternalServer = Error("internal server error")
-	ErrBadHandler     = Error("unregistered handler")
+var (
+	ErrTimeout        = errors.New("timeout")
+	ErrInternalServer = errors.New("internal server error")
+	ErrBadHandler     = errors.New("unregistered handler")
 )
 
 const (

@@ -1,10 +1,10 @@
 package rmqrpc
 
 import (
+	"fmt"
 	"log"
 	"time"
 
-	"github.com/pkg/errors"
 	"github.com/streadway/amqp"
 )
 
@@ -43,7 +43,7 @@ func (c *Connection) AttemptConnect() error {
 	}
 
 	if err != nil {
-		return errors.Wrap(err, "rmq_rpc - AttemptConnect - c.connect")
+		return fmt.Errorf("rmq_rpc - AttemptConnect - c.connect: %w", err)
 	}
 
 	return nil
@@ -54,12 +54,12 @@ func (c *Connection) connect() error {
 
 	c.Connection, err = amqp.Dial(c.URL)
 	if err != nil {
-		return errors.Wrap(err, "amqp.Dial")
+		return fmt.Errorf("amqp.Dial: %w", err)
 	}
 
 	c.Channel, err = c.Connection.Channel()
 	if err != nil {
-		return errors.Wrap(err, "c.Connection.Channel")
+		return fmt.Errorf("c.Connection.Channel: %w", err)
 	}
 
 	err = c.Channel.ExchangeDeclare(
@@ -72,7 +72,7 @@ func (c *Connection) connect() error {
 		nil,
 	)
 	if err != nil {
-		return errors.Wrap(err, "c.Connection.Channel")
+		return fmt.Errorf("c.Connection.Channel: %w", err)
 	}
 
 	queue, err := c.Channel.QueueDeclare(
@@ -84,7 +84,7 @@ func (c *Connection) connect() error {
 		nil,
 	)
 	if err != nil {
-		return errors.Wrap(err, "c.Channel.QueueDeclare")
+		return fmt.Errorf("c.Channel.QueueDeclare: %w", err)
 	}
 
 	err = c.Channel.QueueBind(
@@ -95,7 +95,7 @@ func (c *Connection) connect() error {
 		nil,
 	)
 	if err != nil {
-		return errors.Wrap(err, "c.Channel.QueueBind")
+		return fmt.Errorf("c.Channel.QueueBind: %w", err)
 	}
 
 	c.Delivery, err = c.Channel.Consume(
@@ -108,7 +108,7 @@ func (c *Connection) connect() error {
 		nil,
 	)
 	if err != nil {
-		return errors.Wrap(err, "c.Channel.Consume")
+		return fmt.Errorf("c.Channel.Consume: %w", err)
 	}
 
 	return nil
