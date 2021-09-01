@@ -12,11 +12,11 @@ require (
 	github.com/ilyakaznacheev/cleanenv v1.2.5
 	github.com/jackc/pgx/v4 v4.13.0
 	github.com/pkg/errors v0.9.1
+	github.com/rs/zerolog v1.24.0
 	github.com/streadway/amqp v1.0.0
 	github.com/swaggo/files v0.0.0-20210815190702-a29dd2bc99b2
 	github.com/swaggo/gin-swagger v1.3.1
 	github.com/swaggo/swag v1.7.1
-	go.uber.org/zap v1.19.0
 )
 
 require (
@@ -66,13 +66,11 @@ require (
 	github.com/modern-go/reflect2 v1.0.1 // indirect
 	github.com/tidwall/pretty v1.1.0 // indirect
 	github.com/ugorji/go/codec v1.1.13 // indirect
-	go.uber.org/atomic v1.7.0 // indirect
-	go.uber.org/multierr v1.6.0 // indirect
 	golang.org/x/crypto v0.0.0-20210711020723-a769d52b0f97 // indirect
 	golang.org/x/net v0.0.0-20210805182204-aaa1db679c0d // indirect
 	golang.org/x/sys v0.0.0-20210615035016-665e8c7367d1 // indirect
 	golang.org/x/text v0.3.6 // indirect
-	golang.org/x/tools v0.1.0 // indirect
+	golang.org/x/tools v0.1.5 // indirect
 	golang.org/x/xerrors v0.0.0-20200804184101-5ec99f83aff1 // indirect
 	google.golang.org/protobuf v1.25.0 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect

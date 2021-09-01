@@ -7,7 +7,6 @@ import (
 
 	"github.com/evrone/go-clean-template/config"
 	"github.com/evrone/go-clean-template/internal/app"
-	"github.com/evrone/go-clean-template/pkg/logger"
 )
 
 func main() {
@@ -18,12 +17,6 @@ func main() {
 	if err != nil {
 		log.Fatalf("Config error: %s", err)
 	}
-
-	// Logger
-	zap := logger.NewZapLogger(cfg.Log.ZapLevel)
-	defer zap.Close()
-
-	logger.NewAppLogger(zap, cfg.App.Name, cfg.App.Version)
 
 	// Run
 	app.Run(&cfg)
