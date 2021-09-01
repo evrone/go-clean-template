@@ -12,6 +12,8 @@ import (
 	rmqrpc "github.com/evrone/go-clean-template/pkg/rabbitmq/rmq_rpc"
 )
 
+var ErrConnectionClosed = errors.New("rmq_rpc client - Client - RemoteCall - Connection closed")
+
 const (
 	_defaultWaitTime = 5 * time.Second
 	_defaultAttempts = 10
@@ -85,7 +87,7 @@ func (c *Client) publish(corrID, handler string, request interface{}) error {
 	if request != nil {
 		requestBody, err = json.Marshal(request)
 		if err != nil {
-			return errors.New("json.Marshal")
+			return err
 		}
 	}
 
@@ -110,7 +112,7 @@ func (c *Client) RemoteCall(handler string, request, response interface{}) error
 		time.Sleep(c.timeout)
 		select {
 		case <-c.stop:
-			return errors.New("rmq_rpc client - Client - RemoteCall - Connection closed")
+			return ErrConnectionClosed
 		default:
 		}
 	default:
