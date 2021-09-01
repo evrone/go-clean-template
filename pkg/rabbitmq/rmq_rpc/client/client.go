@@ -13,6 +13,7 @@ import (
 	rmqrpc "github.com/evrone/go-clean-template/pkg/rabbitmq/rmq_rpc"
 )
 
+// ErrConnectionClosed -.
 var ErrConnectionClosed = errors.New("rmq_rpc client - Client - RemoteCall - Connection closed")
 
 const (
