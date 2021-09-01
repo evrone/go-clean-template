@@ -11,6 +11,7 @@ import (
 	// Swagger docs.
 	_ "github.com/evrone/go-clean-template/docs"
 	"github.com/evrone/go-clean-template/internal/usecase"
+	"github.com/evrone/go-clean-template/pkg/logger"
 )
 
 // Swagger spec:
@@ -20,7 +21,7 @@ import (
 // @host        localhost:8080
 // @BasePath    /api/v1
 
-func NewRouter(handler *gin.Engine, t usecase.Translation) {
+func NewRouter(handler *gin.Engine, l logger.Interface, t usecase.Translation) {
 	// Options
 	handler.Use(gin.Logger())
 	handler.Use(gin.Recovery())
@@ -35,6 +36,6 @@ func NewRouter(handler *gin.Engine, t usecase.Translation) {
 	// Routers
 	h := handler.Group("/api/v1")
 	{
-		newTranslationRoutes(h, t)
+		newTranslationRoutes(h, t, l)
 	}
 }

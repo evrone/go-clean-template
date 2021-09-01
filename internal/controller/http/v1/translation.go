@@ -7,14 +7,16 @@ import (
 
 	"github.com/evrone/go-clean-template/internal/entity"
 	"github.com/evrone/go-clean-template/internal/usecase"
+	"github.com/evrone/go-clean-template/pkg/logger"
 )
 
 type translationRoutes struct {
 	t usecase.Translation
+	l logger.Interface
 }
 
-func newTranslationRoutes(handler *gin.RouterGroup, t usecase.Translation) {
-	r := &translationRoutes{t}
+func newTranslationRoutes(handler *gin.RouterGroup, t usecase.Translation, l logger.Interface) {
+	r := &translationRoutes{t, l}
 
 	h := handler.Group("/translation")
 	{
@@ -39,6 +41,7 @@ type historyResponse struct {
 func (r *translationRoutes) history(c *gin.Context) {
 	translations, err := r.t.History(c.Request.Context())
 	if err != nil {
+		r.l.Error(err, "http - v1 - history")
 		errorResponse(c, http.StatusBadRequest, err, "database problems")
 
 		return
@@ -66,6 +69,7 @@ type doTranslateRequest struct {
 func (r *translationRoutes) doTranslate(c *gin.Context) {
 	var request doTranslateRequest
 	if err := c.ShouldBindJSON(&request); err != nil {
+		r.l.Error(err, "http - v1 - doTranslate")
 		errorResponse(c, http.StatusBadRequest, err, "invalid request body")
 
 		return
@@ -80,6 +84,7 @@ func (r *translationRoutes) doTranslate(c *gin.Context) {
 		},
 	)
 	if err != nil {
+		r.l.Error(err, "http - v1 - doTranslate")
 		errorResponse(c, http.StatusBadRequest, err, "translation service problems")
 
 		return

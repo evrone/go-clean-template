@@ -26,9 +26,11 @@ type Server struct {
 	router map[string]CallHandler
 
 	timeout time.Duration
+
+	logger logger.Interface
 }
 
-func NewServer(url, serverExchange string, router map[string]CallHandler, opts ...Option) (*Server, error) {
+func NewServer(url, serverExchange string, router map[string]CallHandler, l logger.Interface, opts ...Option) (*Server, error) {
 	cfg := rmqrpc.Config{
 		URL:      url,
 		WaitTime: defaultWaitTime,
@@ -41,6 +43,7 @@ func NewServer(url, serverExchange string, router map[string]CallHandler, opts .
 		stop:    make(chan struct{}),
 		router:  router,
 		timeout: defaultTimeout,
+		logger:  l,
 	}
 
 	// Custom options
@@ -89,14 +92,14 @@ func (s *Server) serveCall(d *amqp.Delivery) {
 	if err != nil {
 		s.publish(d, nil, rmqrpc.ErrInternalServer.Error())
 
-		logger.Error(err, "rmq_rpc server - Server - serveCall - callHandler")
+		s.logger.Error(err, "rmq_rpc server - Server - serveCall - callHandler")
 
 		return
 	}
 
 	body, err := json.Marshal(response)
 	if err != nil {
-		logger.Error(err, "rmq_rpc server - Server - serveCall - json.Marshal")
+		s.logger.Error(err, "rmq_rpc server - Server - serveCall - json.Marshal")
 	}
 
 	s.publish(d, body, rmqrpc.Success)
@@ -111,7 +114,7 @@ func (s *Server) publish(d *amqp.Delivery, body []byte, status string) {
 			Body:          body,
 		})
 	if err != nil {
-		logger.Error(err, "rmq_rpc server - Server - publish - s.conn.Channel.Publish")
+		s.logger.Error(err, "rmq_rpc server - Server - publish - s.conn.Channel.Publish")
 	}
 }
 

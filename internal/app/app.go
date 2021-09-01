@@ -22,6 +22,8 @@ import (
 
 // Run creates objects via constructors.
 func Run(cfg *config.Config) {
+	logger := logger.New(cfg.Log.Level)
+
 	// Repository
 	pg, err := postgres.NewPostgres(cfg.PG.URL, postgres.MaxPoolSize(cfg.PG.PoolMax))
 	if err != nil {
@@ -38,14 +40,14 @@ func Run(cfg *config.Config) {
 	// RabbitMQ RPC Server
 	rmqRouter := amqprpc.NewRouter(translationUseCase)
 
-	rmqServer, err := server.NewServer(cfg.RMQ.URL, cfg.RMQ.ServerExchange, rmqRouter)
+	rmqServer, err := server.NewServer(cfg.RMQ.URL, cfg.RMQ.ServerExchange, rmqRouter, logger)
 	if err != nil {
 		logger.Fatal(err, "app - Run - rmqServer - server.NewServer")
 	}
 
 	// HTTP Server
 	handler := gin.New()
-	v1.NewRouter(handler, translationUseCase)
+	v1.NewRouter(handler, logger, translationUseCase)
 	httpServer := httpserver.NewServer(handler, httpserver.Port(cfg.HTTP.Port))
 
 	// Waiting signal

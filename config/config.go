@@ -19,7 +19,7 @@ type (
 	}
 
 	Log struct {
-		ZapLevel string `env-required:"true" yaml:"zap_level"   env:"LOG_ZAP_LEVEL"`
+		Level string `env-required:"true" yaml:"log_level"   env:"LOG_LEVEL"`
 	}
 
 	PG struct {
