@@ -8,12 +8,14 @@ import (
 	"github.com/streadway/amqp"
 )
 
+// Config -.
 type Config struct {
 	URL      string
 	WaitTime time.Duration
 	Attempts int
 }
 
+// Connection -.
 type Connection struct {
 	ConsumerExchange string
 	Config
@@ -22,6 +24,7 @@ type Connection struct {
 	Delivery   <-chan amqp.Delivery
 }
 
+// NewConnection -.
 func NewConnection(consumerExchange string, cfg Config) *Connection {
 	conn := &Connection{
 		ConsumerExchange: consumerExchange,
@@ -31,6 +34,7 @@ func NewConnection(consumerExchange string, cfg Config) *Connection {
 	return conn
 }
 
+// AttemptConnect -.
 func (c *Connection) AttemptConnect() error {
 	var err error
 	for i := c.Attempts; i > 0; i-- {

@@ -17,8 +17,10 @@ const (
 	_defaultTimeout  = 2 * time.Second
 )
 
+// CallHandler -.
 type CallHandler func(*amqp.Delivery) (interface{}, error)
 
+// Server -.
 type Server struct {
 	conn   *rmqrpc.Connection
 	error  chan error
@@ -30,6 +32,7 @@ type Server struct {
 	logger logger.Interface
 }
 
+// NewServer -.
 func NewServer(
 	url, serverExchange string,
 	router map[string]CallHandler,
@@ -139,10 +142,12 @@ func (s *Server) reconnect() {
 	go s.consumer()
 }
 
+// Notify -.
 func (s *Server) Notify() <-chan error {
 	return s.error
 }
 
+// Shutdown -.
 func (s *Server) Shutdown() error {
 	select {
 	case <-s.error:
