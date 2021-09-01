@@ -47,14 +47,7 @@ func New(level string) *Logger {
 }
 
 func (l *Logger) Debug(message interface{}, args ...interface{}) {
-	switch msg := message.(type) {
-	case error:
-		l.log(msg.Error(), args...)
-	case string:
-		l.log(msg, args...)
-	default:
-		l.log(fmt.Sprintf("debug message %v has unknown type %v", message, msg), args...)
-	}
+	l.msg("debug", message, args...)
 }
 
 func (l *Logger) Info(message string, args ...interface{}) {
@@ -70,33 +63,30 @@ func (l *Logger) Error(message interface{}, args ...interface{}) {
 		l.Debug(message, args...)
 	}
 
-	switch msg := message.(type) {
-	case error:
-		l.log(msg.Error(), args...)
-	case string:
-		l.log(msg, args...)
-	default:
-		l.log(fmt.Sprintf("error message %v has unknown type %v", message, msg), args...)
-	}
+	l.msg("error", message, args...)
 }
 
 func (l *Logger) Fatal(message interface{}, args ...interface{}) {
-	switch msg := message.(type) {
-	case error:
-		l.log(msg.Error(), args...)
-	case string:
-		l.log(msg, args...)
-	default:
-		l.log(fmt.Sprintf("fatal message %v has unknown type %v", message, msg), args...)
-	}
+	l.msg("fatal", message, args...)
 
 	os.Exit(1)
 }
 
 func (l *Logger) log(message string, args ...interface{}) {
-	if args == nil {
+	if len(args) == 0 {
 		l.logger.Info().Msg(message)
 	} else {
 		l.logger.Info().Msgf(message, args...)
+	}
+}
+
+func (l *Logger) msg(level string, message interface{}, args ...interface{}) {
+	switch msg := message.(type) {
+	case error:
+		l.log(msg.Error(), args...)
+	case string:
+		l.log(msg, args...)
+	default:
+		l.log(fmt.Sprintf("%s message %v has unknown type %v", level, message, msg), args...)
 	}
 }
