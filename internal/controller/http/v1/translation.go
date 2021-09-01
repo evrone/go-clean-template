@@ -42,7 +42,7 @@ func (r *translationRoutes) history(c *gin.Context) {
 	translations, err := r.t.History(c.Request.Context())
 	if err != nil {
 		r.l.Error(err, "http - v1 - history")
-		errorResponse(c, http.StatusBadRequest, err, "database problems")
+		errorResponse(c, http.StatusBadRequest, "database problems")
 
 		return
 	}
@@ -70,7 +70,7 @@ func (r *translationRoutes) doTranslate(c *gin.Context) {
 	var request doTranslateRequest
 	if err := c.ShouldBindJSON(&request); err != nil {
 		r.l.Error(err, "http - v1 - doTranslate")
-		errorResponse(c, http.StatusBadRequest, err, "invalid request body")
+		errorResponse(c, http.StatusBadRequest, "invalid request body")
 
 		return
 	}
@@ -85,7 +85,7 @@ func (r *translationRoutes) doTranslate(c *gin.Context) {
 	)
 	if err != nil {
 		r.l.Error(err, "http - v1 - doTranslate")
-		errorResponse(c, http.StatusBadRequest, err, "translation service problems")
+		errorResponse(c, http.StatusBadRequest, "translation service problems")
 
 		return
 	}

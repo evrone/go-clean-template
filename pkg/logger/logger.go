@@ -37,6 +37,7 @@ func New(level string) *Logger {
 	default:
 		l = zerolog.InfoLevel
 	}
+
 	zerolog.SetGlobalLevel(l)
 	logger := zerolog.New(os.Stdout).With().Timestamp().Logger()
 

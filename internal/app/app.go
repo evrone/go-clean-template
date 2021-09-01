@@ -22,12 +22,12 @@ import (
 
 // Run creates objects via constructors.
 func Run(cfg *config.Config) {
-	logger := logger.New(cfg.Log.Level)
+	l := logger.New(cfg.Log.Level)
 
 	// Repository
 	pg, err := postgres.NewPostgres(cfg.PG.URL, postgres.MaxPoolSize(cfg.PG.PoolMax))
 	if err != nil {
-		logger.Fatal(err, "app - Run - postgres.NewPostgres")
+		l.Fatal(err, "app - Run - postgres.NewPostgres")
 	}
 	defer pg.Close()
 
@@ -40,14 +40,14 @@ func Run(cfg *config.Config) {
 	// RabbitMQ RPC Server
 	rmqRouter := amqprpc.NewRouter(translationUseCase)
 
-	rmqServer, err := server.NewServer(cfg.RMQ.URL, cfg.RMQ.ServerExchange, rmqRouter, logger)
+	rmqServer, err := server.NewServer(cfg.RMQ.URL, cfg.RMQ.ServerExchange, rmqRouter, l)
 	if err != nil {
-		logger.Fatal(err, "app - Run - rmqServer - server.NewServer")
+		l.Fatal(err, "app - Run - rmqServer - server.NewServer")
 	}
 
 	// HTTP Server
 	handler := gin.New()
-	v1.NewRouter(handler, logger, translationUseCase)
+	v1.NewRouter(handler, l, translationUseCase)
 	httpServer := httpserver.NewServer(handler, httpserver.Port(cfg.HTTP.Port))
 
 	// Waiting signal
@@ -56,21 +56,21 @@ func Run(cfg *config.Config) {
 
 	select {
 	case s := <-interrupt:
-		logger.Info("app - Run - signal: " + s.String())
+		l.Info("app - Run - signal: " + s.String())
 	case err = <-httpServer.Notify():
-		logger.Error(err, "app - Run - httpServer.Notify")
+		l.Error(err, "app - Run - httpServer.Notify")
 	case err = <-rmqServer.Notify():
-		logger.Error(err, "app - Run - rmqServer.Notify")
+		l.Error(err, "app - Run - rmqServer.Notify")
 	}
 
 	// Shutdown
 	err = httpServer.Shutdown()
 	if err != nil {
-		logger.Error(err, "app - Run - httpServer.Shutdown")
+		l.Error(err, "app - Run - httpServer.Shutdown")
 	}
 
 	err = rmqServer.Shutdown()
 	if err != nil {
-		logger.Error(err, "app - Run - rmqServer.Shutdown")
+		l.Error(err, "app - Run - rmqServer.Shutdown")
 	}
 }

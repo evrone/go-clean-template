@@ -30,7 +30,12 @@ type Server struct {
 	logger logger.Interface
 }
 
-func NewServer(url, serverExchange string, router map[string]CallHandler, l logger.Interface, opts ...Option) (*Server, error) {
+func NewServer(
+	url, serverExchange string,
+	router map[string]CallHandler,
+	l logger.Interface,
+	opts ...Option,
+) (*Server, error) {
 	cfg := rmqrpc.Config{
 		URL:      url,
 		WaitTime: defaultWaitTime,
