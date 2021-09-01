@@ -65,6 +65,7 @@ jobs:
         continue-on-error: true
 
   tests:
+    name: runner / tests
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
