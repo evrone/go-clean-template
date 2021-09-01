@@ -1,4 +1,4 @@
-// +build migrate
+//go:build migrate
 
 package app
 
@@ -11,11 +11,6 @@ import (
 	"github.com/golang-migrate/migrate/v4"
 	_ "github.com/golang-migrate/migrate/v4/database/postgres"
 	_ "github.com/golang-migrate/migrate/v4/source/file"
-)
-
-const (
-	defaultAttempts = 20
-	defaultTimeout  = time.Second
 )
 
 func init() {

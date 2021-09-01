@@ -13,9 +13,9 @@ import (
 )
 
 const (
-	defaultWaitTime = 5 * time.Second
-	defaultAttempts = 10
-	defaultTimeout  = 2 * time.Second
+	_defaultWaitTime = 5 * time.Second
+	_defaultAttempts = 10
+	_defaultTimeout  = 2 * time.Second
 )
 
 type Message struct {
@@ -48,8 +48,8 @@ type Client struct {
 func NewClient(url, serverExchange, clientExchange string, opts ...Option) (*Client, error) {
 	cfg := rmqrpc.Config{
 		URL:      url,
-		WaitTime: defaultWaitTime,
-		Attempts: defaultAttempts,
+		WaitTime: _defaultWaitTime,
+		Attempts: _defaultAttempts,
 	}
 
 	c := &Client{
@@ -58,7 +58,7 @@ func NewClient(url, serverExchange, clientExchange string, opts ...Option) (*Cli
 		error:          make(chan error),
 		stop:           make(chan struct{}),
 		calls:          make(map[string]*pendingCall),
-		timeout:        defaultTimeout,
+		timeout:        _defaultTimeout,
 	}
 
 	// Custom options

@@ -12,9 +12,9 @@ import (
 )
 
 const (
-	defaultWaitTime = 5 * time.Second
-	defaultAttempts = 10
-	defaultTimeout  = 2 * time.Second
+	_defaultWaitTime = 5 * time.Second
+	_defaultAttempts = 10
+	_defaultTimeout  = 2 * time.Second
 )
 
 type CallHandler func(*amqp.Delivery) (interface{}, error)
@@ -38,8 +38,8 @@ func NewServer(
 ) (*Server, error) {
 	cfg := rmqrpc.Config{
 		URL:      url,
-		WaitTime: defaultWaitTime,
-		Attempts: defaultAttempts,
+		WaitTime: _defaultWaitTime,
+		Attempts: _defaultAttempts,
 	}
 
 	s := &Server{
@@ -47,7 +47,7 @@ func NewServer(
 		error:   make(chan error),
 		stop:    make(chan struct{}),
 		router:  router,
-		timeout: defaultTimeout,
+		timeout: _defaultTimeout,
 		logger:  l,
 	}
 
