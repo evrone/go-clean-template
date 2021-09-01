@@ -6,7 +6,7 @@ http:
   port: '8080'
 
 logger:
-  zap_level: 'debug'
+  log_level: 'debug'
   rollbar_env: 'go-clean-template'
 
 postgres:
