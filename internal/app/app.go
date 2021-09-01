@@ -2,6 +2,7 @@
 package app
 
 import (
+	"fmt"
 	"os"
 	"os/signal"
 	"syscall"
@@ -27,7 +28,7 @@ func Run(cfg *config.Config) {
 	// Repository
 	pg, err := postgres.NewPostgres(cfg.PG.URL, postgres.MaxPoolSize(cfg.PG.PoolMax))
 	if err != nil {
-		l.Fatal(err, "app - Run - postgres.NewPostgres")
+		l.Fatal(fmt.Errorf("app - Run - postgres.NewPostgres: %w", err))
 	}
 	defer pg.Close()
 
@@ -42,7 +43,7 @@ func Run(cfg *config.Config) {
 
 	rmqServer, err := server.NewServer(cfg.RMQ.URL, cfg.RMQ.ServerExchange, rmqRouter, l)
 	if err != nil {
-		l.Fatal(err, "app - Run - rmqServer - server.NewServer")
+		l.Fatal(fmt.Errorf("app - Run - rmqServer - server.NewServer: %w", err))
 	}
 
 	// HTTP Server
@@ -58,19 +59,19 @@ func Run(cfg *config.Config) {
 	case s := <-interrupt:
 		l.Info("app - Run - signal: " + s.String())
 	case err = <-httpServer.Notify():
-		l.Error(err, "app - Run - httpServer.Notify")
+		l.Error(fmt.Errorf("app - Run - httpServer.Notify: %w", err))
 	case err = <-rmqServer.Notify():
-		l.Error(err, "app - Run - rmqServer.Notify")
+		l.Error(fmt.Errorf("app - Run - rmqServer.Notify: %w", err))
 	}
 
 	// Shutdown
 	err = httpServer.Shutdown()
 	if err != nil {
-		l.Error(err, "app - Run - httpServer.Shutdown")
+		l.Error(fmt.Errorf("app - Run - httpServer.Shutdown: %w", err))
 	}
 
 	err = rmqServer.Shutdown()
 	if err != nil {
-		l.Error(err, "app - Run - rmqServer.Shutdown")
+		l.Error(fmt.Errorf("app - Run - rmqServer.Shutdown: %w", err))
 	}
 }
