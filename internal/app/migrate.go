@@ -1,4 +1,4 @@
-// +build migrate
+//go:build migrate
 
 package app
 
@@ -14,8 +14,8 @@ import (
 )
 
 const (
-	defaultAttempts = 20
-	defaultTimeout  = time.Second
+	_defaultAttempts = 20
+	_defaultTimeout  = time.Second
 )
 
 func init() {
@@ -27,7 +27,7 @@ func init() {
 	databaseURL += "?sslmode=disable"
 
 	var (
-		attempts = defaultAttempts
+		attempts = _defaultAttempts
 		err      error
 		m        *migrate.Migrate
 	)
@@ -39,7 +39,7 @@ func init() {
 		}
 
 		log.Printf("Migrate: postgres is trying to connect, attempts left: %d", attempts)
-		time.Sleep(defaultTimeout)
+		time.Sleep(_defaultTimeout)
 		attempts--
 	}
 
