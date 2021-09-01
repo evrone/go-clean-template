@@ -14,13 +14,13 @@ import (
 	"github.com/evrone/go-clean-template/pkg/logger"
 )
 
+// NewRouter -.
 // Swagger spec:
 // @title       Go Clean Template API
 // @description Using a translation service as an example
 // @version     1.0
 // @host        localhost:8080
 // @BasePath    /api/v1
-// NewRouter -.
 func NewRouter(handler *gin.Engine, l logger.Interface, t usecase.Translation) {
 	// Options
 	handler.Use(gin.Logger())

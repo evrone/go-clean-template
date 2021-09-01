@@ -2,6 +2,7 @@
 // HTTP response objects if suitable. Each logic group entities in own file.
 package entity
 
+// Translation -.
 type Translation struct {
 	Source      string `json:"source"       example:"auto"`
 	Destination string `json:"destination"  example:"en"`
