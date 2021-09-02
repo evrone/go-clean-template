@@ -250,6 +250,7 @@ In the template, the _infrastructure_ packages are located inside `internal/usec
 
 You can choose how to call the entry points as you wish. The options are:
 - controller (in our case)
+- delivery
 - transport
 - gateways
 - entrypoints
