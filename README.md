@@ -160,7 +160,9 @@ type UseCase struct {
 }
 
 func New(r Repository) *UseCase{
-    return &UseCase{r}
+    return &UseCase{
+        repo: r,
+    }
 }
 
 func (uc *UseCase) Do()  {
