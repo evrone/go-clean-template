@@ -44,8 +44,6 @@ linters-settings:
         - return
   govet:
     check-shadowing: true
-  lll:
-    line-length: 120
   misspell:
     locale: US
   nestif:
@@ -91,7 +89,6 @@ linters:
     - gosimple
     - govet
     - ineffassign
-    - lll
     - makezero
     - misspell
     - nakedret
