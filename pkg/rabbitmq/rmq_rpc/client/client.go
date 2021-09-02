@@ -51,8 +51,8 @@ type Client struct {
 	timeout time.Duration
 }
 
-// NewClient -.
-func NewClient(url, serverExchange, clientExchange string, opts ...Option) (*Client, error) {
+// New -.
+func New(url, serverExchange, clientExchange string, opts ...Option) (*Client, error) {
 	cfg := rmqrpc.Config{
 		URL:      url,
 		WaitTime: _defaultWaitTime,
@@ -60,7 +60,7 @@ func NewClient(url, serverExchange, clientExchange string, opts ...Option) (*Cli
 	}
 
 	c := &Client{
-		conn:           rmqrpc.NewConnection(clientExchange, cfg),
+		conn:           rmqrpc.New(clientExchange, cfg),
 		serverExchange: serverExchange,
 		error:          make(chan error),
 		stop:           make(chan struct{}),
