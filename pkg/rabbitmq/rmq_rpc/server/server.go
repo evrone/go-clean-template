@@ -32,13 +32,8 @@ type Server struct {
 	logger logger.Interface
 }
 
-// NewServer -.
-func NewServer(
-	url, serverExchange string,
-	router map[string]CallHandler,
-	l logger.Interface,
-	opts ...Option,
-) (*Server, error) {
+// New -.
+func New(url, serverExchange string, router map[string]CallHandler, l logger.Interface, opts ...Option) (*Server, error) {
 	cfg := rmqrpc.Config{
 		URL:      url,
 		WaitTime: _defaultWaitTime,
@@ -46,7 +41,7 @@ func NewServer(
 	}
 
 	s := &Server{
-		conn:    rmqrpc.NewConnection(serverExchange, cfg),
+		conn:    rmqrpc.New(serverExchange, cfg),
 		error:   make(chan error),
 		stop:    make(chan struct{}),
 		router:  router,

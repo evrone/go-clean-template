@@ -24,8 +24,8 @@ type Connection struct {
 	Delivery   <-chan amqp.Delivery
 }
 
-// NewConnection -.
-func NewConnection(consumerExchange string, cfg Config) *Connection {
+// New -.
+func New(consumerExchange string, cfg Config) *Connection {
 	conn := &Connection{
 		ConsumerExchange: consumerExchange,
 		Config:           cfg,

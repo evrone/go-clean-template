@@ -26,30 +26,30 @@ func Run(cfg *config.Config) {
 	l := logger.New(cfg.Log.Level)
 
 	// Repository
-	pg, err := postgres.NewPostgres(cfg.PG.URL, postgres.MaxPoolSize(cfg.PG.PoolMax))
+	pg, err := postgres.New(cfg.PG.URL, postgres.MaxPoolSize(cfg.PG.PoolMax))
 	if err != nil {
-		l.Fatal(fmt.Errorf("app - Run - postgres.NewPostgres: %w", err))
+		l.Fatal(fmt.Errorf("app - Run - postgres.New: %w", err))
 	}
 	defer pg.Close()
 
 	// Use case
 	translationUseCase := usecase.New(
-		repo.NewTranslationRepo(pg),
-		webapi.NewTranslationWebAPI(),
+		repo.New(pg),
+		webapi.New(),
 	)
 
 	// RabbitMQ RPC Server
 	rmqRouter := amqprpc.NewRouter(translationUseCase)
 
-	rmqServer, err := server.NewServer(cfg.RMQ.URL, cfg.RMQ.ServerExchange, rmqRouter, l)
+	rmqServer, err := server.New(cfg.RMQ.URL, cfg.RMQ.ServerExchange, rmqRouter, l)
 	if err != nil {
-		l.Fatal(fmt.Errorf("app - Run - rmqServer - server.NewServer: %w", err))
+		l.Fatal(fmt.Errorf("app - Run - rmqServer - server.New: %w", err))
 	}
 
 	// HTTP Server
 	handler := gin.New()
 	v1.NewRouter(handler, l, translationUseCase)
-	httpServer := httpserver.NewServer(handler, httpserver.Port(cfg.HTTP.Port))
+	httpServer := httpserver.New(handler, httpserver.Port(cfg.HTTP.Port))
 
 	// Waiting signal
 	interrupt := make(chan os.Signal, 1)
