@@ -20,7 +20,7 @@ import (
 // @description Using a translation service as an example
 // @version     1.0
 // @host        localhost:8080
-// @BasePath    /api/v1
+// @BasePath    /v1
 func NewRouter(handler *gin.Engine, l logger.Interface, t usecase.Translation) {
 	// Options
 	handler.Use(gin.Logger())
@@ -34,7 +34,7 @@ func NewRouter(handler *gin.Engine, l logger.Interface, t usecase.Translation) {
 	handler.GET("/healthz", func(c *gin.Context) { c.Status(http.StatusOK) })
 
 	// Routers
-	h := handler.Group("/api/v1")
+	h := handler.Group("/v1")
 	{
 		newTranslationRoutes(h, t, l)
 	}
