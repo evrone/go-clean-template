@@ -19,7 +19,7 @@ const (
 	attempts   = 20
 
 	// HTTP REST
-	basePath = "http://" + host + "/api/v1"
+	basePath = "http://" + host + "/v1"
 
 	// RabbitMQ RPC
 	rmqURL            = "amqp://guest:guest@rabbitmq:5672/"

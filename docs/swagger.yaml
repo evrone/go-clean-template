@@ -1,4 +1,4 @@
-basePath: /api/v1
+basePath: /v1
 definitions:
   entity.Translation:
     properties:
