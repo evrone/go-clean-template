@@ -128,6 +128,9 @@ issues:
       linters:
         - paralleltest
         - godot
+    - path: internal/controller/http
+      linters:
+        - godot
 
 run:
   skip-dirs:
