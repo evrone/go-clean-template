@@ -21,7 +21,7 @@ func New(r TranslationRepo, w TranslationWebAPI) *TranslationUseCase {
 	}
 }
 
-// History -.
+// History - getting translate history from store.
 func (uc *TranslationUseCase) History(ctx context.Context) ([]entity.Translation, error) {
 	translations, err := uc.repo.GetHistory(ctx)
 	if err != nil {
