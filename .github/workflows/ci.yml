@@ -73,13 +73,14 @@ jobs:
         with:
           go-version: 1.17
       - name: Unit Tests
-        run: go test -race -covermode atomic -coverprofile=covprofile ./internal/...
+        run: go test -race -covermode atomic -coverprofile=coverage.txt ./internal/...
       - name: Install goveralls
         run: go install github.com/mattn/goveralls@latest
       - name: Send coverage
-        env:
-          COVERALLS_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: goveralls -coverprofile=covprofile -service=github
+        uses: shogo82148/actions-goveralls@v1
+        with:
+          working-directory: internal
+          path-to-profile: coverage.txt
 
       - name: Integration tests
         run: docker-compose up --build --abort-on-container-exit --exit-code-from integration
