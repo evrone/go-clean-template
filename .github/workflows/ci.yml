@@ -74,12 +74,9 @@ jobs:
           go-version: 1.17
       - name: Unit Tests
         run: go test -race -covermode atomic -coverprofile=coverage.txt ./internal/...
-      - name: Install goveralls
-        run: go install github.com/mattn/goveralls@latest
       - name: Send coverage
         uses: shogo82148/actions-goveralls@v1
         with:
-          working-directory: internal
           path-to-profile: coverage.txt
 
       - name: Integration tests
