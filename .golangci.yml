@@ -37,11 +37,11 @@ linters-settings:
     settings:
       mnd:
         checks:
-        - argument
-        - case
-        - condition
-        - operation
-        - return
+          - argument
+          - case
+          - condition
+          - operation
+          - return
   govet:
     check-shadowing: true
   misspell:
