@@ -79,7 +79,7 @@ jobs:
           -race\
           -covermode atomic\
           -coverprofile=coverage.txt\
-          ./internal/...""
+          ./internal/..."
       - name: Upload coverage report
         uses: codecov/codecov-action@v1.0.2
         with:
