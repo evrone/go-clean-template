@@ -74,11 +74,11 @@ jobs:
           go-version: 1.17
 
       - name: Unit Tests
-        run: "go test\
-          -v\
-          -race\
-          -covermode atomic\
-          -coverprofile=coverage.txt\
+        run: "go test \
+          -v \
+          -race \
+          -covermode atomic \
+          -coverprofile=coverage.txt \
           ./internal/..."
       - name: Upload coverage report
         uses: codecov/codecov-action@v1.0.2
@@ -89,7 +89,7 @@ jobs:
           name: codecov-umbrella
 
       - name: Integration tests
-        run: "docker-compose up\
-          --build\
-          --abort-on-container-exit\
+        run: "docker-compose up \
+          --build \
+          --abort-on-container-exit \
           --exit-code-from integration"
