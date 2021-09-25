@@ -11,16 +11,6 @@ jobs:
       - name: golangci-lint
         uses: reviewdog/action-golangci-lint@v2
 
-  misspell:
-    name: runner / misspell
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v2
-      - uses: reviewdog/action-misspell@v1
-        with:
-          locale: "US"
-          fail_on_error: true
-
   yamllint:
     name: runner / yamllint
     runs-on: ubuntu-latest
