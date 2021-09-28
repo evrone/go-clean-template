@@ -71,12 +71,7 @@ jobs:
           -coverprofile=coverage.txt \
           ./internal/..."
       - name: Upload coverage report
-        uses: codecov/codecov-action@v1.0.2
-        with:
-          token: ${{ secrets.CODECOV_TOKEN }}
-          file: coverage.txt
-          flags: unittests
-          name: codecov-umbrella
+        run: bash <(curl -s https://codecov.io/bash)
 
       - name: Integration tests
         run: "docker-compose up \
