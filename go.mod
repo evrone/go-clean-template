@@ -4,7 +4,7 @@ go 1.17
 
 require (
 	github.com/Conight/go-googletrans v0.0.0-20200929083318-176776d061cb
-	github.com/Eun/go-hit v0.5.22
+	github.com/Eun/go-hit v0.5.23
 	github.com/Masterminds/squirrel v1.5.0
 	github.com/gin-gonic/gin v1.7.4
 	github.com/golang-migrate/migrate/v4 v4.15.0
@@ -84,7 +84,7 @@ require (
 	golang.org/x/net v0.0.0-20210924151903-3ad01bbaa167 // indirect
 	golang.org/x/sys v0.0.0-20210925032602-92d5a993a665 // indirect
 	golang.org/x/text v0.3.7 // indirect
-	golang.org/x/tools v0.1.6 // indirect
+	golang.org/x/tools v0.1.7 // indirect
 	golang.org/x/xerrors v0.0.0-20200804184101-5ec99f83aff1 // indirect
 	google.golang.org/genproto v0.0.0-20210924002016-3dee208752a0 // indirect
 	google.golang.org/grpc v1.41.0 // indirect
