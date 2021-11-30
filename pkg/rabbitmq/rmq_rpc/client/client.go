@@ -45,7 +45,7 @@ type Client struct {
 	error          chan error
 	stop           chan struct{}
 
-	sync.RWMutex
+	rw    sync.RWMutex
 	calls map[string]*pendingCall
 
 	timeout time.Duration
@@ -198,9 +198,9 @@ func (c *Client) reconnect() {
 }
 
 func (c *Client) getCall(d *amqp.Delivery) {
-	c.RLock()
+	c.rw.RLock()
 	call, ok := c.calls[d.CorrelationId]
-	c.RUnlock()
+	c.rw.RUnlock()
 
 	if !ok {
 		return
@@ -212,15 +212,15 @@ func (c *Client) getCall(d *amqp.Delivery) {
 }
 
 func (c *Client) addCall(corrID string, call *pendingCall) {
-	c.Lock()
+	c.rw.Lock()
 	c.calls[corrID] = call
-	c.Unlock()
+	c.rw.Unlock()
 }
 
 func (c *Client) deleteCall(corrID string) {
-	c.Lock()
+	c.rw.Lock()
 	delete(c.calls, corrID)
-	c.Unlock()
+	c.rw.Unlock()
 }
 
 // Notify -.
