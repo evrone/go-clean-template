@@ -10,7 +10,7 @@ require (
 	github.com/golang-migrate/migrate/v4 v4.15.1
 	github.com/golang/mock v1.6.0
 	github.com/google/uuid v1.3.0
-	github.com/ilyakaznacheev/cleanenv v1.2.5
+	github.com/ilyakaznacheev/cleanenv v1.2.6
 	github.com/jackc/pgx/v4 v4.14.1
 	github.com/prometheus/client_golang v1.11.0
 	github.com/rs/zerolog v1.26.0
