@@ -7,7 +7,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Check out code into the Go module directory
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
       - name: golangci-lint
         uses: reviewdog/action-golangci-lint@v2
 
@@ -15,7 +15,7 @@ jobs:
     name: runner / yamllint
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - uses: reviewdog/action-yamllint@v1
         with:
           fail_on_error: true
@@ -26,7 +26,7 @@ jobs:
     name: runner / hadolint
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - uses: reviewdog/action-hadolint@v1
         with:
           fail_on_error: true
@@ -36,7 +36,7 @@ jobs:
     name: runner / dotenv-linter
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - uses: dotenv-linter/action-dotenv-linter@v2
         with:
           reporter: github-pr-review
@@ -45,7 +45,7 @@ jobs:
     name: runner / check-dependencies
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - uses: actions/setup-go@v2
       - name: WriteGoList
         run: go list -json -m all > go.list
@@ -57,7 +57,7 @@ jobs:
     name: runner / tests
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - uses: actions/setup-go@v2
         with:
           go-version: 1.17
