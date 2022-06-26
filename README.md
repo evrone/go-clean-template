@@ -2,6 +2,7 @@
 
 # Go Clean template
 [🇨🇳中文](README_CN.md)
+
 Clean Architecture template for Golang services
 
 [![Go Report Card](https://goreportcard.com/badge/github.com/evrone/go-clean-template)](https://goreportcard.com/report/github.com/evrone/go-clean-template)
