@@ -1,6 +1,7 @@
 ![Go Clean Template](docs/img/logo.svg)
 
 # Go Clean template
+[🇨🇳中文](README_CN.md)
 
 Clean Architecture template for Golang services
 
