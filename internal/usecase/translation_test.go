@@ -3,6 +3,7 @@ package usecase_test
 import (
 	"context"
 	"errors"
+	"sync"
 	"testing"
 
 	"github.com/golang/mock/gomock"
@@ -40,6 +41,8 @@ func TestHistory(t *testing.T) {
 
 	translation, repo, _ := translation(t)
 
+	var mu sync.Mutex
+
 	tests := []test{
 		{
 			name: "empty result",
@@ -65,9 +68,11 @@ func TestHistory(t *testing.T) {
 		t.Run(tc.name, func(t *testing.T) {
 			t.Parallel()
 
+			mu.Lock()
 			tc.mock()
 
 			res, err := translation.History(context.Background())
+			mu.Unlock()
 
 			require.Equal(t, res, tc.res)
 			require.ErrorIs(t, err, tc.err)
@@ -79,6 +84,8 @@ func TestTranslate(t *testing.T) {
 	t.Parallel()
 
 	translation, repo, webAPI := translation(t)
+
+	var mu sync.Mutex
 
 	tests := []test{
 		{
@@ -115,9 +122,11 @@ func TestTranslate(t *testing.T) {
 		t.Run(tc.name, func(t *testing.T) {
 			t.Parallel()
 
+			mu.Lock()
 			tc.mock()
 
 			res, err := translation.Translate(context.Background(), entity.Translation{})
+			mu.Unlock()
 
 			require.EqualValues(t, res, tc.res)
 			require.ErrorIs(t, err, tc.err)
