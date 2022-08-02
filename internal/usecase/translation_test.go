@@ -67,12 +67,12 @@ func TestHistory(t *testing.T) {
 
 		t.Run(tc.name, func(t *testing.T) {
 			t.Parallel()
-
 			mu.Lock()
+			defer mu.Unlock()
+
 			tc.mock()
 
 			res, err := translation.History(context.Background())
-			mu.Unlock()
 
 			require.Equal(t, res, tc.res)
 			require.ErrorIs(t, err, tc.err)
@@ -121,12 +121,12 @@ func TestTranslate(t *testing.T) {
 
 		t.Run(tc.name, func(t *testing.T) {
 			t.Parallel()
-
 			mu.Lock()
+			defer mu.Unlock()
+
 			tc.mock()
 
 			res, err := translation.Translate(context.Background(), entity.Translation{})
-			mu.Unlock()
 
 			require.EqualValues(t, res, tc.res)
 			require.ErrorIs(t, err, tc.err)
