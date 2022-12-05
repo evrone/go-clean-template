@@ -12,9 +12,9 @@ Clean Architecture template for Golang services
 
 ## Overview
 The purpose of the template is to show:
-- how to organize a project and prevent it from turning into spaghetti code
-- where to store business logic so that it remains independent, clean, and extensible
-- how not to lose control when a microservice grows
+- How to organize a project and prevent it from turning into spaghetti code.
+- Where to store business logic so that it remains independent, clean, and extensible.
+- How not to lose control when a microservice grows.
 
 Using the principles of Robert Martin (aka Uncle Bob).
 
@@ -51,7 +51,7 @@ Configuration. First, `config.yml` is read, then environment variables overwrite
 The config structure is in the `config.go`.
 The `env-required: true` tag obliges you to specify a value (either in yaml, or in environment variables).
 
-For configuration, we chose the [cleanenv](https://github.com/ilyakaznacheev/cleanenv) library.
+**Note:** For configuration, we chose the [cleanenv](https://github.com/ilyakaznacheev/cleanenv) library.
 It does not have many stars on GitHub, but is simple and meets all the requirements.
 
 Reading the config from yaml contradicts the ideology of 12 factors, but in practice, it is more convenient than
@@ -279,8 +279,8 @@ _Ports and adapters_ are very close to _Clean Architecture_, the differences are
 
 
 ## Similar projects
-- [https://github.com/bxcodec/go-clean-arch](https://github.com/bxcodec/go-clean-arch)
-- [https://github.com/zhashkevych/courses-backend](https://github.com/zhashkevych/courses-backend)
+- `GitHub Repo` &rarr; [bxcodec/go-clean-arch](https://github.com/bxcodec/go-clean-arch)
+- `GitHub Repo` &rarr; [zhashkevych/courses-backend](https://github.com/zhashkevych/courses-backend)
 
 ## Useful links
 - [The Clean Architecture article](https://blog.cleancoder.com/uncle-bob/2012/08/13/the-clean-architecture.html)
