@@ -72,7 +72,7 @@ func TestHTTPDoTranslate(t *testing.T) {
 		Send().Headers("Content-Type").Add("application/json"),
 		Send().Body().String(body),
 		Expect().Status().Equal(http.StatusOK),
-		Expect().Body().JSON().JQ(".translation").Equal("text for translation"),
+		Expect().Body().JSON().JQ(".translation").Equal("text to translation"),
 	)
 
 	body = `{
