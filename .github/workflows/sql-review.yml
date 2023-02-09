@@ -1,0 +1,14 @@
+on: [pull_request]
+
+jobs:
+  postgres-sql-review:
+    runs-on: ubuntu-latest
+    name: Postgres SQL Review
+    steps:
+      - uses: actions/checkout@v3
+      - name: Check PostgreSQL
+        uses: bytebase/sql-review-action@main
+        with:
+          override-file-path: ./sql-review-override.yml
+          database-type: POSTGRES
+          file-pattern: ^migrations/.*\.sql$
