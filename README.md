@@ -112,45 +112,19 @@ For example:
 $ go run -tags migrate ./cmd/app
 ```
 
-### `internal/controller`
+### `internal/interfaces`
 Server handler layer (MVC controllers). The template shows 2 servers:
-- RPC (RabbitMQ as transport)
-- REST http (Gin framework)
+- RPC (RabbitMQ as transport, located in `internal/interfaces/rpc`)
+- REST http (Gin framework, located in `internal/interfaces/rest`)
 
 Server routers are written in the same style:
 - Handlers are grouped by area of application (by a common basis)
 - For each group, its own router structure is created, the methods of which process paths
 - The structure of the business logic is injected into the router structure, which will be called by the handlers
 
-#### `internal/controller/http`
-Simple REST versioning.
-For v2, we will need to add the `http/v2` folder with the same content.
-And in the file `internal/app` add the line:
-```go
-handler := gin.New()
-v1.NewRouter(handler, t)
-v2.NewRouter(handler, t)
-```
-
 Instead of Gin, you can use any other http framework or even the standard `net/http` library.
 
-In `v1/router.go` and above the handler methods, there are comments for generating swagger documentation using [swag](https://github.com/swaggo/swag).
-
-### `internal/entity`
-Entities of business logic (models) can be used in any layer.
-There can also be methods, for example, for validation.
-
-### `internal/usecase`
-
-Business logic.
-
-- Methods are grouped by area of application (on a common basis)
-- Each group has its own structure
-- One file - one structure
-
-Repositories, webapi, rpc, and other business logic structures are injected into business logic
-structures
-(see [Dependency Injection](#dependency-injection)).
+In `router.go` and its handler methods, there are comments for generating swagger documentation using [swag](https://github.com/swaggo/swag).
 
 ### `internal`
 
