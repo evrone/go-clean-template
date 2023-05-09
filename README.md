@@ -247,12 +247,28 @@ distinct functions:
 
 1. Domain Layer: Executes the fundamental, use-case agnostic business logic within the
    domain/system.
-2. Application Layer: Carries out application-specific use cases, which can be seen as user
-   interactions via the User Interface (UI).
+2. Application Layer: Carries out application-specific use cases and contains IO heavy operations
+   like fetching and storing data. It should contain as less logic as possible and acts as the glue
+   between incoming access and the actual domain code to avoid domain leakage to outer layers.
 3. Interfaces Layer: Comprises UI components, REST-Controller, message-receivers and others incoming
    sources for the application.
 4. Infrastructure Layer: Bolsters other layers by implementing abstractions and integrating
    third-party libraries and systems.
+
+Access flow starts from interfaces (e.g. REST), which access application services that are a facade
+for a specific group of use cases. The application service is a great place to handle transactions,
+logging, and other pure technical requirements. To keep it as free from domain logic as possible, a
+typical method fetches an entity, calls an operation on it, or via another service, and stores it.
+
+The infrastructure layer does its work behind the scenes. If there is a repository that gets the
+data, the interface for the repository is located in the domain package because the domain requires
+it to operate. The implementation is located in infrastructure because from a domain point of view,
+it's not important how the data is fetched or stored. It's a detail that is abstracted away, which
+comes with a lot of benefits like testability and portability.
+
+It's not always beneficial to create an interface in the domain and implement it in infrastructure.
+Sometimes, you just don't want to pollute the domain with something specific like monitoring. Hence,
+you may want to put the interface in the application layer.
 
 For example, let's go through an example for access to the database from a REST controller.
 
