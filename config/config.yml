@@ -11,7 +11,9 @@ logger:
 
 postgres:
   pool_max: 2
+  url: 'postgres://user:pass@localhost:5432/postgres'
 
 rabbitmq:
   rpc_server_exchange: 'rpc_server'
   rpc_client_exchange: 'rpc_client'
+  url: 'amqp://guest:guest@localhost:5672'

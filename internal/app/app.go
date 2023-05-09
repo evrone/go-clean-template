@@ -23,15 +23,63 @@ import (
 
 // Run creates objects via constructors.
 func Run(cfg *config.Config) {
-	l := logger.New(cfg.Log.Level)
+	log := logger.New(cfg.Log.Level)
 
 	// Repository
-	pg, err := postgres.New(cfg.PG.URL, postgres.MaxPoolSize(cfg.PG.PoolMax))
-	if err != nil {
-		l.Fatal(fmt.Errorf("app - Run - postgres.New: %w", err))
-	}
+	pg := setupPostgresClient(cfg, log)
 	defer pg.Close()
 
+	rmqServer, err, httpEngine := setupHttpEngine(cfg, pg, log)
+	httpServer := httpserver.New(httpEngine, httpserver.Port(cfg.HTTP.Port))
+
+	// Waiting signal
+	interrupt := make(chan os.Signal, 1)
+	signal.Notify(interrupt, os.Interrupt, syscall.SIGTERM)
+
+	select {
+	case s := <-interrupt:
+		log.Info("app - Run - signal: " + s.String())
+	case err = <-httpServer.Notify():
+		log.Error(fmt.Errorf("app - Run - httpServer.Notify: %w", err))
+	case err = <-rmqServer.Notify():
+		log.Error(fmt.Errorf("app - Run - rmqServer.Notify: %w", err))
+	}
+
+	// Shutdown
+	err = httpServer.Shutdown()
+	if err != nil {
+		log.Error(fmt.Errorf("app - Run - httpServer.Shutdown: %w", err))
+	}
+
+	err = rmqServer.Shutdown()
+	if err != nil {
+		log.Error(fmt.Errorf("app - Run - rmqServer.Shutdown: %w", err))
+	}
+}
+
+func setupHttpEngine(cfg *config.Config, pg *postgres.Postgres, log *logger.Logger) (*server.Server, error, *gin.Engine) {
+	translationUseCase, rmqRouter := setupRabbitMqRouter(pg)
+
+	rmqServer, err := server.New(cfg.RMQ.URL, cfg.RMQ.ServerExchange, rmqRouter, log)
+	if err != nil {
+		log.Fatal(fmt.Errorf("app - Run - rmqServer - server.New: %w", err))
+	}
+
+	// HTTP Server
+	httpEngine := gin.New()
+	v1.NewRouter(httpEngine, log, translationUseCase)
+	return rmqServer, err, httpEngine
+}
+
+func setupPostgresClient(cfg *config.Config, log *logger.Logger) *postgres.Postgres {
+	pg, err := postgres.New(cfg.PG.URL, postgres.MaxPoolSize(cfg.PG.PoolMax))
+	if err != nil {
+		log.Fatal(fmt.Errorf("app - Run - postgres.New: %w", err))
+	}
+	return pg
+}
+
+func setupRabbitMqRouter(pg *postgres.Postgres) (*usecase.TranslationUseCase, map[string]server.CallHandler) {
 	// Use case
 	translationUseCase := usecase.New(
 		repo.New(pg),
@@ -40,38 +88,5 @@ func Run(cfg *config.Config) {
 
 	// RabbitMQ RPC Server
 	rmqRouter := amqprpc.NewRouter(translationUseCase)
-
-	rmqServer, err := server.New(cfg.RMQ.URL, cfg.RMQ.ServerExchange, rmqRouter, l)
-	if err != nil {
-		l.Fatal(fmt.Errorf("app - Run - rmqServer - server.New: %w", err))
-	}
-
-	// HTTP Server
-	handler := gin.New()
-	v1.NewRouter(handler, l, translationUseCase)
-	httpServer := httpserver.New(handler, httpserver.Port(cfg.HTTP.Port))
-
-	// Waiting signal
-	interrupt := make(chan os.Signal, 1)
-	signal.Notify(interrupt, os.Interrupt, syscall.SIGTERM)
-
-	select {
-	case s := <-interrupt:
-		l.Info("app - Run - signal: " + s.String())
-	case err = <-httpServer.Notify():
-		l.Error(fmt.Errorf("app - Run - httpServer.Notify: %w", err))
-	case err = <-rmqServer.Notify():
-		l.Error(fmt.Errorf("app - Run - rmqServer.Notify: %w", err))
-	}
-
-	// Shutdown
-	err = httpServer.Shutdown()
-	if err != nil {
-		l.Error(fmt.Errorf("app - Run - httpServer.Shutdown: %w", err))
-	}
-
-	err = rmqServer.Shutdown()
-	if err != nil {
-		l.Error(fmt.Errorf("app - Run - rmqServer.Shutdown: %w", err))
-	}
+	return translationUseCase, rmqRouter
 }
