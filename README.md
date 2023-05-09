@@ -55,7 +55,7 @@ This template comes with a set of libraries to quickly get up to speed.
 developers to test HTTP clients and servers more effectively. It provides utilities to create mock
 HTTP servers and clients, simulating real-world scenarios for thorough testing.
 
-The httptest package is leveraged to execute system-tests efficiently, which are located in close to
+The httptest package is leveraged to execute system-tests efficiently, which are close to
 the main entry point, which is `app_test.go`.
 
 ## Project structure
