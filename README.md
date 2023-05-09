@@ -24,6 +24,7 @@ by [Sebastian Sigl](https://twitter.com/sesigl).
 
 ## Content
 - [Quick start](#quick-start)
+- [Libraries](#libraries)
 - [Project structure](#project-structure)
 - [Dependency Injection](#dependency-injection)
 - [DDD Architecture](#clean-architecture)
@@ -43,6 +44,19 @@ Integration tests (can be run in CI):
 # DB, app + migrations, integration tests
 $ make compose-up-integration-test
 ```
+
+## Libraries
+
+This template comes with a set of libraries to quickly get up to speed.
+
+### GoLang httptest
+
+[Httptest](https://pkg.go.dev/net/http/httptest) is a package within the Go programming language that enables
+developers to test HTTP clients and servers more effectively. It provides utilities to create mock
+HTTP servers and clients, simulating real-world scenarios for thorough testing.
+
+The httptest package is leveraged to execute system-tests efficiently, which are located in close to
+the main entry point, which is `app_test.go`.
 
 ## Project structure
 
