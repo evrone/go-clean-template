@@ -51,12 +51,27 @@ This template comes with a set of libraries to quickly get up to speed.
 
 ### GoLang httptest
 
-[Httptest](https://pkg.go.dev/net/http/httptest) is a package within the Go programming language that enables
+[Httptest](https://pkg.go.dev/net/http/httptest) is a package within the Go programming language
+that enables
 developers to test HTTP clients and servers more effectively. It provides utilities to create mock
 HTTP servers and clients, simulating real-world scenarios for thorough testing.
 
 The httptest package is leveraged to execute system-tests efficiently, which are close to
 the main entry point, which is `app_test.go`.
+
+### Testcontainers
+
+[Testcontainers](https://golang.testcontainers.org/) is a library for Golang that provides a friendly API to run Docker containers for
+integration testing (system-tests). It allows developers to spin up required services like databases, web servers,
+or any other application that can run in a Docker container as part of their test setup. This
+provides a consistent, reproducible, and isolated environment for tests, making it a powerful tool
+for modern test-driven development in Golang.
+
+The system tests are located in `internal/app_test.go` and provide a high level coverage starting
+RabbitMQ and Postgres to run main use cases. Hence, `makefile` contains 2 tasks:
+
+- `test`, running all tests
+- `test-fast`, running all tests excluding slow running tests like system-tests
 
 ## Project structure
 

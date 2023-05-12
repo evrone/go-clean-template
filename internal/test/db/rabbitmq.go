@@ -18,7 +18,7 @@ func MustStartRMQContainer(ctx context.Context, cfg *config.Config) {
 	}
 
 	timeout := 5 * time.Minute // Default timeout
-	tag := "3.11.15"
+	tag := "3.11.15-alpine"
 
 	req := testcontainers.ContainerRequest{
 		Image:        fmt.Sprintf("rabbitmq:%s", tag),

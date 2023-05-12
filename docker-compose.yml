@@ -33,14 +33,5 @@ services:
       - postgres
       - rabbitmq
 
-  integration:
-    build:
-      context: .
-      dockerfile: integration-test/Dockerfile
-    container_name: integration
-    image: integration
-    depends_on:
-      - app
-
 volumes:
   pg-data:

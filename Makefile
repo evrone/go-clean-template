@@ -16,10 +16,6 @@ compose-up: ### Run docker-compose
 	docker-compose up --build -d postgres rabbitmq && docker-compose logs -f
 .PHONY: compose-up
 
-compose-up-integration-test: ### Run docker-compose with integration test
-	docker-compose up --build --abort-on-container-exit --exit-code-from integration
-.PHONY: compose-up-integration-test
-
 compose-down: ### Down docker-compose
 	docker-compose down --remove-orphans
 .PHONY: compose-down
@@ -49,13 +45,13 @@ linter-dotenv: ### check by dotenv linter
 	dotenv-linter
 .PHONY: linter-dotenv
 
-test: ### run test
-	go test -v -cover -race ./internal/...
+test: ### run all tests including slow running system (e.g. system-tests)
+	go test --tags=system -v -cover ./internal/... ./pkg/...
 .PHONY: test
 
-integration-test: ### run integration-test
-	go clean -testcache && go test -v ./integration-test/...
-.PHONY: integration-test
+test-fast: ### run fast tests only
+	go test -v -cover ./internal/... ./pkg/...
+.PHONY: test-fast
 
 mock: ### run mockgen
 	mockgen -source ./internal/usecase/interfaces.go -package usecase_test > ./internal/usecase/mocks_test.go

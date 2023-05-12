@@ -8,7 +8,8 @@ import (
 	"github.com/testcontainers/testcontainers-go"
 	postgres2 "github.com/testcontainers/testcontainers-go/modules/postgres"
 	"github.com/testcontainers/testcontainers-go/wait"
-	"os"
+	"path/filepath"
+	"runtime"
 	"time"
 
 	_ "github.com/golang-migrate/migrate/v4/database/postgres"
@@ -42,9 +43,9 @@ func MustStartPostgresContainer(err error, ctx context.Context, cfg *config.Conf
 }
 
 func ExecuteMigrate(pgConnectionUrl string) {
-	cwd := mustGetCwd()
+	projectRoot := projectRoot()
 
-	migrationDirectoryUri := fmt.Sprintf("file://%s/migrations", cwd)
+	migrationDirectoryUri := fmt.Sprintf("file://%s/migrations", projectRoot)
 	m, err := migrate.New(
 		migrationDirectoryUri,
 		pgConnectionUrl,
@@ -58,11 +59,9 @@ func ExecuteMigrate(pgConnectionUrl string) {
 	}
 }
 
-func mustGetCwd() string {
-	cwd, err := os.Getwd()
-	if err != nil {
-		panic(err)
-	}
+func projectRoot() string {
+	_, b, _, _ := runtime.Caller(0)
+	projectRoot := filepath.Dir(b)
 
-	return cwd
+	return projectRoot + "/../../../"
 }

@@ -2,6 +2,8 @@ package config
 
 import (
 	"fmt"
+	"path/filepath"
+	"runtime"
 
 	"github.com/ilyakaznacheev/cleanenv"
 )
@@ -50,7 +52,9 @@ type (
 func NewConfig() (*Config, error) {
 	cfg := &Config{}
 
-	err := cleanenv.ReadConfig("./config/config.yml", cfg)
+	cwd := projectRoot()
+
+	err := cleanenv.ReadConfig(cwd+"./config/config.yml", cfg)
 	if err != nil {
 		return nil, fmt.Errorf("config error: %w", err)
 	}
@@ -61,4 +65,11 @@ func NewConfig() (*Config, error) {
 	}
 
 	return cfg, nil
+}
+
+func projectRoot() string {
+	_, b, _, _ := runtime.Caller(0)
+	projectRoot := filepath.Dir(b)
+
+	return projectRoot + "/../"
 }
