@@ -26,16 +26,17 @@ func Run(cfg *config.Config) {
 	log := logger.New(cfg.Log.Level)
 
 	// Repository
-	pg := setupPostgresClient(cfg, log)
+	pg := setupPostgresClient(cfg)
 	defer pg.Close()
 
-	rmqServer, err, httpEngine := setupHttpEngine(cfg, pg, log)
+	rmqServer, httpEngine := setupHttpEngine(cfg, pg, log)
 	httpServer := httpserver.New(httpEngine, httpserver.Port(cfg.HTTP.Port))
 
 	// Waiting signal
 	interrupt := make(chan os.Signal, 1)
 	signal.Notify(interrupt, os.Interrupt, syscall.SIGTERM)
 
+	var err error
 	select {
 	case s := <-interrupt:
 		log.Info("app - Run - signal: " + s.String())
@@ -57,24 +58,25 @@ func Run(cfg *config.Config) {
 	}
 }
 
-func setupHttpEngine(cfg *config.Config, pg *postgres.Postgres, log *logger.Logger) (*server.Server, error, *gin.Engine) {
+func setupHttpEngine(cfg *config.Config, pg *postgres.Postgres, log *logger.Logger) (*server.Server, *gin.Engine) {
 	translationUseCase, rmqRouter := setupRabbitMqRouter(pg)
 
 	rmqServer, err := server.New(cfg.RMQ.URL, cfg.RMQ.ServerExchange, rmqRouter, log)
 	if err != nil {
-		log.Fatal(fmt.Errorf("app - Run - rmqServer - server.New: %w", err))
+		panic(fmt.Errorf("app - Run - rmqServer - server.New: %w", err))
 	}
 
 	// HTTP Server
 	httpEngine := gin.New()
 	v1.NewRouter(httpEngine, log, translationUseCase)
-	return rmqServer, err, httpEngine
+
+	return rmqServer, httpEngine
 }
 
-func setupPostgresClient(cfg *config.Config, log *logger.Logger) *postgres.Postgres {
+func setupPostgresClient(cfg *config.Config) *postgres.Postgres {
 	pg, err := postgres.New(cfg.PG.URL, postgres.MaxPoolSize(cfg.PG.PoolMax))
 	if err != nil {
-		log.Fatal(fmt.Errorf("app - Run - postgres.New: %w", err))
+		panic(fmt.Errorf("app - Run - postgres.New: %w", err))
 	}
 	return pg
 }
