@@ -62,7 +62,8 @@ the main entry point, which is `app_test.go`.
 ### Testcontainers
 
 [Testcontainers](https://golang.testcontainers.org/) is a library for Golang that provides a friendly API to run Docker containers for
-integration testing (system-tests). It allows developers to spin up required services like databases, web servers,
+integration testing (system-tests). It allows developers to spin up required services like
+databases, web servers,
 or any other application that can run in a Docker container as part of their test setup. This
 provides a consistent, reproducible, and isolated environment for tests, making it a powerful tool
 for modern test-driven development in Golang.
@@ -72,6 +73,21 @@ RabbitMQ and Postgres to run main use cases. Hence, `makefile` contains 2 tasks:
 
 - `test`, running all tests
 - `test-fast`, running all tests excluding slow running tests like system-tests
+
+>
+> **Test-Driven-Development and testcontainers**
+>
+>Testcontainers work seamlessly when they boot up swiftly. For containers that require more time,
+> like the RabbitMQ testcontainer in this instance, you can utilize the `reuse` feature already
+> activated in this template.
+>
+>1. Initiate a test that employs the necessary container, set a breakpoint, and maintain its
+    operation as long as required.
+>2. Begin code testing and implementation. Since containers are already operational, you'll use the
+    running containers, accelerating the testing process.
+>
+>To enhance convenience, a GitHub issue has been
+> raised: https://github.com/testcontainers/testcontainers-go/issues/1191
 
 ## Project structure
 

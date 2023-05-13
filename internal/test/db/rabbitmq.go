@@ -24,11 +24,13 @@ func MustStartRMQContainer(ctx context.Context, cfg *config.Config) {
 		Image:        fmt.Sprintf("rabbitmq:%s", tag),
 		ExposedPorts: []string{string(port)},
 		WaitingFor:   wait.ForListeningPort(port).WithStartupTimeout(timeout),
+		Name:         "rmq-container",
 	}
 
 	rmqContainer, err := testcontainers.GenericContainer(ctx, testcontainers.GenericContainerRequest{
 		ContainerRequest: req,
 		Started:          true,
+		Reuse:            true,
 	})
 	if err != nil {
 		panic(fmt.Errorf("failed to start container: %v", err))

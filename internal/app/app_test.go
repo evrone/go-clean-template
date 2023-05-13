@@ -131,7 +131,7 @@ func given() (*gin.Engine, *config.Config) {
 	db.MustStartRMQContainer(ctx, cfg)
 
 	pg := setupPostgresClient(cfg)
-	db.ExecuteMigrate(cfg.PG.URL)
+	db.ExecuteMigrate(cfg.PG.URL, log)
 
 	httpEngine := mustSetupHttpEngine(cfg, pg, log)
 

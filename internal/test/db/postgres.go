@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"github.com/evrone/go-clean-template/config"
+	"github.com/evrone/go-clean-template/pkg/logger"
 	"github.com/golang-migrate/migrate/v4"
 	"github.com/testcontainers/testcontainers-go"
 	postgres2 "github.com/testcontainers/testcontainers-go/modules/postgres"
@@ -26,6 +27,12 @@ func MustStartPostgresContainer(err error, ctx context.Context, cfg *config.Conf
 		postgres2.WithUsername("user"),
 		postgres2.WithPassword("pass"),
 		testcontainers.WithWaitStrategy(wait.ForLog("database system is ready to accept connections").WithOccurrence(2).WithStartupTimeout(5*time.Second)),
+		testcontainers.CustomizeRequest(testcontainers.GenericContainerRequest{
+			ContainerRequest: testcontainers.ContainerRequest{
+				Name: "postgres-container",
+			},
+			Reuse: true,
+		}),
 	)
 
 	if err != nil {
@@ -36,13 +43,9 @@ func MustStartPostgresContainer(err error, ctx context.Context, cfg *config.Conf
 	realPort, err := container.MappedPort(ctx, "5432")
 
 	cfg.PG.URL = fmt.Sprintf("postgres://user:pass@%v:%v/postgres?sslmode=disable", host, realPort.Port())
-
-	//connStr, err := container.ConnectionString(ctx, "sslmode=disable", "application_name=test")
-	//cfg.PG.URL = connStr
-
 }
 
-func ExecuteMigrate(pgConnectionUrl string) {
+func ExecuteMigrate(pgConnectionUrl string, log *logger.Logger) {
 	projectRoot := projectRoot()
 
 	migrationDirectoryUri := fmt.Sprintf("file://%s/migrations", projectRoot)
@@ -55,7 +58,8 @@ func ExecuteMigrate(pgConnectionUrl string) {
 		panic(err)
 	}
 	if err := m.Up(); err != nil {
-		panic(err)
+		// errors if no migration need to be executed
+		log.Info(fmt.Sprintf("MIGRATE: %s", err))
 	}
 }
 
