@@ -5,7 +5,7 @@ Domain Driven Design (DDD) Architecture template for Golang services
 [![Go Report Card](https://goreportcard.com/badge/github.com/evrone/go-clean-template)](https://goreportcard.com/report/github.com/evrone/go-clean-template)
 [![License](https://img.shields.io/github/license/evrone/go-clean-template.svg)](https://github.com/evrone/go-clean-template/blob/master/LICENSE)
 [![Release](https://img.shields.io/github/v/release/evrone/go-clean-template.svg)](https://github.com/evrone/go-clean-template/releases/)
-[![codecov](https://codecov.io/gh/evrone/go-clean-template/branch/master/graph/badge.svg?token=XE3E0X3EVQ)](https://codecov.io/gh/evrone/go-clean-template)
+[![codecov](https://codecov.io/gh/sesigl/go-project-ddd-template/branch/master/graph/badge.svg?token=RLK70TCXU1)](https://codecov.io/gh/sesigl/go-project-ddd-template)
 
 ## Overview
 The purpose of the template is to show:
