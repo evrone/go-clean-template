@@ -41,18 +41,6 @@ jobs:
         with:
           reporter: github-pr-review
 
-  check-dependencies:
-    name: runner / check-dependencies
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-      - uses: actions/setup-go@v2
-      - name: WriteGoList
-        run: go list -json -m all > go.list
-      - name: Nancy
-        uses: sonatype-nexus-community/nancy-github-action@main
-        continue-on-error: true
-
   tests:
     name: runner / tests
     runs-on: ubuntu-latest
