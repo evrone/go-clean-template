@@ -38,7 +38,7 @@ linter-golangci: ### check by golangci linter
 .PHONY: linter-golangci
 
 linter-hadolint: ### check by hadolint linter
-	git ls-files --exclude='Dockerfile*' --ignored | xargs hadolint
+	find . -name 'Dockerfile' | xargs hadolint
 .PHONY: linter-hadolint
 
 linter-dotenv: ### check by dotenv linter
