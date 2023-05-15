@@ -19,7 +19,7 @@ jobs:
       - uses: reviewdog/action-yamllint@v1
         with:
           fail_on_error: true
-          reporter: github-pr-check
+          reporter: github-pr-review
           yamllint_flags: '-d "{extends: default, rules: {truthy: disable}}" .'
 
   hadolint:
@@ -30,7 +30,7 @@ jobs:
       - uses: reviewdog/action-hadolint@v1
         with:
           fail_on_error: true
-          reporter: github-pr-check
+          reporter: github-pr-review
 
   dotenv-linter:
     name: runner / dotenv-linter
@@ -39,7 +39,7 @@ jobs:
       - uses: actions/checkout@v3
       - uses: dotenv-linter/action-dotenv-linter@v2
         with:
-          reporter: github-pr-check
+          reporter: github-pr-review
 
   tests:
     name: runner / tests
