@@ -27,10 +27,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-      - uses: reviewdog/action-hadolint@v1
+      - uses: hadolint/hadolint-action@v3.1.0
         with:
-          fail_on_error: true
-          reporter: github-pr-review
+          recursive: true
+          dockerfile: Dockerfile
 
   dotenv-linter:
     name: runner / dotenv-linter
