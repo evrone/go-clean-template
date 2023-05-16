@@ -27,10 +27,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-      - uses: reviewdog/action-hadolint@v1
+      - uses: hadolint/hadolint-action@v3.1.0
         with:
-          fail_on_error: true
-          reporter: github-pr-review
+          recursive: true
+          dockerfile: Dockerfile
 
   dotenv-linter:
     name: runner / dotenv-linter
@@ -40,18 +40,6 @@ jobs:
       - uses: dotenv-linter/action-dotenv-linter@v2
         with:
           reporter: github-pr-review
-
-  check-dependencies:
-    name: runner / check-dependencies
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-      - uses: actions/setup-go@v2
-      - name: WriteGoList
-        run: go list -json -m all > go.list
-      - name: Nancy
-        uses: sonatype-nexus-community/nancy-github-action@main
-        continue-on-error: true
 
   tests:
     name: runner / tests
