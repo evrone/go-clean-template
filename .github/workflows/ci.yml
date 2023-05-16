@@ -2,17 +2,19 @@ name: CI
 on: [push]
 
 jobs:
-  golangci-lint:
+  golangci:
     name: runner / golangci-lint
     runs-on: ubuntu-latest
     steps:
-      - name: Check out code into the Go module directory
-        uses: actions/checkout@v3
-      - name: golangci-lint
-        uses: reviewdog/action-golangci-lint@v2
+      - uses: actions/setup-go@v4
         with:
-          fail_on_error: true
-          reporter: github-pr-review
+          go-version: '1.17'
+          cache: false
+      - uses: actions/checkout@v3
+      - name: golangci-lint
+        uses: golangci/golangci-lint-action@v3
+        with:
+          version: v1.29
 
   yamllint:
     name: runner / yamllint
