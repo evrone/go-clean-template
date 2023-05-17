@@ -112,11 +112,9 @@ value (either in yaml, or in environment
 variables).
 
 For configuration, we chose the [cleanenv](https://github.com/ilyakaznacheev/cleanenv) library.
-It does not have many stars on GitHub, but is simple and meets all the requirements.
 
 Reading the config from yaml contradicts the ideology of 12 factors, but in practice, it is more
-convenient than
-reading the entire config from ENV.
+convenient than reading the entire config from ENV.
 It is assumed that default values are in yaml, and security-sensitive variables are defined in ENV.
 
 ### `docs`
