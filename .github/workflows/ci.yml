@@ -21,11 +21,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-      - uses: reviewdog/action-yamllint@v1
+      - name: yaml-lint
+        uses: karancode/yamllint-github-action@master
         with:
-          fail_on_error: true
-          reporter: github-pr-review
-          yamllint_flags: '-d "{extends: default, rules: {truthy: disable}}" .'
+          yamllint_strict: true
 
   hadolint:
     name: runner / hadolint
