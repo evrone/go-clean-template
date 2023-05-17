@@ -36,6 +36,16 @@ jobs:
           recursive: true
           dockerfile: Dockerfile
 
+  dotenv-linter:
+    name: runner / dotenv-linter
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: dotenv-linter/action-dotenv-linter@v2
+        with:
+          reporter: github-check
+          fail_on_error: true
+
   tests:
     name: runner / tests
     runs-on: ubuntu-latest
