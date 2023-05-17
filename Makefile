@@ -45,6 +45,10 @@ linter-dotenv: ### check by dotenv linter
 	dotenv-linter
 .PHONY: linter-dotenv
 
+linter-yaml:
+	yamllint . -s
+.PHONY: linter-yaml
+
 test: ### run all tests including slow running system (e.g. system-tests)
 	go test --tags=system -v -cover -covermode atomic -coverprofile=coverage.txt ./internal/... ./pkg/...
 .PHONY: test
