@@ -54,7 +54,7 @@ func NewConfig() (*Config, error) {
 
 	cwd := projectRoot()
 
-	err := cleanenv.ReadConfig(cwd+"./config/config.yml", cfg)
+	err := cleanenv.ReadConfig(cwd+".env", cfg)
 	if err != nil {
 		return nil, fmt.Errorf("config error: %w", err)
 	}

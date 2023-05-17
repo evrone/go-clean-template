@@ -1,3 +1,4 @@
+include .env.local
 export
 
 LOCAL_BIN:=$(CURDIR)/bin
@@ -44,7 +45,11 @@ linter-yaml:
 	yamllint . -s
 .PHONY: linter-yaml
 
-lint: linter-golangci linter-hadolint linter-yaml ### run all linters
+linter-dotenv: ### check by dotenv linter
+	dotenv-linter
+.PHONY: linter-dotenv
+
+lint: linter-golangci linter-hadolint linter-yaml linter-dotenv ### run all linters
 .PHONY: lint
 
 test: ### run all tests including slow running system (e.g. system-tests)
