@@ -1,4 +1,3 @@
-include .env.example
 export
 
 LOCAL_BIN:=$(CURDIR)/bin
@@ -41,13 +40,12 @@ linter-hadolint: ### check by hadolint linter
 	find . -name 'Dockerfile' | xargs hadolint
 .PHONY: linter-hadolint
 
-linter-dotenv: ### check by dotenv linter
-	dotenv-linter
-.PHONY: linter-dotenv
-
 linter-yaml:
 	yamllint . -s
 .PHONY: linter-yaml
+
+lint: linter-golangci linter-hadolint linter-yaml ### run all linters
+.PHONY: lint
 
 test: ### run all tests including slow running system (e.g. system-tests)
 	go test --tags=system -v -cover -covermode atomic -coverprofile=coverage.txt ./internal/... ./pkg/...
@@ -68,7 +66,3 @@ migrate-create:  ### create new migration
 migrate-up: ### migration up
 	migrate -path migrations -database '$(PG_URL)?sslmode=disable' up
 .PHONY: migrate-up
-
-bin-deps:
-	GOBIN=$(LOCAL_BIN) go install -tags 'postgres' github.com/golang-migrate/migrate/v4/cmd/migrate@latest
-	GOBIN=$(LOCAL_BIN) go install github.com/golang/mock/mockgen@latest
