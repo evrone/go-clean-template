@@ -89,6 +89,16 @@ RabbitMQ and Postgres to run main use cases. Hence, `makefile` contains 2 tasks:
 >To enhance convenience, a GitHub issue has been
 > raised: https://github.com/testcontainers/testcontainers-go/issues/1191
 
+### Cleanenv
+
+[Cleanenv](https://github.com/ilyakaznacheev/cleanenv) is a utility library for reading and parsing
+configuration structures from files and environment variables. By importing the library and calling
+appropriate methods, you can easily manipulate and track your project's configuration. Additionally,
+Cleanenv can overwrite your configuration based on environment variables, providing flexibility for
+different execution contexts. The library also supports outputting a detailed list of configuration
+variables for easier debugging and tracking. Find the configuration definition and cleanenv 
+integration in `config/config.go`.
+
 ## Project structure
 
 ### `cmd`
@@ -105,17 +115,15 @@ sensitive information like API keys or passwords within the source code or versi
 The `config` directory facilitates a clean architecture by decoupling configuration details
 from domain logic. This approach allows developers to focus on the core business requirements.
 
-First, `config.yml` is read, then environment variables overwrite the yaml config if they match.
+For convenience, there is a `.env.example` file that can be used, which is set with default values
+for local usage.
 
-The config structure is in the `config.go`. The `env-required: true` tag obliges you to specify a
-value (either in yaml, or in environment
-variables).
+The config structure is in the `config.go`. An `env-required: true` tag can be used to specify a
+value (either in yaml, or in environment variables).
 
-For configuration, we chose the [cleanenv](https://github.com/ilyakaznacheev/cleanenv) library.
-
-Reading the config from yaml contradicts the ideology of 12 factors, but in practice, it is more
-convenient than reading the entire config from ENV.
-It is assumed that default values are in yaml, and security-sensitive variables are defined in ENV.
+Reading the config from `.env` contradicts the ideology of 12 factors, but in practice, it is more
+convenient than reading the entire config from ENV. It is assumed that default values are in `.env`,
+and security-sensitive variables are defined in ENV.
 
 ### `docs`
 

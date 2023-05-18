@@ -2,6 +2,7 @@ package config
 
 import (
 	"fmt"
+	"os"
 	"path/filepath"
 	"runtime"
 
@@ -48,23 +49,47 @@ type (
 	}
 )
 
-// NewConfig returns app config.
 func NewConfig() (*Config, error) {
 	cfg := &Config{}
-
 	cwd := projectRoot()
+	envFilePath := cwd + ".env"
 
-	err := cleanenv.ReadConfig(cwd+".env.local", cfg)
+	config, err := readEnv(envFilePath, cfg)
 	if err != nil {
-		return nil, fmt.Errorf("config error: %w", err)
-	}
-
-	err = cleanenv.ReadEnv(cfg)
-	if err != nil {
-		return nil, err
+		return config, err
 	}
 
 	return cfg, nil
+}
+
+func readEnv(envFilePath string, cfg *Config) (*Config, error) {
+	envFileExists := checkFileExists(envFilePath)
+
+	if envFileExists {
+		err := cleanenv.ReadConfig(envFilePath, cfg)
+		if err != nil {
+			return nil, fmt.Errorf("config error: %w", err)
+		}
+	} else {
+		err := cleanenv.ReadEnv(cfg)
+		if err != nil {
+
+			if _, statErr := os.Stat(envFilePath + ".example"); statErr == nil {
+				return nil, fmt.Errorf("missing environmentvariables: %w\n\nprovide all required environment variables or rename and update .env.example to .env for convinience", err)
+			}
+
+			return nil, err
+		}
+	}
+	return nil, nil
+}
+
+func checkFileExists(fileName string) bool {
+	envFileExists := false
+	if _, err := os.Stat(fileName); err == nil {
+		envFileExists = true
+	}
+	return envFileExists
 }
 
 func projectRoot() string {
