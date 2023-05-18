@@ -96,8 +96,39 @@ configuration structures from files and environment variables. By importing the 
 appropriate methods, you can easily manipulate and track your project's configuration. Additionally,
 Cleanenv can overwrite your configuration based on environment variables, providing flexibility for
 different execution contexts. The library also supports outputting a detailed list of configuration
-variables for easier debugging and tracking. Find the configuration definition and cleanenv 
+variables for easier debugging and tracking. Find the configuration definition and cleanenv
 integration in `config/config.go`.
+
+### Golang-migration
+
+[Golang-migrate](https://github.com/golang-migrate/migrate) is a powerful tool for managing database
+migrations, designed with the flexibility to function as either a CLI or library. With its focus on
+maintaining lightweight database drivers, it seamlessly integrates migrations from various sources
+and applies them in the correct sequence. It's designed with a fail-fast philosophy, meaning it will
+not make assumptions or attempt to correct user input, ensuring robust and reliable database
+migrations.
+
+Use the makefile task `migrate-up` to run migrations. 
+
+For system tests, migrations are executed programmatically.
+
+> **Avoiding application startup migrations**:
+>
+> Performing database migrations as part of the application startup can lead to problems, especially
+> in production environments:
+>1. Risk of Database Corruption and Downtime: Running migrations during startup can cause issues
+    such as database corruption and downtime, particularly as the application scales.
+>2. Parallel Migrations Issue: In production, multiple servers can attempt identical migrations
+    simultaneously, potentially breaking the database.
+>3. Downtime Due to Mental Coupling: If schema upgrades always occur during startup, you might
+    assume that new code always runs with the latest schema. This could hinder rollbacks and cause
+    downtime if a new code version is faulty.
+>
+> Decoupling schema migrations from application startup allows for safer single migrations and reduces
+> downtime risks. It also provides room for better testing of new code and supports zero-downtime
+> migrations for high uptime requirements. It's important
+> to adjust migration strategies based on whether you're working in a development or production
+>environment.
 
 ## Project structure
 
@@ -154,14 +185,6 @@ Next, we start the server and wait for signals in _select_ for graceful completi
 If `app.go` starts to grow, you can split it into multiple files.
 
 For a large number of injections, [wire](https://github.com/google/wire) can be used.
-
-The `migrate.go` file is used for database auto migrations.
-It is included if an argument with the _migrate_ tag is specified.
-For example:
-
-```sh
-$ go run -tags migrate ./cmd/app
-```
 
 ### `internal/interfaces`
 Server handler layer (MVC controllers). The template shows 2 servers:
