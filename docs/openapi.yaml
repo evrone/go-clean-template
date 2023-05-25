@@ -1,0 +1,109 @@
+openapi: 3.0.1
+info:
+  title: Go Clean Template API
+  description: Using a translation service as an example
+  contact: {}
+  version: "1.0"
+servers:
+  - url: //localhost:8080/v1
+paths:
+  /translation/do-translate:
+    post:
+      tags:
+        - translation
+      summary: Translate
+      description: Translate a text
+      operationId: do-translate
+      requestBody:
+        description: Set up translation
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/v1.doTranslateRequest'
+        required: true
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/entity.Translation'
+        400:
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/v1.response'
+        500:
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/v1.response'
+      x-codegen-request-body-name: request
+  /translation/history:
+    get:
+      tags:
+        - translation
+      summary: Show history
+      description: Show all translation history
+      operationId: history
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/v1.historyResponse'
+        500:
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/v1.response'
+components:
+  schemas:
+    entity.Translation:
+      type: object
+      properties:
+        destination:
+          type: string
+          example: en
+        original:
+          type: string
+          example: текст для перевода
+        source:
+          type: string
+          example: auto
+        translation:
+          type: string
+          example: text for translation
+    v1.doTranslateRequest:
+      required:
+        - destination
+        - original
+        - source
+      type: object
+      properties:
+        destination:
+          type: string
+          example: en
+        original:
+          type: string
+          example: текст для перевода
+        source:
+          type: string
+          example: auto
+    v1.historyResponse:
+      type: object
+      properties:
+        history:
+          type: array
+          items:
+            $ref: '#/components/schemas/entity.Translation'
+    v1.response:
+      type: object
+      properties:
+        error:
+          type: string
+          example: message

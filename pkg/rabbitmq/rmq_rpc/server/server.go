@@ -33,7 +33,12 @@ type Server struct {
 }
 
 // New -.
-func New(url, serverExchange string, router map[string]CallHandler, l logger.Interface, opts ...Option) (*Server, error) {
+func New(url,
+	serverExchange string,
+	router map[string]CallHandler,
+	l logger.Interface,
+	opts ...Option) (*Server, error) {
+
 	cfg := rmqrpc.Config{
 		URL:      url,
 		WaitTime: _defaultWaitTime,

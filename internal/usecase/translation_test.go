@@ -30,7 +30,7 @@ func translation(t *testing.T) (*usecase.TranslationUseCase, *MockTranslationRep
 	repo := NewMockTranslationRepo(mockCtl)
 	webAPI := NewMockTranslationWebAPI(mockCtl)
 
-	translation := usecase.New(repo, webAPI)
+	translation := usecase.NewWithDependencies(repo, webAPI)
 
 	return translation, repo, webAPI
 }
