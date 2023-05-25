@@ -71,3 +71,11 @@ migrate-create:  ### create new migration
 migrate-up: ### migration up
 	migrate -path migrations -database '$(PG_URL)?sslmode=disable' up
 .PHONY: migrate-up
+
+setup-mac: ### setup mac os dependencies to run all tasks
+	brew install openapi-generator
+.PHONY: setup-mac
+
+generate: ### Generate server files based on OpenAPI specs
+	openapi-generator generate -i docs/openapi.yaml -g go-gin-server  -o ./internal/interfaces/rest/v1 && rm -rf ./internal/interfaces/rest/v1/main.go ./internal/interfaces/rest/v1/go.mod ./internal/interfaces/rest/v1/Dockerfile ./internal/interfaces/rest/v1/go.sum ./internal/interfaces/rest/v1/api
+.PHONY: generate

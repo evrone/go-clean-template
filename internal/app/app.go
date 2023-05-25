@@ -2,7 +2,11 @@
 package app
 
 import (
+	"context"
 	"fmt"
+	openapi "github.com/evrone/go-clean-template/internal/interfaces/rest/v1/go"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
+	"net/http"
 	"os"
 	"os/signal"
 	"syscall"
@@ -11,10 +15,7 @@ import (
 
 	"github.com/evrone/go-clean-template/config"
 	amqprpc "github.com/evrone/go-clean-template/internal/controller/amqp_rpc"
-	v1 "github.com/evrone/go-clean-template/internal/controller/http/v1"
 	"github.com/evrone/go-clean-template/internal/usecase"
-	"github.com/evrone/go-clean-template/internal/usecase/repo"
-	"github.com/evrone/go-clean-template/internal/usecase/webapi"
 	"github.com/evrone/go-clean-template/pkg/httpserver"
 	"github.com/evrone/go-clean-template/pkg/logger"
 	"github.com/evrone/go-clean-template/pkg/postgres"
@@ -25,11 +26,7 @@ import (
 func Run(cfg *config.Config) {
 	log := logger.New(cfg.Log.Level)
 
-	// Repository
-	pg := setupPostgresClient(cfg)
-	defer pg.Close()
-
-	rmqServer, httpEngine := setupHttpEngine(cfg, pg, log)
+	rmqServer, httpEngine := setupHttpEngine(cfg, log)
 	httpServer := httpserver.New(httpEngine, httpserver.Port(cfg.HTTP.Port))
 
 	// Waiting signal
@@ -58,8 +55,11 @@ func Run(cfg *config.Config) {
 	}
 }
 
-func setupHttpEngine(cfg *config.Config, pg *postgres.Postgres, log *logger.Logger) (*server.Server, *gin.Engine) {
-	translationUseCase, rmqRouter := setupRabbitMqRouter(pg)
+func setupHttpEngine(cfg *config.Config, log *logger.Logger) (*server.Server, *gin.Engine) {
+	translationUseCase, rmqRouter := setupRabbitMqRouter()
+
+	var ctx = context.Background()
+	context.WithValue(ctx, "translationUseCase", translationUseCase)
 
 	rmqServer, err := server.New(cfg.RMQ.URL, cfg.RMQ.ServerExchange, rmqRouter, log)
 	if err != nil {
@@ -67,10 +67,22 @@ func setupHttpEngine(cfg *config.Config, pg *postgres.Postgres, log *logger.Logg
 	}
 
 	// HTTP Server
-	httpEngine := gin.New()
-	v1.NewRouter(httpEngine, log, translationUseCase)
+	router := openapi.NewRouter()
+	setupRouter(router)
 
-	return rmqServer, httpEngine
+	return rmqServer, router
+}
+
+func setupRouter(handler *gin.Engine) {
+	// Options
+	handler.Use(gin.Logger())
+	handler.Use(gin.Recovery())
+
+	// K8s probe
+	handler.GET("/healthz", func(c *gin.Context) { c.Status(http.StatusOK) })
+
+	// Prometheus metrics
+	handler.GET("/metrics", gin.WrapH(promhttp.Handler()))
 }
 
 func setupPostgresClient(cfg *config.Config) *postgres.Postgres {
@@ -81,12 +93,9 @@ func setupPostgresClient(cfg *config.Config) *postgres.Postgres {
 	return pg
 }
 
-func setupRabbitMqRouter(pg *postgres.Postgres) (*usecase.TranslationUseCase, map[string]server.CallHandler) {
+func setupRabbitMqRouter() (*usecase.TranslationUseCase, map[string]server.CallHandler) {
 	// Use case
-	translationUseCase := usecase.New(
-		repo.New(pg),
-		webapi.New(),
-	)
+	translationUseCase := usecase.New()
 
 	// RabbitMQ RPC Server
 	rmqRouter := amqprpc.NewRouter(translationUseCase)

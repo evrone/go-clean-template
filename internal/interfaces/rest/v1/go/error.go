@@ -1,4 +1,4 @@
-package v1
+package openapi
 
 import (
 	"github.com/gin-gonic/gin"

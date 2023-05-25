@@ -54,34 +54,34 @@ func NewConfig() (*Config, error) {
 	cwd := projectRoot()
 	envFilePath := cwd + ".env"
 
-	config, err := readEnv(envFilePath, cfg)
+	err := readEnv(envFilePath, cfg)
 	if err != nil {
-		return config, err
+		return cfg, err
 	}
 
 	return cfg, nil
 }
 
-func readEnv(envFilePath string, cfg *Config) (*Config, error) {
+func readEnv(envFilePath string, cfg *Config) error {
 	envFileExists := checkFileExists(envFilePath)
 
 	if envFileExists {
 		err := cleanenv.ReadConfig(envFilePath, cfg)
 		if err != nil {
-			return nil, fmt.Errorf("config error: %w", err)
+			return fmt.Errorf("config error: %w", err)
 		}
 	} else {
 		err := cleanenv.ReadEnv(cfg)
 		if err != nil {
 
 			if _, statErr := os.Stat(envFilePath + ".example"); statErr == nil {
-				return nil, fmt.Errorf("missing environmentvariables: %w\n\nprovide all required environment variables or rename and update .env.example to .env for convinience", err)
+				return fmt.Errorf("missing environmentvariables: %w\n\nprovide all required environment variables or rename and update .env.example to .env for convinience", err)
 			}
 
-			return nil, err
+			return err
 		}
 	}
-	return nil, nil
+	return nil
 }
 
 func checkFileExists(fileName string) bool {
