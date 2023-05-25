@@ -20,7 +20,7 @@ import (
 	_ "github.com/mattes/migrate/source/file"
 )
 
-func MustStartPostgresContainer(err error, ctx context.Context, cfg *config.Config) {
+func MustStartPostgresContainer(ctx context.Context, cfg *config.Config) {
 	container, err := postgres2.RunContainer(ctx,
 		testcontainers.WithImage("postgres:15.2"),
 		postgres2.WithDatabase("postgres"),

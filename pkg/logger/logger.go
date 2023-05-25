@@ -2,6 +2,7 @@ package logger
 
 import (
 	"fmt"
+	"github.com/evrone/go-clean-template/config"
 	"os"
 	"strings"
 
@@ -25,10 +26,10 @@ type Logger struct {
 var _ Interface = (*Logger)(nil)
 
 // New -.
-func New(level string) *Logger {
+func New(cfg *config.Config) *Logger {
 	var l zerolog.Level
 
-	switch strings.ToLower(level) {
+	switch strings.ToLower(cfg.Log.Level) {
 	case "error":
 		l = zerolog.ErrorLevel
 	case "warn":

@@ -4,7 +4,9 @@ package postgres
 import (
 	"context"
 	"fmt"
+	"github.com/evrone/go-clean-template/config"
 	"log"
+	"sync"
 	"time"
 
 	"github.com/Masterminds/squirrel"
@@ -12,7 +14,6 @@ import (
 )
 
 const (
-	_defaultMaxPoolSize  = 1
 	_defaultConnAttempts = 10
 	_defaultConnTimeout  = time.Second
 )
@@ -27,22 +28,34 @@ type Postgres struct {
 	Pool    *pgxpool.Pool
 }
 
-// New -.
-func New(url string, opts ...Option) (*Postgres, error) {
-	pg := &Postgres{
-		maxPoolSize:  _defaultMaxPoolSize,
+var pg *Postgres
+var hdlOnce sync.Once
+
+// NewOrGetSingleton -.
+func NewOrGetSingleton(config *config.Config) *Postgres {
+
+	hdlOnce.Do(func() {
+		postgres, err := initPg(config)
+		if err != nil {
+			panic(err)
+		}
+
+		pg = postgres
+	})
+
+	return pg
+}
+
+func initPg(config *config.Config) (*Postgres, error) {
+	pg = &Postgres{
+		maxPoolSize:  config.PG.PoolMax,
 		connAttempts: _defaultConnAttempts,
 		connTimeout:  _defaultConnTimeout,
 	}
 
-	// Custom options
-	for _, opt := range opts {
-		opt(pg)
-	}
-
 	pg.Builder = squirrel.StatementBuilder.PlaceholderFormat(squirrel.Dollar)
 
-	poolConfig, err := pgxpool.ParseConfig(url)
+	poolConfig, err := pgxpool.ParseConfig(config.PG.URL)
 	if err != nil {
 		return nil, fmt.Errorf("postgres - NewPostgres - pgxpool.ParseConfig: %w", err)
 	}

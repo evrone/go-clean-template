@@ -76,6 +76,12 @@ setup-mac: ### setup mac os dependencies to run all tasks
 	brew install openapi-generator
 .PHONY: setup-mac
 
-generate: ### Generate server files based on OpenAPI specs
+generate: generate-openapi-files generate-di-files ### Generate all files
+
+generate-openapi-files: ### Generate server files based on OpenAPI specs
 	openapi-generator generate -i docs/openapi.yaml -g go-gin-server  -o ./internal/interfaces/rest/v1 && rm -rf ./internal/interfaces/rest/v1/main.go ./internal/interfaces/rest/v1/go.mod ./internal/interfaces/rest/v1/Dockerfile ./internal/interfaces/rest/v1/go.sum ./internal/interfaces/rest/v1/api
-.PHONY: generate
+.PHONY: generate-openapi-files
+
+generate-di-files: ### Generate dependency injection files
+	wire ./...
+.PHONY: generate-di-files

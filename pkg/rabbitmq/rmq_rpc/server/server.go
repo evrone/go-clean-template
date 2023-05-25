@@ -3,6 +3,7 @@ package server
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/evrone/go-clean-template/config"
 	"time"
 
 	"github.com/streadway/amqp"
@@ -29,44 +30,35 @@ type Server struct {
 
 	timeout time.Duration
 
-	logger logger.Interface
+	logger *logger.Logger
 }
 
 // New -.
-func New(url,
-	serverExchange string,
-	router map[string]CallHandler,
-	l logger.Interface,
-	opts ...Option) (*Server, error) {
+func New(config *config.Config, log *logger.Logger, amqpRpcRouter map[string]CallHandler) *Server {
 
 	cfg := rmqrpc.Config{
-		URL:      url,
+		URL:      config.RMQ.URL,
 		WaitTime: _defaultWaitTime,
 		Attempts: _defaultAttempts,
 	}
 
 	s := &Server{
-		conn:    rmqrpc.New(serverExchange, cfg),
+		conn:    rmqrpc.New(config.RMQ.ServerExchange, cfg),
 		error:   make(chan error),
 		stop:    make(chan struct{}),
-		router:  router,
+		router:  amqpRpcRouter,
 		timeout: _defaultTimeout,
-		logger:  l,
-	}
-
-	// Custom options
-	for _, opt := range opts {
-		opt(s)
+		logger:  log,
 	}
 
 	err := s.conn.AttemptConnect()
 	if err != nil {
-		return nil, fmt.Errorf("rmq_rpc server - NewServer - s.conn.AttemptConnect: %w", err)
+		panic(fmt.Errorf("rmq_rpc server - NewServer - s.conn.AttemptConnect: %w", err))
 	}
 
 	go s.consumer()
 
-	return s, nil
+	return s
 }
 
 func (s *Server) consumer() {

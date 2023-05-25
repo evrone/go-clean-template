@@ -82,7 +82,7 @@ func TestApp(t *testing.T) {
 			panic(err)
 		}
 		if err != nil {
-			t.Fatal("RabbitMQ RPC Client - init error - client.New")
+			t.Fatal("RabbitMQ RPC Client - init error - client.NewOrGetSingleton")
 		}
 
 		defer func() {
@@ -121,13 +121,10 @@ func TestApp(t *testing.T) {
 func given() (*gin.Engine, *config.Config) {
 	ctx := context.Background()
 
-	cfg, err := config.NewConfig()
-	if err != nil {
-		panic(err)
-	}
-	log := logger.New(cfg.Log.Level)
+	cfg := config.NewConfig()
+	log := logger.New(cfg)
 
-	db.MustStartPostgresContainer(err, ctx, cfg)
+	db.MustStartPostgresContainer(ctx, cfg)
 	db.MustStartRMQContainer(ctx, cfg)
 
 	pg := setupPostgresClient(cfg)
@@ -139,7 +136,7 @@ func given() (*gin.Engine, *config.Config) {
 }
 
 func mustSetupHttpEngine(config *config.Config, pg *postgres.Postgres, logger *logger.Logger) *gin.Engine {
-	_, httpEngine := setupHttpEngine(config, pg, logger)
+	_, httpEngine := setupHttpEngine(config, logger)
 	return httpEngine
 }
 

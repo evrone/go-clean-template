@@ -2,8 +2,8 @@
 package app
 
 import (
-	"context"
 	"fmt"
+	"github.com/evrone/go-clean-template/internal"
 	openapi "github.com/evrone/go-clean-template/internal/interfaces/rest/v1/go"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"net/http"
@@ -14,8 +14,6 @@ import (
 	"github.com/gin-gonic/gin"
 
 	"github.com/evrone/go-clean-template/config"
-	amqprpc "github.com/evrone/go-clean-template/internal/controller/amqp_rpc"
-	"github.com/evrone/go-clean-template/internal/usecase"
 	"github.com/evrone/go-clean-template/pkg/httpserver"
 	"github.com/evrone/go-clean-template/pkg/logger"
 	"github.com/evrone/go-clean-template/pkg/postgres"
@@ -24,7 +22,7 @@ import (
 
 // Run creates objects via constructors.
 func Run(cfg *config.Config) {
-	log := logger.New(cfg.Log.Level)
+	log := internal.InitializeLogger()
 
 	rmqServer, httpEngine := setupHttpEngine(cfg, log)
 	httpServer := httpserver.New(httpEngine, httpserver.Port(cfg.HTTP.Port))
@@ -56,15 +54,10 @@ func Run(cfg *config.Config) {
 }
 
 func setupHttpEngine(cfg *config.Config, log *logger.Logger) (*server.Server, *gin.Engine) {
-	translationUseCase, rmqRouter := setupRabbitMqRouter()
+	// RabbitMQ RPC Server
+	rmqRouter := internal.InitializeNewAmqpRpcRouter()
 
-	var ctx = context.Background()
-	context.WithValue(ctx, "translationUseCase", translationUseCase)
-
-	rmqServer, err := server.New(cfg.RMQ.URL, cfg.RMQ.ServerExchange, rmqRouter, log)
-	if err != nil {
-		panic(fmt.Errorf("app - Run - rmqServer - server.New: %w", err))
-	}
+	rmqServer := server.New(cfg, log, rmqRouter)
 
 	// HTTP Server
 	router := openapi.NewRouter()
@@ -86,18 +79,7 @@ func setupRouter(handler *gin.Engine) {
 }
 
 func setupPostgresClient(cfg *config.Config) *postgres.Postgres {
-	pg, err := postgres.New(cfg.PG.URL, postgres.MaxPoolSize(cfg.PG.PoolMax))
-	if err != nil {
-		panic(fmt.Errorf("app - Run - postgres.New: %w", err))
-	}
+	pg := postgres.NewOrGetSingleton(cfg)
+
 	return pg
-}
-
-func setupRabbitMqRouter() (*usecase.TranslationUseCase, map[string]server.CallHandler) {
-	// Use case
-	translationUseCase := usecase.New()
-
-	// RabbitMQ RPC Server
-	rmqRouter := amqprpc.NewRouter(translationUseCase)
-	return translationUseCase, rmqRouter
 }

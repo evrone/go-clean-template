@@ -3,14 +3,21 @@ package amqprpc
 import (
 	"github.com/evrone/go-clean-template/internal/usecase"
 	"github.com/evrone/go-clean-template/pkg/rabbitmq/rmq_rpc/server"
+	"sync"
 )
 
-// NewRouter -.
-func NewRouter(t usecase.Translation) map[string]server.CallHandler {
-	routes := make(map[string]server.CallHandler)
-	{
-		newTranslationRoutes(routes, t)
-	}
+var hdlOnce sync.Once
+var amqpRpcRouter map[string]server.CallHandler
 
-	return routes
+// NewRouter -.
+func NewRouter(t *usecase.TranslationUseCase) map[string]server.CallHandler {
+
+	hdlOnce.Do(func() {
+		amqpRpcRouter = make(map[string]server.CallHandler)
+		{
+			newTranslationRoutes(amqpRpcRouter, t)
+		}
+	})
+
+	return amqpRpcRouter
 }

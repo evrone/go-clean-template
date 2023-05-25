@@ -49,17 +49,17 @@ type (
 	}
 )
 
-func NewConfig() (*Config, error) {
+func NewConfig() *Config {
 	cfg := &Config{}
 	cwd := projectRoot()
 	envFilePath := cwd + ".env"
 
 	err := readEnv(envFilePath, cfg)
 	if err != nil {
-		return cfg, err
+		panic(err)
 	}
 
-	return cfg, nil
+	return cfg
 }
 
 func readEnv(envFilePath string, cfg *Config) error {
