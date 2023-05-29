@@ -55,9 +55,7 @@ func Run(cfg *config.Config) {
 
 func setupHttpEngine(cfg *config.Config, log *logger.Logger) (*server.Server, *gin.Engine) {
 	// RabbitMQ RPC Server
-	rmqRouter := internal.InitializeNewAmqpRpcRouter()
-
-	rmqServer := server.New(cfg, log, rmqRouter)
+	rmqServer := internal.InitializeNewRmqRpcServerWithConfig(cfg)
 
 	// HTTP Server
 	router := openapi.NewRouter()

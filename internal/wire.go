@@ -16,9 +16,10 @@ import (
 	"github.com/google/wire"
 )
 
+var deps = []interface{}{}
+
 var providerSet wire.ProviderSet = wire.NewSet(
 	postgres.NewOrGetSingleton,
-	config.NewConfig,
 	repository.New,
 	webapi.New,
 	usecase.New,
@@ -28,12 +29,12 @@ var providerSet wire.ProviderSet = wire.NewSet(
 )
 
 func InitializePostgresConnection() *postgres.Postgres {
-	wire.Build(providerSet)
+	wire.Build(providerSet, config.NewConfig)
 	return &postgres.Postgres{}
 }
 
 func InitializeTranslationRepository() *repository.TranslationRepository {
-	wire.Build(providerSet)
+	wire.Build(providerSet, config.NewConfig)
 	return &repository.TranslationRepository{}
 }
 
@@ -43,21 +44,26 @@ func InitializeTranslationWebAPI() *webapi.TranslationWebAPI {
 }
 
 func InitializeTranslationUseCase() *usecase.TranslationUseCase {
-	wire.Build(providerSet)
+	wire.Build(providerSet, config.NewConfig)
 	return &usecase.TranslationUseCase{}
 }
 
 func InitializeLogger() *logger.Logger {
-	wire.Build(providerSet)
+	wire.Build(providerSet, config.NewConfig)
 	return &logger.Logger{}
 }
 
 func InitializeNewAmqpRpcRouter() map[string]server.CallHandler {
-	wire.Build(providerSet)
+	wire.Build(providerSet, config.NewConfig)
 	return map[string]server.CallHandler{}
 }
 
 func InitializeNewRmqRpcServer() *server.Server {
+	wire.Build(providerSet, config.NewConfig)
+	return &server.Server{}
+}
+
+func InitializeNewRmqRpcServerWithConfig(config *config.Config) *server.Server {
 	wire.Build(providerSet)
 	return &server.Server{}
 }

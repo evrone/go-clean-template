@@ -75,6 +75,19 @@ func InitializeNewRmqRpcServer() *server.Server {
 	return serverServer
 }
 
+func InitializeNewRmqRpcServerWithConfig(config2 *config.Config) *server.Server {
+	loggerLogger := logger.New(config2)
+	postgresPostgres := postgres.NewOrGetSingleton(config2)
+	translationRepository := repository.New(postgresPostgres)
+	translationWebAPI := webapi.New()
+	translationUseCase := usecase.New(translationRepository, translationWebAPI)
+	v := amqprpc.NewRouter(translationUseCase)
+	serverServer := server.New(config2, loggerLogger, v)
+	return serverServer
+}
+
 // wire.go:
 
-var providerSet wire.ProviderSet = wire.NewSet(postgres.NewOrGetSingleton, config.NewConfig, repository.New, webapi.New, usecase.New, logger.New, amqprpc.NewRouter, server.New)
+var deps = []interface{}{}
+
+var providerSet wire.ProviderSet = wire.NewSet(postgres.NewOrGetSingleton, repository.New, webapi.New, usecase.New, logger.New, amqprpc.NewRouter, server.New)
