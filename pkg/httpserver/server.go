@@ -1,8 +1,13 @@
-// Package httpserver implements HTTP server.
+// Package httpserver implements HTTP Server.
 package httpserver
 
 import (
 	"context"
+	"github.com/evrone/go-clean-template/config"
+	openapi "github.com/evrone/go-clean-template/internal/interfaces/rest/v1/go"
+	"github.com/gin-gonic/gin"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
+	"net"
 	"net/http"
 	"time"
 )
@@ -22,13 +27,19 @@ type Server struct {
 }
 
 // New -.
-func New(handler http.Handler, opts ...Option) *Server {
+func New(cfg *config.Config) (*Server, *gin.Engine) {
+
+	// HTTP server
+	router := openapi.NewRouter()
+	setupRouter(router)
+
 	httpServer := &http.Server{
-		Handler:      handler,
+		Handler:      router,
 		ReadTimeout:  _defaultReadTimeout,
 		WriteTimeout: _defaultWriteTimeout,
 		Addr:         _defaultAddr,
 	}
+	httpServer.Addr = net.JoinHostPort("", cfg.HTTP.Port)
 
 	s := &Server{
 		server:          httpServer,
@@ -36,14 +47,21 @@ func New(handler http.Handler, opts ...Option) *Server {
 		shutdownTimeout: _defaultShutdownTimeout,
 	}
 
-	// Custom options
-	for _, opt := range opts {
-		opt(s)
-	}
-
 	s.start()
 
-	return s
+	return s, router
+}
+
+func setupRouter(handler *gin.Engine) {
+	// Options
+	handler.Use(gin.Logger())
+	handler.Use(gin.Recovery())
+
+	// K8s probe
+	handler.GET("/healthz", func(c *gin.Context) { c.Status(http.StatusOK) })
+
+	// Prometheus metrics
+	handler.GET("/metrics", gin.WrapH(promhttp.Handler()))
 }
 
 func (s *Server) start() {

@@ -62,7 +62,7 @@ var doc = `{
                         }
                     },
                     "500": {
-                        "description": "Internal Server Error",
+                        "description": "Internal server Error",
                         "schema": {
                             "$ref": "#/definitions/v1.response"
                         }
@@ -92,7 +92,7 @@ var doc = `{
                         }
                     },
                     "500": {
-                        "description": "Internal Server Error",
+                        "description": "Internal server Error",
                         "schema": {
                             "$ref": "#/definitions/v1.response"
                         }

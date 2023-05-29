@@ -1,14 +1,12 @@
-//go:build system
-// +build system
-
 package app
 
 import (
 	"context"
 	"github.com/evrone/go-clean-template/config"
+	"github.com/evrone/go-clean-template/internal"
 	"github.com/evrone/go-clean-template/internal/test/db"
+	"github.com/evrone/go-clean-template/pkg/httpserver"
 	"github.com/evrone/go-clean-template/pkg/logger"
-	"github.com/evrone/go-clean-template/pkg/postgres"
 	"github.com/evrone/go-clean-template/pkg/rabbitmq/rmq_rpc/client"
 	"github.com/gin-gonic/gin"
 	"github.com/stretchr/testify/require"
@@ -127,17 +125,13 @@ func given() (*gin.Engine, *config.Config) {
 	db.MustStartPostgresContainer(ctx, cfg)
 	db.MustStartRMQContainer(ctx, cfg)
 
-	pg := setupPostgresClient(cfg)
 	db.ExecuteMigrate(cfg.PG.URL, log)
 
-	httpEngine := mustSetupHttpEngine(cfg, pg, log)
+	// RabbitMQ RPC server
+	internal.InitializeNewRmqRpcServerWithConfig(cfg)
+	_, httpEngine := httpserver.New(cfg)
 
 	return httpEngine, cfg
-}
-
-func mustSetupHttpEngine(config *config.Config, pg *postgres.Postgres, logger *logger.Logger) *gin.Engine {
-	_, httpEngine := setupHttpEngine(config, logger)
-	return httpEngine
 }
 
 func sendRequest(method string, url string, httpEngine *gin.Engine, body io.Reader) *httptest.ResponseRecorder {
