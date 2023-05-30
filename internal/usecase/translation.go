@@ -3,15 +3,16 @@ package usecase
 import (
 	"context"
 	"fmt"
-	"github.com/evrone/go-clean-template/internal/entity"
+	"github.com/evrone/go-clean-template/internal/domain/translation/entity"
+	"github.com/evrone/go-clean-template/internal/domain/translation/service"
 	"github.com/evrone/go-clean-template/internal/usecase/repository"
 	"github.com/evrone/go-clean-template/internal/usecase/webapi"
 )
 
 // TranslationUseCase -.
 type TranslationUseCase struct {
-	repo   TranslationRepo
-	webAPI TranslationWebAPI
+	repo   entity.TranslationRepository
+	webAPI service.Translator
 }
 
 // New -.
@@ -22,7 +23,7 @@ func New(r *repository.TranslationRepository, t *webapi.TranslationWebAPI) *Tran
 	)
 }
 
-func NewWithDependencies(r TranslationRepo, w TranslationWebAPI) *TranslationUseCase {
+func NewWithDependencies(r entity.TranslationRepository, w service.Translator) *TranslationUseCase {
 	return &TranslationUseCase{
 		repo:   r,
 		webAPI: w,
@@ -40,7 +41,7 @@ func (uc *TranslationUseCase) History(ctx context.Context) ([]entity.Translation
 }
 
 // Translate -.
-func (uc *TranslationUseCase) Translate(ctx context.Context, t entity.Translation) (entity.Translation, error) {
+func (uc *TranslationUseCase) Translate(_ context.Context, t entity.Translation) (entity.Translation, error) {
 	translation, err := uc.webAPI.Translate(t)
 	if err != nil {
 		return entity.Translation{}, fmt.Errorf("TranslationUseCase - Translate - s.webAPI.Translate: %w", err)

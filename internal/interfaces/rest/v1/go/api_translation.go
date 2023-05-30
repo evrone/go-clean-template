@@ -11,7 +11,7 @@ package openapi
 
 import (
 	"github.com/evrone/go-clean-template/internal"
-	"github.com/evrone/go-clean-template/internal/entity"
+	"github.com/evrone/go-clean-template/internal/domain/translation/entity"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
