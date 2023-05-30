@@ -3,12 +3,9 @@ package usecase
 import (
 	"context"
 	"fmt"
-	"github.com/evrone/go-clean-template/config"
-	"github.com/evrone/go-clean-template/internal/usecase/repo"
-	"github.com/evrone/go-clean-template/internal/usecase/webapi"
-	"github.com/evrone/go-clean-template/pkg/postgres"
-
 	"github.com/evrone/go-clean-template/internal/entity"
+	"github.com/evrone/go-clean-template/internal/usecase/repository"
+	"github.com/evrone/go-clean-template/internal/usecase/webapi"
 )
 
 // TranslationUseCase -.
@@ -18,20 +15,10 @@ type TranslationUseCase struct {
 }
 
 // New -.
-func New() *TranslationUseCase {
-	cfg, err := config.NewConfig()
-	if err != nil {
-		panic(err)
-	}
-
-	pg := setupPostgresClient(cfg)
-
-	r := repo.New(pg)
-	w := webapi.New()
-
+func New(r *repository.TranslationRepository, t *webapi.TranslationWebAPI) *TranslationUseCase {
 	return NewWithDependencies(
 		r,
-		w,
+		t,
 	)
 }
 
@@ -40,14 +27,6 @@ func NewWithDependencies(r TranslationRepo, w TranslationWebAPI) *TranslationUse
 		repo:   r,
 		webAPI: w,
 	}
-}
-
-func setupPostgresClient(cfg *config.Config) *postgres.Postgres {
-	pg, err := postgres.New(cfg.PG.URL, postgres.MaxPoolSize(cfg.PG.PoolMax))
-	if err != nil {
-		panic(fmt.Errorf("app - Run - postgres.New: %w", err))
-	}
-	return pg
 }
 
 // History - getting translate history from store.

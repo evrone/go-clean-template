@@ -124,11 +124,71 @@ For system tests, migrations are executed programmatically.
     assume that new code always runs with the latest schema. This could hinder rollbacks and cause
     downtime if a new code version is faulty.
 >
-> Decoupling schema migrations from application startup allows for safer single migrations and reduces
+> Decoupling schema migrations from application startup allows for safer single migrations and
+> reduces
 > downtime risks. It also provides room for better testing of new code and supports zero-downtime
 > migrations for high uptime requirements. It's important
 > to adjust migration strategies based on whether you're working in a development or production
->environment.
+> environment.
+
+### Wire: Dependancy Injection Made Simple
+
+[Wire](https://github.com/google/wire), created by Google, is a powerful and efficient compile-time
+dependency injection tool for Go. It's designed to simplify the task of initializing complex
+structures by automating the process. Wire works by generating a Go code file that resolves all of
+the dependencies in your project at compile time, ensuring type-safety, reducing runtime overhead,
+and enhancing code maintainability. It's an excellent choice for those striving for clean, robust,
+and efficient software design in the Go programming landscape.
+
+With an API-First approach, it may not always be feasible or necessary to set up dependency
+injection for every aspect of your application. Yet, Wire provides us the flexibility to selectively
+manage and instantiate dependencies as needed.
+
+Therefore, with the exception of the generated HTTP Server backend – considered an outer layer and
+therefore a unique case – we advocate using Wire to manage dependencies throughout the rest of your
+application.
+
+Furthermore, it's important to maintain an emphasis on encapsulation and boundary enforcement. In
+some cases, this might mean not exposing a factory method. After all, while dependency injection is
+a powerful tool, it's not a mandate. It should be used judiciously, and not everywhere and always.
+Utilize dependency injection where it provides clear value, while maintaining the integrity of your
+software design principles.
+
+> **Why Use Dependency Injection in Go?**
+>
+>Dependency Injection (DI) may initially seem at odds with Go's simplicity and "just enough"
+> philosophy. However, DI can bring substantial advantages to your Go applications, especially when
+> dealing with complex or large codebases. Here's why:
+>
+>**1. Enhances Code Testability:**
+>
+>Dependency Injection allows you to inject mock dependencies into your software during testing. This
+> way, you can simulate various scenarios and focus on testing individual pieces of your system
+> independently, promoting effective unit testing and enhancing overall code quality.
+>
+>**2. Improves Code Maintainability:**
+>
+>Dependency Injection decouples the relationship between dependent objects, making your code more
+> modular. This decoupling allows you to change or replace dependencies without affecting other
+> parts
+> of your system. This makes it easier to update, maintain, and understand your code.
+>
+>**3. Facilitates Scalable Codebase:**
+>
+>As your Go application grows, manually managing dependencies can become daunting. DI automates the
+> initialization and provision of dependencies, making your codebase more scalable and manageable.
+>
+>**4. Enables Effective Concurrency Handling:**
+>
+>In concurrent applications, managing object lifecycles can be challenging. Dependency Injection can
+> manage object lifecycles, ensuring that each goroutine gets an appropriate instance (either a new
+> one or a shared one based on the scope) of the required object.
+>
+>**5. Promotes Better Software Design:**
+>
+>Dependency Injection encourages you to think in terms of interfaces rather than concrete types.
+> This leads to a design that is more flexible, extensible, and adheres to the SOLID principles, 
+> enhancing the overall software design quality.
 
 ## Project structure
 

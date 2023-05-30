@@ -10,10 +10,8 @@
 package openapi
 
 import (
-	"github.com/evrone/go-clean-template/config"
+	"github.com/evrone/go-clean-template/internal"
 	"github.com/evrone/go-clean-template/internal/entity"
-	"github.com/evrone/go-clean-template/internal/usecase"
-	"github.com/evrone/go-clean-template/pkg/logger"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -32,8 +30,8 @@ type doTranslateRequest struct {
 // DoTranslate - Translate
 func DoTranslate(c *gin.Context) {
 
-	// TODO, cfg and logger should just be resolved by using DI using wire
-	err, log, translationUseCase := prepare()
+	log := internal.InitializeLogger()
+	translationUseCase := internal.InitializeTranslationUseCase()
 
 	var request doTranslateRequest
 	if err := c.ShouldBindJSON(&request); err != nil {
@@ -65,8 +63,8 @@ func DoTranslate(c *gin.Context) {
 // History - Show history
 func History(c *gin.Context) {
 
-	// TODO, cfg and logger should just be resolved by using DI using wire
-	err, log, translationUseCase := prepare()
+	log := internal.InitializeLogger()
+	translationUseCase := internal.InitializeTranslationUseCase()
 
 	translations, err := translationUseCase.History(c.Request.Context())
 	if err != nil {
@@ -77,16 +75,4 @@ func History(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, historyResponse{translations})
-}
-
-func prepare() (error, *logger.Logger, *usecase.TranslationUseCase) {
-	cfg, err := config.NewConfig()
-	if err != nil {
-		panic(err)
-	}
-
-	log := logger.New(cfg.Log.Level)
-
-	translationUseCase := usecase.New()
-	return err, log, translationUseCase
 }

@@ -12,10 +12,10 @@ import (
 )
 
 type translationRoutes struct {
-	translationUseCase usecase.Translation
+	translationUseCase *usecase.TranslationUseCase
 }
 
-func newTranslationRoutes(routes map[string]server.CallHandler, t usecase.Translation) {
+func newTranslationRoutes(routes map[string]server.CallHandler, t *usecase.TranslationUseCase) {
 	r := &translationRoutes{t}
 	{
 		routes["getHistory"] = r.getHistory()

@@ -1,14 +1,12 @@
-//go:build system
-// +build system
-
 package app
 
 import (
 	"context"
 	"github.com/evrone/go-clean-template/config"
+	"github.com/evrone/go-clean-template/internal"
 	"github.com/evrone/go-clean-template/internal/test/db"
+	"github.com/evrone/go-clean-template/pkg/httpserver"
 	"github.com/evrone/go-clean-template/pkg/logger"
-	"github.com/evrone/go-clean-template/pkg/postgres"
 	"github.com/evrone/go-clean-template/pkg/rabbitmq/rmq_rpc/client"
 	"github.com/gin-gonic/gin"
 	"github.com/stretchr/testify/require"
@@ -82,7 +80,7 @@ func TestApp(t *testing.T) {
 			panic(err)
 		}
 		if err != nil {
-			t.Fatal("RabbitMQ RPC Client - init error - client.New")
+			t.Fatal("RabbitMQ RPC Client - init error - client.NewOrGetSingleton")
 		}
 
 		defer func() {
@@ -121,26 +119,19 @@ func TestApp(t *testing.T) {
 func given() (*gin.Engine, *config.Config) {
 	ctx := context.Background()
 
-	cfg, err := config.NewConfig()
-	if err != nil {
-		panic(err)
-	}
-	log := logger.New(cfg.Log.Level)
+	cfg := config.NewConfig()
+	log := logger.New(cfg)
 
-	db.MustStartPostgresContainer(err, ctx, cfg)
+	db.MustStartPostgresContainer(ctx, cfg)
 	db.MustStartRMQContainer(ctx, cfg)
 
-	pg := setupPostgresClient(cfg)
 	db.ExecuteMigrate(cfg.PG.URL, log)
 
-	httpEngine := mustSetupHttpEngine(cfg, pg, log)
+	// RabbitMQ RPC server
+	internal.InitializeNewRmqRpcServerWithConfig(cfg)
+	_, httpEngine := httpserver.New(cfg)
 
 	return httpEngine, cfg
-}
-
-func mustSetupHttpEngine(config *config.Config, pg *postgres.Postgres, logger *logger.Logger) *gin.Engine {
-	_, httpEngine := setupHttpEngine(config, pg, logger)
-	return httpEngine
 }
 
 func sendRequest(method string, url string, httpEngine *gin.Engine, body io.Reader) *httptest.ResponseRecorder {

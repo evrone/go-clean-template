@@ -3,6 +3,7 @@ package server
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/evrone/go-clean-template/config"
 	"time"
 
 	"github.com/streadway/amqp"
@@ -29,44 +30,35 @@ type Server struct {
 
 	timeout time.Duration
 
-	logger logger.Interface
+	logger *logger.Logger
 }
 
 // New -.
-func New(url,
-	serverExchange string,
-	router map[string]CallHandler,
-	l logger.Interface,
-	opts ...Option) (*Server, error) {
+func New(config *config.Config, log *logger.Logger, amqpRpcRouter map[string]CallHandler) *Server {
 
 	cfg := rmqrpc.Config{
-		URL:      url,
+		URL:      config.RMQ.URL,
 		WaitTime: _defaultWaitTime,
 		Attempts: _defaultAttempts,
 	}
 
 	s := &Server{
-		conn:    rmqrpc.New(serverExchange, cfg),
+		conn:    rmqrpc.New(config.RMQ.ServerExchange, cfg),
 		error:   make(chan error),
 		stop:    make(chan struct{}),
-		router:  router,
+		router:  amqpRpcRouter,
 		timeout: _defaultTimeout,
-		logger:  l,
-	}
-
-	// Custom options
-	for _, opt := range opts {
-		opt(s)
+		logger:  log,
 	}
 
 	err := s.conn.AttemptConnect()
 	if err != nil {
-		return nil, fmt.Errorf("rmq_rpc server - NewServer - s.conn.AttemptConnect: %w", err)
+		panic(fmt.Errorf("rmq_rpc server - NewServer - s.conn.AttemptConnect: %w", err))
 	}
 
 	go s.consumer()
 
-	return s, nil
+	return s
 }
 
 func (s *Server) consumer() {
@@ -100,14 +92,14 @@ func (s *Server) serveCall(d *amqp.Delivery) {
 	if err != nil {
 		s.publish(d, nil, rmqrpc.ErrInternalServer.Error())
 
-		s.logger.Error(err, "rmq_rpc server - Server - serveCall - callHandler")
+		s.logger.Error(err, "rmq_rpc server - server - serveCall - callHandler")
 
 		return
 	}
 
 	body, err := json.Marshal(response)
 	if err != nil {
-		s.logger.Error(err, "rmq_rpc server - Server - serveCall - json.Marshal")
+		s.logger.Error(err, "rmq_rpc server - server - serveCall - json.Marshal")
 	}
 
 	s.publish(d, body, rmqrpc.Success)
@@ -122,7 +114,7 @@ func (s *Server) publish(d *amqp.Delivery, body []byte, status string) {
 			Body:          body,
 		})
 	if err != nil {
-		s.logger.Error(err, "rmq_rpc server - Server - publish - s.conn.Channel.Publish")
+		s.logger.Error(err, "rmq_rpc server - server - publish - s.conn.Channel.Publish")
 	}
 }
 
@@ -160,7 +152,7 @@ func (s *Server) Shutdown() error {
 
 	err := s.conn.Connection.Close()
 	if err != nil {
-		return fmt.Errorf("rmq_rpc server - Server - Shutdown - s.Connection.Close: %w", err)
+		return fmt.Errorf("rmq_rpc server - server - Shutdown - s.Connection.Close: %w", err)
 	}
 
 	return nil
