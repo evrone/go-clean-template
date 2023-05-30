@@ -8,16 +8,16 @@ import (
 	"os/signal"
 	"syscall"
 
-	"github.com/evrone/go-clean-template/config"
 	"github.com/evrone/go-clean-template/pkg/httpserver"
 )
 
 // Run creates objects via constructors.
-func Run(cfg *config.Config) {
+func Run() {
 	log := internal.InitializeLogger()
+	cfg := internal.InitializeConfig()
 
 	//servers
-	rmqServer := internal.InitializeNewRmqRpcServerWithConfig(cfg)
+	rmqServer := internal.InitializeNewRmqRpcServer()
 	httpServer, _ := httpserver.New(cfg)
 
 	// Waiting signal

@@ -28,6 +28,11 @@ var providerSet wire.ProviderSet = wire.NewSet(
 	server.New,
 )
 
+func InitializeConfig() *config.Config {
+	wire.Build(config.NewConfig)
+	return &config.Config{}
+}
+
 func InitializePostgresConnection() *postgres.Postgres {
 	wire.Build(providerSet, config.NewConfig)
 	return &postgres.Postgres{}
@@ -51,11 +56,6 @@ func InitializeTranslationUseCase() *usecase.TranslationUseCase {
 func InitializeLogger() *logger.Logger {
 	wire.Build(providerSet, config.NewConfig)
 	return &logger.Logger{}
-}
-
-func InitializeNewAmqpRpcRouter() map[string]server.CallHandler {
-	wire.Build(providerSet, config.NewConfig)
-	return map[string]server.CallHandler{}
 }
 
 func InitializeNewRmqRpcServer() *server.Server {

@@ -20,6 +20,11 @@ import (
 
 // Injectors from wire.go:
 
+func InitializeConfig() *config.Config {
+	configConfig := config.NewConfig()
+	return configConfig
+}
+
 func InitializePostgresConnection() *postgres.Postgres {
 	configConfig := config.NewConfig()
 	postgresPostgres := postgres.NewOrGetSingleton(configConfig)
@@ -51,16 +56,6 @@ func InitializeLogger() *logger.Logger {
 	configConfig := config.NewConfig()
 	loggerLogger := logger.New(configConfig)
 	return loggerLogger
-}
-
-func InitializeNewAmqpRpcRouter() map[string]server.CallHandler {
-	configConfig := config.NewConfig()
-	postgresPostgres := postgres.NewOrGetSingleton(configConfig)
-	translationRepository := repository.New(postgresPostgres)
-	translationWebAPI := webapi.New()
-	translationUseCase := usecase.New(translationRepository, translationWebAPI)
-	v := amqprpc.NewRouter(translationUseCase)
-	return v
 }
 
 func InitializeNewRmqRpcServer() *server.Server {
