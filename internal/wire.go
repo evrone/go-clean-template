@@ -1,15 +1,15 @@
-// The build tag makes sure the stub is not built in the final build.
 //go:build wireinject
 // +build wireinject
 
+// The build tag makes sure the stub is not built in the final build.
 package internal
 
 import (
 	"github.com/evrone/go-clean-template/config"
-	amqprpc "github.com/evrone/go-clean-template/internal/controller/amqp_rpc"
-	"github.com/evrone/go-clean-template/internal/usecase"
-	"github.com/evrone/go-clean-template/internal/usecase/repository"
-	"github.com/evrone/go-clean-template/internal/usecase/webapi"
+	"github.com/evrone/go-clean-template/internal/application"
+	"github.com/evrone/go-clean-template/internal/infrastructure/googleapi"
+	"github.com/evrone/go-clean-template/internal/infrastructure/repository"
+	amqprpc "github.com/evrone/go-clean-template/internal/interfaces/amqp_rpc"
 	"github.com/evrone/go-clean-template/pkg/logger"
 	"github.com/evrone/go-clean-template/pkg/postgres"
 	"github.com/evrone/go-clean-template/pkg/rabbitmq/rmq_rpc/server"
@@ -21,8 +21,8 @@ var deps = []interface{}{}
 var providerSet wire.ProviderSet = wire.NewSet(
 	postgres.NewOrGetSingleton,
 	repository.New,
-	webapi.New,
-	usecase.New,
+	googleapi.New,
+	application.New,
 	logger.New,
 	amqprpc.NewRouter,
 	server.New,
@@ -43,14 +43,14 @@ func InitializeTranslationRepository() *repository.TranslationRepository {
 	return &repository.TranslationRepository{}
 }
 
-func InitializeTranslationWebAPI() *webapi.TranslationWebAPI {
+func InitializeTranslationWebAPI() *googleapi.GoogleTranslator {
 	wire.Build(providerSet)
-	return &webapi.TranslationWebAPI{}
+	return &googleapi.GoogleTranslator{}
 }
 
-func InitializeTranslationUseCase() *usecase.TranslationUseCase {
+func InitializeTranslationUseCase() *application.TranslationUseCase {
 	wire.Build(providerSet, config.NewConfig)
-	return &usecase.TranslationUseCase{}
+	return &application.TranslationUseCase{}
 }
 
 func InitializeLogger() *logger.Logger {

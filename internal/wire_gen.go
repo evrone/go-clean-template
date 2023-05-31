@@ -8,10 +8,10 @@ package internal
 
 import (
 	"github.com/evrone/go-clean-template/config"
-	"github.com/evrone/go-clean-template/internal/controller/amqp_rpc"
-	"github.com/evrone/go-clean-template/internal/usecase"
-	"github.com/evrone/go-clean-template/internal/usecase/repository"
-	"github.com/evrone/go-clean-template/internal/usecase/webapi"
+	"github.com/evrone/go-clean-template/internal/application"
+	"github.com/evrone/go-clean-template/internal/infrastructure/googleapi"
+	"github.com/evrone/go-clean-template/internal/infrastructure/repository"
+	"github.com/evrone/go-clean-template/internal/interfaces/amqp_rpc"
 	"github.com/evrone/go-clean-template/pkg/logger"
 	"github.com/evrone/go-clean-template/pkg/postgres"
 	"github.com/evrone/go-clean-template/pkg/rabbitmq/rmq_rpc/server"
@@ -38,17 +38,17 @@ func InitializeTranslationRepository() *repository.TranslationRepository {
 	return translationRepository
 }
 
-func InitializeTranslationWebAPI() *webapi.TranslationWebAPI {
-	translationWebAPI := webapi.New()
-	return translationWebAPI
+func InitializeTranslationWebAPI() *googleapi.GoogleTranslator {
+	googleTranslator := googleapi.New()
+	return googleTranslator
 }
 
-func InitializeTranslationUseCase() *usecase.TranslationUseCase {
+func InitializeTranslationUseCase() *application.TranslationUseCase {
 	configConfig := config.NewConfig()
 	postgresPostgres := postgres.NewOrGetSingleton(configConfig)
 	translationRepository := repository.New(postgresPostgres)
-	translationWebAPI := webapi.New()
-	translationUseCase := usecase.New(translationRepository, translationWebAPI)
+	googleTranslator := googleapi.New()
+	translationUseCase := application.New(translationRepository, googleTranslator)
 	return translationUseCase
 }
 
@@ -63,8 +63,8 @@ func InitializeNewRmqRpcServer() *server.Server {
 	loggerLogger := logger.New(configConfig)
 	postgresPostgres := postgres.NewOrGetSingleton(configConfig)
 	translationRepository := repository.New(postgresPostgres)
-	translationWebAPI := webapi.New()
-	translationUseCase := usecase.New(translationRepository, translationWebAPI)
+	googleTranslator := googleapi.New()
+	translationUseCase := application.New(translationRepository, googleTranslator)
 	v := amqprpc.NewRouter(translationUseCase)
 	serverServer := server.New(configConfig, loggerLogger, v)
 	return serverServer
@@ -74,8 +74,8 @@ func InitializeNewRmqRpcServerWithConfig(config2 *config.Config) *server.Server 
 	loggerLogger := logger.New(config2)
 	postgresPostgres := postgres.NewOrGetSingleton(config2)
 	translationRepository := repository.New(postgresPostgres)
-	translationWebAPI := webapi.New()
-	translationUseCase := usecase.New(translationRepository, translationWebAPI)
+	googleTranslator := googleapi.New()
+	translationUseCase := application.New(translationRepository, googleTranslator)
 	v := amqprpc.NewRouter(translationUseCase)
 	serverServer := server.New(config2, loggerLogger, v)
 	return serverServer
@@ -85,4 +85,4 @@ func InitializeNewRmqRpcServerWithConfig(config2 *config.Config) *server.Server 
 
 var deps = []interface{}{}
 
-var providerSet wire.ProviderSet = wire.NewSet(postgres.NewOrGetSingleton, repository.New, webapi.New, usecase.New, logger.New, amqprpc.NewRouter, server.New)
+var providerSet wire.ProviderSet = wire.NewSet(postgres.NewOrGetSingleton, repository.New, googleapi.New, application.New, logger.New, amqprpc.NewRouter, server.New)

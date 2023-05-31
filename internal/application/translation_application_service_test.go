@@ -1,4 +1,4 @@
-package usecase_test
+package application_test
 
 import (
 	"context"
@@ -8,8 +8,8 @@ import (
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/require"
 
+	"github.com/evrone/go-clean-template/internal/application"
 	"github.com/evrone/go-clean-template/internal/domain/translation/entity"
-	"github.com/evrone/go-clean-template/internal/usecase"
 )
 
 var errInternalServErr = errors.New("internal server error")
@@ -21,7 +21,7 @@ type test struct {
 	err  error
 }
 
-func translation(t *testing.T) (*usecase.TranslationUseCase, *MockTranslationRepo, *MockTranslationWebAPI) {
+func translation(t *testing.T) (*application.TranslationUseCase, *MockTranslationRepo, *MockTranslationWebAPI) {
 	t.Helper()
 
 	mockCtl := gomock.NewController(t)
@@ -30,7 +30,7 @@ func translation(t *testing.T) (*usecase.TranslationUseCase, *MockTranslationRep
 	repo := NewMockTranslationRepo(mockCtl)
 	webAPI := NewMockTranslationWebAPI(mockCtl)
 
-	translation := usecase.NewWithDependencies(repo, webAPI)
+	translation := application.NewWithDependencies(repo, webAPI)
 
 	return translation, repo, webAPI
 }
@@ -99,7 +99,7 @@ func TestTranslate(t *testing.T) {
 			err: errInternalServErr,
 		},
 		{
-			name: "repo error",
+			name: "translationRepository error",
 			mock: func() {
 				webAPI.EXPECT().Translate(entity.Translation{}).Return(entity.Translation{}, nil)
 				repo.EXPECT().Store(context.Background(), entity.Translation{}).Return(errInternalServErr)

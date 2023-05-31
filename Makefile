@@ -53,7 +53,7 @@ lint: linter-golangci linter-hadolint linter-yaml linter-dotenv ### run all lint
 .PHONY: lint
 
 test: ### run all tests including slow running system (e.g. system-tests)
-	go test --tags=system -v -cover -covermode atomic -coverprofile=coverage.txt ./internal/... ./pkg/...
+	go test --tags=system -v -cover -covermode atomic -coverprofile=coverage.txt ./internal/... ./pkg/... ./cmd/...
 .PHONY: test
 
 test-fast: ### run fast tests only

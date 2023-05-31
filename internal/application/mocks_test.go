@@ -2,7 +2,7 @@
 // Source: ./internal/usecase/interfaces.go
 
 // Package usecase_test is a generated GoMock package.
-package usecase_test
+package application_test
 
 import (
 	context "context"

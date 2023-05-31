@@ -6,16 +6,16 @@ import (
 
 	"github.com/streadway/amqp"
 
+	"github.com/evrone/go-clean-template/internal/application"
 	"github.com/evrone/go-clean-template/internal/domain/translation/entity"
-	"github.com/evrone/go-clean-template/internal/usecase"
 	"github.com/evrone/go-clean-template/pkg/rabbitmq/rmq_rpc/server"
 )
 
 type translationRoutes struct {
-	translationUseCase *usecase.TranslationUseCase
+	translationUseCase *application.TranslationUseCase
 }
 
-func newTranslationRoutes(routes map[string]server.CallHandler, t *usecase.TranslationUseCase) {
+func newTranslationRoutes(routes map[string]server.CallHandler, t *application.TranslationUseCase) {
 	r := &translationRoutes{t}
 	{
 		routes["getHistory"] = r.getHistory()
