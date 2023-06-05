@@ -9,6 +9,10 @@
 
 package openapi
 
-type V1HistoryResponse struct {
-	History []EntityTranslation `json:"history,omitempty"`
+type TranslateRequestObject struct {
+	Destination string `json:"destination"`
+
+	Original string `json:"original"`
+
+	Source string `json:"source"`
 }

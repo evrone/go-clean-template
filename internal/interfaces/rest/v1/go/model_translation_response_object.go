@@ -9,7 +9,7 @@
 
 package openapi
 
-type EntityTranslation struct {
+type TranslationResponseObject struct {
 	Destination string `json:"destination,omitempty"`
 
 	Original string `json:"original,omitempty"`

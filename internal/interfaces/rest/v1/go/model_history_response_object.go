@@ -9,6 +9,6 @@
 
 package openapi
 
-type V1Response struct {
-	Error string `json:"error,omitempty"`
+type HistoryResponseObject struct {
+	History []TranslationResponseObject `json:"history,omitempty"`
 }

@@ -2,13 +2,13 @@
 // Source: ./internal/usecase/interfaces.go
 
 // Package usecase_test is a generated GoMock package.
-package usecase_test
+package application_test
 
 import (
 	context "context"
 	reflect "reflect"
 
-	entity "github.com/evrone/go-clean-template/internal/entity"
+	"github.com/evrone/go-clean-template/internal/domain/translation/entity"
 	gomock "github.com/golang/mock/gomock"
 )
 
@@ -65,7 +65,7 @@ func (mr *MockTranslationMockRecorder) Translate(arg0, arg1 interface{}) *gomock
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Translate", reflect.TypeOf((*MockTranslation)(nil).Translate), arg0, arg1)
 }
 
-// MockTranslationRepo is a mock of TranslationRepo interface.
+// MockTranslationRepo is a mock of TranslationRepository interface.
 type MockTranslationRepo struct {
 	ctrl     *gomock.Controller
 	recorder *MockTranslationRepoMockRecorder

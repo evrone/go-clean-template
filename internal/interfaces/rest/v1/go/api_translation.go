@@ -11,29 +11,18 @@ package openapi
 
 import (
 	"github.com/evrone/go-clean-template/internal"
-	"github.com/evrone/go-clean-template/internal/entity"
+	"github.com/evrone/go-clean-template/internal/domain/translation/entity"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
 )
 
-type historyResponse struct {
-	History []entity.Translation `json:"history"`
-}
-
-type doTranslateRequest struct {
-	Source      string `json:"source"       binding:"required"  example:"auto"`
-	Destination string `json:"destination"  binding:"required"  example:"en"`
-	Original    string `json:"original"     binding:"required"  example:"текст для перевода"`
-}
-
-// DoTranslate - Translate
 func DoTranslate(c *gin.Context) {
 
 	log := internal.InitializeLogger()
 	translationUseCase := internal.InitializeTranslationUseCase()
 
-	var request doTranslateRequest
+	var request TranslateRequestObject
 	if err := c.ShouldBindJSON(&request); err != nil {
 		log.Error(err, "http - v1 - doTranslate")
 		errorResponse(c, http.StatusBadRequest, "invalid request body")
@@ -53,14 +42,14 @@ func DoTranslate(c *gin.Context) {
 	if err != nil {
 		log.Error(err, "http - v1 - doTranslate")
 		errorResponse(c, http.StatusInternalServerError, "translation service problems")
-
 		return
 	}
 
-	c.JSON(http.StatusOK, translation)
+	translationResponseObject := translationToResponseObject(translation)
+
+	c.JSON(http.StatusOK, translationResponseObject)
 }
 
-// History - Show history
 func History(c *gin.Context) {
 
 	log := internal.InitializeLogger()
@@ -74,5 +63,27 @@ func History(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, historyResponse{translations})
+	translationResponseObjects := translationsToResponseObjects(translations)
+
+	c.JSON(http.StatusOK, HistoryResponseObject{
+		History: translationResponseObjects,
+	})
+}
+
+func translationsToResponseObjects(translations []entity.Translation) []TranslationResponseObject {
+	var translationResponseObjects = []TranslationResponseObject{}
+
+	for _, translation := range translations {
+		translationResponseObjects = append(translationResponseObjects, translationToResponseObject(translation))
+	}
+	return translationResponseObjects
+}
+
+func translationToResponseObject(translation entity.Translation) TranslationResponseObject {
+	return TranslationResponseObject{
+		Destination: translation.Destination,
+		Original:    translation.Original,
+		Source:      translation.Source,
+		Translation: translation.Translation,
+	}
 }

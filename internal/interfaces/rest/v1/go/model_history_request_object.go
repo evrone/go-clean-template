@@ -9,10 +9,6 @@
 
 package openapi
 
-type V1DoTranslateRequest struct {
-	Destination string `json:"destination"`
-
-	Original string `json:"original"`
-
-	Source string `json:"source"`
+type HistoryRequestObject struct {
+	Error string `json:"error,omitempty"`
 }

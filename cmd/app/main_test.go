@@ -1,4 +1,4 @@
-package app
+package main_test
 
 import (
 	"context"

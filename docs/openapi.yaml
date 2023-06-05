@@ -19,7 +19,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/v1.doTranslateRequest'
+              $ref: '#/components/schemas/TranslateRequestObject'
         required: true
       responses:
         200:
@@ -27,19 +27,19 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/entity.Translation'
+                $ref: '#/components/schemas/TranslationResponseObject'
         400:
           description: Bad Request
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/v1.response'
+                $ref: '#/components/schemas/HistoryRequestObject'
         500:
           description: Internal Server Error
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/v1.response'
+                $ref: '#/components/schemas/HistoryRequestObject'
       x-codegen-request-body-name: request
   /translation/history:
     get:
@@ -54,16 +54,16 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/v1.historyResponse'
+                $ref: '#/components/schemas/HistoryResponseObject'
         500:
           description: Internal Server Error
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/v1.response'
+                $ref: '#/components/schemas/HistoryRequestObject'
 components:
   schemas:
-    entity.Translation:
+    TranslationResponseObject:
       type: object
       properties:
         destination:
@@ -78,7 +78,7 @@ components:
         translation:
           type: string
           example: text for translation
-    v1.doTranslateRequest:
+    TranslateRequestObject:
       required:
         - destination
         - original
@@ -94,14 +94,14 @@ components:
         source:
           type: string
           example: auto
-    v1.historyResponse:
+    HistoryResponseObject:
       type: object
       properties:
         history:
           type: array
           items:
-            $ref: '#/components/schemas/entity.Translation'
-    v1.response:
+            $ref: '#/components/schemas/TranslationResponseObject'
+    HistoryRequestObject:
       type: object
       properties:
         error:
