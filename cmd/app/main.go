@@ -2,8 +2,11 @@ package main
 
 import (
 	"fmt"
+	"github.com/evrone/go-clean-template/config"
 	"github.com/evrone/go-clean-template/internal"
 	"github.com/evrone/go-clean-template/pkg/httpserver"
+	"github.com/evrone/go-clean-template/pkg/logger"
+	"github.com/evrone/go-clean-template/pkg/rabbitmq/rmq_rpc/server"
 	"os"
 	"os/signal"
 	"syscall"
@@ -13,10 +16,18 @@ func main() {
 	log := internal.InitializeLogger()
 	cfg := internal.InitializeConfig()
 
-	//servers
+	rmqServer, httpServer := startServers(cfg)
+	err := waitForSignals(log, httpServer, rmqServer)
+	shutdown(err, httpServer, log, rmqServer)
+}
+
+func startServers(cfg *config.Config) (*server.Server, *httpserver.Server) {
 	rmqServer := internal.InitializeNewRmqRpcServer()
 	httpServer, _ := httpserver.New(cfg)
+	return rmqServer, httpServer
+}
 
+func waitForSignals(log *logger.Logger, httpServer *httpserver.Server, rmqServer *server.Server) error {
 	// Waiting signal
 	interrupt := make(chan os.Signal, 1)
 	signal.Notify(interrupt, os.Interrupt, syscall.SIGTERM)
@@ -30,8 +41,10 @@ func main() {
 	case err = <-rmqServer.Notify():
 		log.Error(fmt.Errorf("app - Run - rmqServer.Notify: %w", err))
 	}
+	return err
+}
 
-	// Shutdown
+func shutdown(err error, httpServer *httpserver.Server, log *logger.Logger, rmqServer *server.Server) {
 	err = httpServer.Shutdown()
 	if err != nil {
 		log.Error(fmt.Errorf("app - Run - httpServer.Shutdown: %w", err))
@@ -41,5 +54,4 @@ func main() {
 	if err != nil {
 		log.Error(fmt.Errorf("app - Run - rmqServer.Shutdown: %w", err))
 	}
-
 }

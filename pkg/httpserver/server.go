@@ -26,13 +26,18 @@ type Server struct {
 	shutdownTimeout time.Duration
 }
 
-// New -.
 func New(cfg *config.Config) (*Server, *gin.Engine) {
 
-	// HTTP server
 	router := openapi.NewRouter()
-	setupRouter(router)
+	setupMonitoringRoutes(router)
 
+	server := prepareHttpServer(cfg, router)
+	server.start()
+
+	return server, router
+}
+
+func prepareHttpServer(cfg *config.Config, router *gin.Engine) *Server {
 	httpServer := &http.Server{
 		Handler:      router,
 		ReadTimeout:  _defaultReadTimeout,
@@ -46,13 +51,10 @@ func New(cfg *config.Config) (*Server, *gin.Engine) {
 		notify:          make(chan error, 1),
 		shutdownTimeout: _defaultShutdownTimeout,
 	}
-
-	s.start()
-
-	return s, router
+	return s
 }
 
-func setupRouter(handler *gin.Engine) {
+func setupMonitoringRoutes(handler *gin.Engine) {
 	// Options
 	handler.Use(gin.Logger())
 	handler.Use(gin.Recovery())

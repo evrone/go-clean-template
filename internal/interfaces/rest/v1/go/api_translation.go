@@ -17,7 +17,6 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// DoTranslate - Translate
 func DoTranslate(c *gin.Context) {
 
 	log := internal.InitializeLogger()
@@ -43,7 +42,6 @@ func DoTranslate(c *gin.Context) {
 	if err != nil {
 		log.Error(err, "http - v1 - doTranslate")
 		errorResponse(c, http.StatusInternalServerError, "translation service problems")
-
 		return
 	}
 
@@ -52,7 +50,6 @@ func DoTranslate(c *gin.Context) {
 	c.JSON(http.StatusOK, translationResponseObject)
 }
 
-// History - Show history
 func History(c *gin.Context) {
 
 	log := internal.InitializeLogger()
