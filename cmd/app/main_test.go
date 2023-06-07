@@ -127,7 +127,6 @@ func given() (*gin.Engine, *config.Config) {
 
 	db.ExecuteMigrate(cfg.PG.URL, log)
 
-	// RabbitMQ RPC server
 	internal.InitializeNewRmqRpcServerWithConfig(cfg)
 	_, httpEngine := httpserver.New(cfg)
 

@@ -61,7 +61,8 @@ test-fast: ### run fast tests only
 .PHONY: test-fast
 
 mock: ### run mockgen
-	mockgen -source ./internal/usecase/interfaces.go -package usecase_test > ./internal/usecase/mocks_test.go
+	mockgen -source ./internal/domain/translation/service/translator.go -package service_test > ./internal/test/mock/translation/service/translator_stub.go
+	mockgen -source ./internal/domain/translation/entity/translation_repository.go -package service_test > ./internal/test/mock/translation/entity/translation_repository_stub.go
 .PHONY: mock
 
 migrate-create:  ### create new migration
@@ -74,6 +75,7 @@ migrate-up: ### migration up
 
 setup-mac: ### setup mac os dependencies to run all tasks
 	brew install openapi-generator
+	go install github.com/golang/mock/mockgen@v1.6.0
 .PHONY: setup-mac
 
 generate: generate-openapi-files generate-di-files ### Generate all files
