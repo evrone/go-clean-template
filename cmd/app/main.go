@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"github.com/evrone/go-clean-template/config"
 	"github.com/evrone/go-clean-template/internal"
 	"github.com/evrone/go-clean-template/pkg/httpserver"
 	"github.com/evrone/go-clean-template/pkg/logger"
@@ -14,16 +13,15 @@ import (
 
 func main() {
 	log := internal.InitializeLogger()
-	cfg := internal.InitializeConfig()
 
-	rmqServer, httpServer := startServers(cfg)
+	rmqServer, httpServer := startServers()
 	err := waitForSignals(log, httpServer, rmqServer)
 	shutdown(err, httpServer, log, rmqServer)
 }
 
-func startServers(cfg *config.Config) (*server.Server, *httpserver.Server) {
+func startServers() (*server.Server, *httpserver.Server) {
 	rmqServer := internal.InitializeNewRmqRpcServer()
-	httpServer, _ := httpserver.New(cfg)
+	httpServer := internal.InitializeNewHttpServer()
 	return rmqServer, httpServer
 }
 

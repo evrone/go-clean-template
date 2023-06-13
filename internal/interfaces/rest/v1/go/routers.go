@@ -10,6 +10,7 @@
 package openapi
 
 import (
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -31,9 +32,9 @@ type Route struct {
 type Routes []Route
 
 // NewRouter returns a new router.
-func NewRouter() *gin.Engine {
+func NewRouter(apiTranslator *Translator) *gin.Engine {
 	router := gin.Default()
-	for _, route := range routes {
+	for _, route := range getRoutes(apiTranslator) {
 		switch route.Method {
 		case http.MethodGet:
 			router.GET(route.Pattern, route.HandlerFunc)
@@ -48,7 +49,21 @@ func NewRouter() *gin.Engine {
 		}
 	}
 
+	setupMonitoringRoutes(router)
+
 	return router
+}
+
+func setupMonitoringRoutes(handler *gin.Engine) {
+	// Options
+	handler.Use(gin.Logger())
+	handler.Use(gin.Recovery())
+
+	// K8s probe
+	handler.GET("/healthz", func(c *gin.Context) { c.Status(http.StatusOK) })
+
+	// Prometheus metrics
+	handler.GET("/metrics", gin.WrapH(promhttp.Handler()))
 }
 
 // Index is the index handler.
@@ -56,25 +71,28 @@ func Index(c *gin.Context) {
 	c.String(http.StatusOK, "Hello World!")
 }
 
-var routes = Routes{
-	{
-		"Index",
-		http.MethodGet,
-		"/v1/",
-		Index,
-	},
+func getRoutes(apiTranslator *Translator) Routes {
+	var routes = Routes{
+		{
+			"Index",
+			http.MethodGet,
+			"/v1/",
+			Index,
+		},
 
-	{
-		"DoTranslate",
-		http.MethodPost,
-		"/v1/translation/do-translate",
-		DoTranslate,
-	},
+		{
+			"DoTranslate",
+			http.MethodPost,
+			"/v1/translation/do-translate",
+			apiTranslator.DoTranslate,
+		},
 
-	{
-		"History",
-		http.MethodGet,
-		"/v1/translation/history",
-		History,
-	},
+		{
+			"History",
+			http.MethodGet,
+			"/v1/translation/history",
+			apiTranslator.History,
+		},
+	}
+	return routes
 }

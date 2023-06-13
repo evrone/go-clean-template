@@ -7,12 +7,17 @@ package internal
 import (
 	"github.com/evrone/go-clean-template/config"
 	"github.com/evrone/go-clean-template/internal/application"
+	"github.com/evrone/go-clean-template/internal/domain/translation/entity"
+	"github.com/evrone/go-clean-template/internal/domain/translation/service"
 	"github.com/evrone/go-clean-template/internal/infrastructure/googleapi"
 	"github.com/evrone/go-clean-template/internal/infrastructure/repository"
 	amqprpc "github.com/evrone/go-clean-template/internal/interfaces/amqp_rpc"
+	openapi "github.com/evrone/go-clean-template/internal/interfaces/rest/v1/go"
+	"github.com/evrone/go-clean-template/pkg/httpserver"
 	"github.com/evrone/go-clean-template/pkg/logger"
 	"github.com/evrone/go-clean-template/pkg/postgres"
 	"github.com/evrone/go-clean-template/pkg/rabbitmq/rmq_rpc/server"
+	"github.com/gin-gonic/gin"
 	"github.com/google/wire"
 )
 
@@ -22,10 +27,30 @@ var providerSet wire.ProviderSet = wire.NewSet(
 	postgres.NewOrGetSingleton,
 	repository.New,
 	googleapi.New,
-	application.New,
 	logger.New,
 	amqprpc.NewRouter,
 	server.New,
+	httpserver.New,
+	openapi.NewTranslator,
+	openapi.NewRouter,
+
+	application.NewWithDependencies,
+	wire.Bind(new(entity.TranslationRepository), new(*repository.TranslationRepository)),
+	wire.Bind(new(service.Translator), new(*googleapi.GoogleTranslator)),
+)
+
+var providerSetSystemTests wire.ProviderSet = wire.NewSet(
+	postgres.NewOrGetSingleton,
+	application.NewWithDependencies,
+	logger.New,
+	amqprpc.NewRouter,
+	server.New,
+	httpserver.New,
+	openapi.NewTranslator,
+	openapi.NewRouter,
+
+	//wire.Bind(new(entity.TranslationRepository), new(*repository.TranslationRepository)),
+	//wire.Bind(new(service.Translator), new(*googleapi.GoogleTranslator)),
 )
 
 func InitializeConfig() *config.Config {
@@ -63,7 +88,35 @@ func InitializeNewRmqRpcServer() *server.Server {
 	return &server.Server{}
 }
 
-func InitializeNewRmqRpcServerWithConfig(config *config.Config) *server.Server {
-	wire.Build(providerSet)
+func InitializeNewRmqRpcServerForTesting(
+	config *config.Config,
+	translationRepository entity.TranslationRepository,
+	translator service.Translator,
+) *server.Server {
+	wire.Build(providerSetSystemTests)
 	return &server.Server{}
+}
+
+func InitializeNewHttpServerForTesting(
+	config *config.Config,
+	translationRepository entity.TranslationRepository,
+	translator service.Translator,
+) *httpserver.Server {
+	wire.Build(providerSetSystemTests)
+	return &httpserver.Server{}
+}
+
+func InitializeNewTranslator() *openapi.Translator {
+	wire.Build(providerSet, config.NewConfig)
+	return &openapi.Translator{}
+}
+
+func InitializeNewRouter() *gin.Engine {
+	wire.Build(providerSet, config.NewConfig)
+	return &gin.Engine{}
+}
+
+func InitializeNewHttpServer() *httpserver.Server {
+	wire.Build(providerSet, config.NewConfig)
+	return &httpserver.Server{}
 }

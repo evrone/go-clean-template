@@ -5,22 +5,12 @@ import (
 	"fmt"
 	"github.com/evrone/go-clean-template/internal/domain/translation/entity"
 	"github.com/evrone/go-clean-template/internal/domain/translation/service"
-	"github.com/evrone/go-clean-template/internal/infrastructure/googleapi"
-	"github.com/evrone/go-clean-template/internal/infrastructure/repository"
 )
 
 // TranslationUseCase -.
 type TranslationUseCase struct {
 	translationRepository entity.TranslationRepository
 	translator            service.Translator
-}
-
-// New -.
-func New(r *repository.TranslationRepository, t *googleapi.GoogleTranslator) *TranslationUseCase {
-	return NewWithDependencies(
-		r,
-		t,
-	)
 }
 
 func NewWithDependencies(translationRepository entity.TranslationRepository, translator service.Translator) *TranslationUseCase {

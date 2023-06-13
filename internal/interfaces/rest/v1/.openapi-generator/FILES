@@ -6,5 +6,4 @@ go/model_history_request_object.go
 go/model_history_response_object.go
 go/model_translate_request_object.go
 go/model_translation_response_object.go
-go/routers.go
 main.go

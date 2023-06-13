@@ -4,9 +4,7 @@ package httpserver
 import (
 	"context"
 	"github.com/evrone/go-clean-template/config"
-	openapi "github.com/evrone/go-clean-template/internal/interfaces/rest/v1/go"
 	"github.com/gin-gonic/gin"
-	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"net"
 	"net/http"
 	"time"
@@ -24,17 +22,15 @@ type Server struct {
 	server          *http.Server
 	notify          chan error
 	shutdownTimeout time.Duration
+	Router          *gin.Engine
 }
 
-func New(cfg *config.Config) (*Server, *gin.Engine) {
-
-	router := openapi.NewRouter()
-	setupMonitoringRoutes(router)
+func New(cfg *config.Config, router *gin.Engine) *Server {
 
 	server := prepareHttpServer(cfg, router)
 	server.start()
 
-	return server, router
+	return server
 }
 
 func prepareHttpServer(cfg *config.Config, router *gin.Engine) *Server {
@@ -50,20 +46,9 @@ func prepareHttpServer(cfg *config.Config, router *gin.Engine) *Server {
 		server:          httpServer,
 		notify:          make(chan error, 1),
 		shutdownTimeout: _defaultShutdownTimeout,
+		Router:          router,
 	}
 	return s
-}
-
-func setupMonitoringRoutes(handler *gin.Engine) {
-	// Options
-	handler.Use(gin.Logger())
-	handler.Use(gin.Recovery())
-
-	// K8s probe
-	handler.GET("/healthz", func(c *gin.Context) { c.Status(http.StatusOK) })
-
-	// Prometheus metrics
-	handler.GET("/metrics", gin.WrapH(promhttp.Handler()))
 }
 
 func (s *Server) start() {

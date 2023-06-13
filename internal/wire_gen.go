@@ -9,12 +9,17 @@ package internal
 import (
 	"github.com/evrone/go-clean-template/config"
 	"github.com/evrone/go-clean-template/internal/application"
+	"github.com/evrone/go-clean-template/internal/domain/translation/entity"
+	"github.com/evrone/go-clean-template/internal/domain/translation/service"
 	"github.com/evrone/go-clean-template/internal/infrastructure/googleapi"
 	"github.com/evrone/go-clean-template/internal/infrastructure/repository"
 	"github.com/evrone/go-clean-template/internal/interfaces/amqp_rpc"
+	"github.com/evrone/go-clean-template/internal/interfaces/rest/v1/go"
+	"github.com/evrone/go-clean-template/pkg/httpserver"
 	"github.com/evrone/go-clean-template/pkg/logger"
 	"github.com/evrone/go-clean-template/pkg/postgres"
 	"github.com/evrone/go-clean-template/pkg/rabbitmq/rmq_rpc/server"
+	"github.com/gin-gonic/gin"
 	"github.com/google/wire"
 )
 
@@ -48,7 +53,7 @@ func InitializeTranslationUseCase() *application.TranslationUseCase {
 	postgresPostgres := postgres.NewOrGetSingleton(configConfig)
 	translationRepository := repository.New(postgresPostgres)
 	googleTranslator := googleapi.New()
-	translationUseCase := application.New(translationRepository, googleTranslator)
+	translationUseCase := application.NewWithDependencies(translationRepository, googleTranslator)
 	return translationUseCase
 }
 
@@ -64,25 +69,69 @@ func InitializeNewRmqRpcServer() *server.Server {
 	postgresPostgres := postgres.NewOrGetSingleton(configConfig)
 	translationRepository := repository.New(postgresPostgres)
 	googleTranslator := googleapi.New()
-	translationUseCase := application.New(translationRepository, googleTranslator)
+	translationUseCase := application.NewWithDependencies(translationRepository, googleTranslator)
 	v := amqprpc.NewRouter(translationUseCase)
 	serverServer := server.New(configConfig, loggerLogger, v)
 	return serverServer
 }
 
-func InitializeNewRmqRpcServerWithConfig(config2 *config.Config) *server.Server {
+func InitializeNewRmqRpcServerForTesting(config2 *config.Config, translationRepository entity.TranslationRepository, translator service.Translator) *server.Server {
 	loggerLogger := logger.New(config2)
-	postgresPostgres := postgres.NewOrGetSingleton(config2)
-	translationRepository := repository.New(postgresPostgres)
-	googleTranslator := googleapi.New()
-	translationUseCase := application.New(translationRepository, googleTranslator)
+	translationUseCase := application.NewWithDependencies(translationRepository, translator)
 	v := amqprpc.NewRouter(translationUseCase)
 	serverServer := server.New(config2, loggerLogger, v)
 	return serverServer
+}
+
+func InitializeNewHttpServerForTesting(config2 *config.Config, translationRepository entity.TranslationRepository, translator service.Translator) *httpserver.Server {
+	translationUseCase := application.NewWithDependencies(translationRepository, translator)
+	loggerLogger := logger.New(config2)
+	openapiTranslator := openapi.NewTranslator(translationUseCase, loggerLogger)
+	engine := openapi.NewRouter(openapiTranslator)
+	httpserverServer := httpserver.New(config2, engine)
+	return httpserverServer
+}
+
+func InitializeNewTranslator() *openapi.Translator {
+	configConfig := config.NewConfig()
+	postgresPostgres := postgres.NewOrGetSingleton(configConfig)
+	translationRepository := repository.New(postgresPostgres)
+	googleTranslator := googleapi.New()
+	translationUseCase := application.NewWithDependencies(translationRepository, googleTranslator)
+	loggerLogger := logger.New(configConfig)
+	translator := openapi.NewTranslator(translationUseCase, loggerLogger)
+	return translator
+}
+
+func InitializeNewRouter() *gin.Engine {
+	configConfig := config.NewConfig()
+	postgresPostgres := postgres.NewOrGetSingleton(configConfig)
+	translationRepository := repository.New(postgresPostgres)
+	googleTranslator := googleapi.New()
+	translationUseCase := application.NewWithDependencies(translationRepository, googleTranslator)
+	loggerLogger := logger.New(configConfig)
+	translator := openapi.NewTranslator(translationUseCase, loggerLogger)
+	engine := openapi.NewRouter(translator)
+	return engine
+}
+
+func InitializeNewHttpServer() *httpserver.Server {
+	configConfig := config.NewConfig()
+	postgresPostgres := postgres.NewOrGetSingleton(configConfig)
+	translationRepository := repository.New(postgresPostgres)
+	googleTranslator := googleapi.New()
+	translationUseCase := application.NewWithDependencies(translationRepository, googleTranslator)
+	loggerLogger := logger.New(configConfig)
+	translator := openapi.NewTranslator(translationUseCase, loggerLogger)
+	engine := openapi.NewRouter(translator)
+	httpserverServer := httpserver.New(configConfig, engine)
+	return httpserverServer
 }
 
 // wire.go:
 
 var deps = []interface{}{}
 
-var providerSet wire.ProviderSet = wire.NewSet(postgres.NewOrGetSingleton, repository.New, googleapi.New, application.New, logger.New, amqprpc.NewRouter, server.New)
+var providerSet wire.ProviderSet = wire.NewSet(postgres.NewOrGetSingleton, repository.New, googleapi.New, logger.New, amqprpc.NewRouter, server.New, httpserver.New, openapi.NewTranslator, openapi.NewRouter, application.NewWithDependencies, wire.Bind(new(entity.TranslationRepository), new(*repository.TranslationRepository)), wire.Bind(new(service.Translator), new(*googleapi.GoogleTranslator)))
+
+var providerSetSystemTests wire.ProviderSet = wire.NewSet(postgres.NewOrGetSingleton, application.NewWithDependencies, logger.New, amqprpc.NewRouter, server.New, httpserver.New, openapi.NewTranslator, openapi.NewRouter)

@@ -10,17 +10,41 @@
 package openapi
 
 import (
-	"github.com/evrone/go-clean-template/internal"
+	"github.com/evrone/go-clean-template/internal/application"
 	"github.com/evrone/go-clean-template/internal/domain/translation/entity"
+	"github.com/evrone/go-clean-template/pkg/logger"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
 )
 
-func DoTranslate(c *gin.Context) {
+type Translator struct {
+	translationUseCase *application.TranslationUseCase
+	log                *logger.Logger
+}
 
-	log := internal.InitializeLogger()
-	translationUseCase := internal.InitializeTranslationUseCase()
+var singletonTranslator *Translator
+
+func NewTranslator(translationUseCase *application.TranslationUseCase, log *logger.Logger) *Translator {
+	singletonTranslator = &Translator{
+		translationUseCase: translationUseCase,
+		log:                log,
+	}
+	return singletonTranslator
+}
+
+func DoTranslate(c *gin.Context) {
+	singletonTranslator.DoTranslate(c)
+}
+
+func History(c *gin.Context) {
+	singletonTranslator.History(c)
+}
+
+func (t *Translator) DoTranslate(c *gin.Context) {
+
+	log := t.log
+	translationUseCase := t.translationUseCase
 
 	var request TranslateRequestObject
 	if err := c.ShouldBindJSON(&request); err != nil {
@@ -50,10 +74,10 @@ func DoTranslate(c *gin.Context) {
 	c.JSON(http.StatusOK, translationResponseObject)
 }
 
-func History(c *gin.Context) {
+func (t *Translator) History(c *gin.Context) {
 
-	log := internal.InitializeLogger()
-	translationUseCase := internal.InitializeTranslationUseCase()
+	log := t.log
+	translationUseCase := t.translationUseCase
 
 	translations, err := translationUseCase.History(c.Request.Context())
 	if err != nil {

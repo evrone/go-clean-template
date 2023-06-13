@@ -5,7 +5,6 @@ import (
 	"github.com/evrone/go-clean-template/config"
 	"github.com/evrone/go-clean-template/internal"
 	"github.com/evrone/go-clean-template/internal/test/db"
-	"github.com/evrone/go-clean-template/pkg/httpserver"
 	"github.com/evrone/go-clean-template/pkg/logger"
 	"github.com/evrone/go-clean-template/pkg/rabbitmq/rmq_rpc/client"
 	"github.com/gin-gonic/gin"
@@ -20,13 +19,11 @@ import (
 var httpEngine *gin.Engine
 var cfg *config.Config
 
-func init() {
-	httpEngine, cfg = given()
-}
-
 func TestApp(t *testing.T) {
 
 	t.Run("When calling the health endpoint, Then return 200", func(t *testing.T) {
+		httpEngine, cfg = given(t)
+
 		w := sendRequest("GET", "/healthz", httpEngine, nil)
 
 		require.Equal(t, 200, w.Code)
@@ -116,7 +113,7 @@ func TestApp(t *testing.T) {
 	})
 }
 
-func given() (*gin.Engine, *config.Config) {
+func given(t *testing.T) (*gin.Engine, *config.Config) {
 	ctx := context.Background()
 
 	cfg := config.NewConfig()
@@ -127,10 +124,19 @@ func given() (*gin.Engine, *config.Config) {
 
 	db.ExecuteMigrate(cfg.PG.URL, log)
 
-	internal.InitializeNewRmqRpcServerWithConfig(cfg)
-	_, httpEngine := httpserver.New(cfg)
+	//ctrl := gomock.NewController(t)
 
-	return httpEngine, cfg
+	//mockRepository := service_test.NewMockTranslationRepository(ctrl)
+	//mockTranslator := service_test2.NewMockTranslator(ctrl)
+
+	repository := internal.InitializeTranslationRepository()
+	translator := internal.InitializeTranslationWebAPI()
+
+	internal.InitializeNewRmqRpcServerForTesting(cfg, repository, translator)
+
+	httpServer := internal.InitializeNewHttpServer()
+
+	return httpServer.Router, cfg
 }
 
 func sendRequest(method string, url string, httpEngine *gin.Engine, body io.Reader) *httptest.ResponseRecorder {
