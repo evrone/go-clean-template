@@ -22,7 +22,7 @@ var cfg *config.Config
 func TestApp(t *testing.T) {
 
 	t.Run("When calling the health endpoint, Then return 200", func(t *testing.T) {
-		httpEngine, cfg = given(t)
+		httpEngine, cfg = given()
 
 		w := sendRequest("GET", "/healthz", httpEngine, nil)
 
@@ -113,7 +113,7 @@ func TestApp(t *testing.T) {
 	})
 }
 
-func given(t *testing.T) (*gin.Engine, *config.Config) {
+func given() (*gin.Engine, *config.Config) {
 	ctx := context.Background()
 
 	cfg := config.NewConfig()
@@ -123,11 +123,6 @@ func given(t *testing.T) (*gin.Engine, *config.Config) {
 	db.MustStartRMQContainer(ctx, cfg)
 
 	db.ExecuteMigrate(cfg.PG.URL, log)
-
-	//ctrl := gomock.NewController(t)
-
-	//mockRepository := service_test.NewMockTranslationRepository(ctrl)
-	//mockTranslator := service_test2.NewMockTranslator(ctrl)
 
 	repository := internal.InitializeTranslationRepository()
 	translator := internal.InitializeTranslationWebAPI()

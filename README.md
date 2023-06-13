@@ -187,7 +187,7 @@ software design principles.
 >**5. Promotes Better Software Design:**
 >
 >Dependency Injection encourages you to think in terms of interfaces rather than concrete types.
-> This leads to a design that is more flexible, extensible, and adheres to the SOLID principles, 
+> This leads to a design that is more flexible, extensible, and adheres to the SOLID principles,
 > enhancing the overall software design quality.
 
 ## Project structure
@@ -478,6 +478,36 @@ Or more complex business logic:
 - **Infrastructure**: The technical components and services that support the domain, such as
   databases, messaging systems, and external API integrations. Implementations are located
   in `internal/infrastructure`.
+
+
+### Balancing Test Strategies: The Effective Use of Mocks, Fakes, and Real Implementations
+
+#### System Tests for Full Application Validation
+
+System tests deliver a holistic view of the application's performance by simulating the entire
+endpoint execution process. These tests employ a docker-based database, which launches quickly, and
+fake service endpoints to simulate actual operations. The primary aim of these tests is to detect
+high-level configuration or component integration issues that could impede the application's
+functionality in a production environment. These tests could also fail due to class-level issues,
+which, while acceptable, should ideally be caught by parallel running tests.
+
+#### Narrowly Scoped Tests for Detailed Business Logic
+
+The intricacies of business logic, from validation rules to exception cases, necessitate rigorous
+testing. The scope of these tests is limited to a few classes to ensure swift execution and precise
+identification of potential problems.
+
+#### Integration Tests between Application and External Systems
+
+Running integration tests with external systems, using either a docker-based database or a fake
+server, proves invaluable in understanding system interactions, particularly in the context of
+database interactions and repository writing tests. Though slower than system tests, they provide a
+more comprehensive view of system interoperability.
+
+In conclusion, while additional tests may fill the spaces between these broad categories, these
+three levels of testing provide a robust starting point for achieving a balanced testing
+environment. By determining the right approach (mocking, fakes, or real environment) for the task at
+hand, you can ensure efficient and effective test coverage.
 
 ### Interface-Type
 
