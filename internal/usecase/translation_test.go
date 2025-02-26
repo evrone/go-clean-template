@@ -5,11 +5,10 @@ import (
 	"errors"
 	"testing"
 
-	"github.com/golang/mock/gomock"
-	"github.com/stretchr/testify/require"
-
 	"github.com/evrone/go-clean-template/internal/entity"
 	"github.com/evrone/go-clean-template/internal/usecase"
+	"github.com/golang/mock/gomock"
+	"github.com/stretchr/testify/require"
 )
 
 var errInternalServErr = errors.New("internal server error")
@@ -35,7 +34,7 @@ func translation(t *testing.T) (*usecase.TranslationUseCase, *MockTranslationRep
 	return translation, repo, webAPI
 }
 
-func TestHistory(t *testing.T) {
+func TestHistory(t *testing.T) { //nolint:tparallel // data races here
 	t.Parallel()
 
 	translation, repo, _ := translation(t)
@@ -59,23 +58,21 @@ func TestHistory(t *testing.T) {
 		},
 	}
 
-	for _, tc := range tests {
-		tc := tc
+	for _, tc := range tests { //nolint:paralleltest // data races here
+		localTc := tc
 
-		t.Run(tc.name, func(t *testing.T) {
-			t.Parallel()
-
-			tc.mock()
+		t.Run(localTc.name, func(t *testing.T) {
+			localTc.mock()
 
 			res, err := translation.History(context.Background())
 
-			require.Equal(t, res, tc.res)
-			require.ErrorIs(t, err, tc.err)
+			require.Equal(t, res, localTc.res)
+			require.ErrorIs(t, err, localTc.err)
 		})
 	}
 }
 
-func TestTranslate(t *testing.T) {
+func TestTranslate(t *testing.T) { //nolint:tparallel // data races here
 	t.Parallel()
 
 	translation, repo, webAPI := translation(t)
@@ -109,18 +106,16 @@ func TestTranslate(t *testing.T) {
 		},
 	}
 
-	for _, tc := range tests {
-		tc := tc
+	for _, tc := range tests { //nolint:paralleltest // data races here
+		localTc := tc
 
-		t.Run(tc.name, func(t *testing.T) {
-			t.Parallel()
-
-			tc.mock()
+		t.Run(localTc.name, func(t *testing.T) {
+			localTc.mock()
 
 			res, err := translation.Translate(context.Background(), entity.Translation{})
 
-			require.EqualValues(t, res, tc.res)
-			require.ErrorIs(t, err, tc.err)
+			require.EqualValues(t, res, localTc.res)
+			require.ErrorIs(t, err, localTc.err)
 		})
 	}
 }

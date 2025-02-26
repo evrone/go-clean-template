@@ -27,9 +27,9 @@ definitions:
         example: auto
         type: string
     required:
-      - destination
-      - original
-      - source
+    - destination
+    - original
+    - source
     type: object
   v1.historyResponse:
     properties:
@@ -54,18 +54,18 @@ paths:
   /translation/do-translate:
     post:
       consumes:
-        - application/json
+      - application/json
       description: Translate a text
       operationId: do-translate
       parameters:
-        - description: Set up translation
-          in: body
-          name: request
-          required: true
-          schema:
-            $ref: '#/definitions/v1.doTranslateRequest'
+      - description: Set up translation
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/v1.doTranslateRequest'
       produces:
-        - application/json
+      - application/json
       responses:
         "200":
           description: OK
@@ -81,15 +81,15 @@ paths:
             $ref: '#/definitions/v1.response'
       summary: Translate
       tags:
-        - translation
+      - translation
   /translation/history:
     get:
       consumes:
-        - application/json
+      - application/json
       description: Show all translation history
       operationId: history
       produces:
-        - application/json
+      - application/json
       responses:
         "200":
           description: OK
@@ -101,5 +101,5 @@ paths:
             $ref: '#/definitions/v1.response'
       summary: Show history
       tags:
-        - translation
+      - translation
 swagger: "2.0"

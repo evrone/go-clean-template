@@ -7,8 +7,7 @@ import (
 	"testing"
 	"time"
 
-	. "github.com/Eun/go-hit"
-
+	. "github.com/Eun/go-hit" //nolint:revive // legacy usage
 	"github.com/evrone/go-clean-template/pkg/rabbitmq/rmq_rpc/client"
 )
 
@@ -72,7 +71,21 @@ func TestHTTPDoTranslate(t *testing.T) {
 		Send().Headers("Content-Type").Add("application/json"),
 		Send().Body().String(body),
 		Expect().Status().Equal(http.StatusOK),
-		Expect().Body().JSON().JQ(".translation").Equal("text for translation"),
+		Expect().Body().JSON().JQ(".translation").Equal("text for text"),
+	)
+
+	body = `{
+		"destination": "en",
+		"original": "Текст для перевода",
+		"source": "ru"
+	}`
+	Test(t,
+		Description("DoTranslate Success"),
+		Post(basePath+"/translation/do-translate"),
+		Send().Headers("Content-Type").Add("application/json"),
+		Send().Body().String(body),
+		Expect().Status().Equal(http.StatusOK),
+		Expect().Body().JSON().JQ(".translation").Equal("Text for translation"),
 	)
 
 	body = `{

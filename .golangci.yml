@@ -1,6 +1,4 @@
 linters-settings:
-  gci:
-    local-prefixes: github.com/evrone/go-clean-template
   dupl:
     threshold: 100
   errorlint:
@@ -33,17 +31,6 @@ linters-settings:
       - unnecessaryBlock
   gofumpt:
     extra-rules: true
-  gomnd:
-    settings:
-      mnd:
-        checks:
-          - argument
-          - case
-          - condition
-          - operation
-          - return
-  govet:
-    check-shadowing: true
   misspell:
     locale: US
   nestif:
@@ -58,15 +45,13 @@ linters:
     - asciicheck
     - bodyclose
     - cyclop
-    - deadcode
-    - depguard
+    - unused
     - dogsled
     - dupl
     - durationcheck
     - errcheck
     - errorlint
     - exhaustive
-    - exportloopref
     - forbidigo
     - funlen
     - gci
@@ -78,11 +63,11 @@ linters:
     - gocyclo
     - godot
     - godox
-    - goerr113
+    - err113
     - gofmt
     - gofumpt
     - goimports
-    - gomnd
+    - mnd
     - gomodguard
     - goprintffuncname
     - gosec
@@ -102,7 +87,6 @@ linters:
     - rowserrcheck
     - sqlclosecheck
     - staticcheck
-    - structcheck
     - stylecheck
     - tparallel
     - thelper
@@ -110,9 +94,9 @@ linters:
     - unconvert
     - unparam
     - unused
-    - varcheck
     - wsl
     - whitespace
+    - copyloopvar
 
 # disable:
 #    - exhaustivestruct
@@ -131,7 +115,3 @@ issues:
     - path: internal/controller/http
       linters:
         - godot
-
-run:
-  skip-dirs:
-    - docs
