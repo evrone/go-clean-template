@@ -82,7 +82,8 @@ func TestHTTPDoTranslate(t *testing.T) {
 	}`
 	Test(t,
 		Description("DoTranslate Success"),
-		Post(basePath+"/translation/do-translate"),
+		BaseURL(basePath),
+		Post("/translation/do-translate"),
 		Send().Headers("Content-Type").Add("application/json"),
 		Send().Body().String(body),
 		Expect().Status().Equal(http.StatusOK),
