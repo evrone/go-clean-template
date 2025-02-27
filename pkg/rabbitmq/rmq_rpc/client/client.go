@@ -7,10 +7,9 @@ import (
 	"sync"
 	"time"
 
+	rmqrpc "github.com/evrone/go-clean-template/pkg/rabbitmq/rmq_rpc"
 	"github.com/google/uuid"
 	"github.com/streadway/amqp"
-
-	rmqrpc "github.com/evrone/go-clean-template/pkg/rabbitmq/rmq_rpc"
 )
 
 // ErrConnectionClosed -.

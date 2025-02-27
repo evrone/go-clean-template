@@ -5,10 +5,9 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/streadway/amqp"
-
 	"github.com/evrone/go-clean-template/pkg/logger"
 	rmqrpc "github.com/evrone/go-clean-template/pkg/rabbitmq/rmq_rpc"
+	"github.com/streadway/amqp"
 )
 
 const (

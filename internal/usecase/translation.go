@@ -38,7 +38,7 @@ func (uc *TranslationUseCase) Translate(ctx context.Context, t entity.Translatio
 		return entity.Translation{}, fmt.Errorf("TranslationUseCase - Translate - s.webAPI.Translate: %w", err)
 	}
 
-	err = uc.repo.Store(context.Background(), translation)
+	err = uc.repo.Store(ctx, translation)
 	if err != nil {
 		return entity.Translation{}, fmt.Errorf("TranslationUseCase - Translate - s.repo.Store: %w", err)
 	}
