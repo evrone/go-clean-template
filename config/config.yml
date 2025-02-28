@@ -7,7 +7,6 @@ http:
 
 logger:
   log_level: 'debug'
-  rollbar_env: 'go-clean-template'
 
 postgres:
   pool_max: 2

@@ -22,7 +22,8 @@ The purpose of the template is to show:
 
 Using the principles of Robert Martin (aka Uncle Bob).
 
-[Go-clean-template](https://evrone.com/go-clean-template?utm_source=github&utm_campaign=go-clean-template) is created & supported by [Evrone](https://evrone.com/?utm_source=github&utm_campaign=go-clean-template).
+[Go-clean-template](https://evrone.com/go-clean-template?utm_source=github&utm_campaign=go-clean-template) is created &
+supported by [Evrone](https://evrone.com/?utm_source=github&utm_campaign=go-clean-template).
 
 ## Content
 
@@ -33,21 +34,32 @@ Using the principles of Robert Martin (aka Uncle Bob).
 
 ## Quick start
 
-Local development:
+### Local development:
 
 ```sh
 # Postgres, RabbitMQ
-$ make compose-up
+make compose-up
 # Run app with migrations
-$ make run
+make run
 ```
 
-Integration tests (can be run in CI):
+### Integration tests (can be run in CI):
 
 ```sh
 # DB, app + migrations, integration tests
-$ make compose-up-integration-test
+make compose-up-integration-test
 ```
+
+Full docker stack with reverse proxy:
+
+```sh
+make compose-up-all 
+```
+
+Check URL's:
+
+- http://app.lvh.me/healthz | http://app.lvh.me/metrics
+- http://rabbitmq.lvh.me (`guest`/`guest`)
 
 ## Project structure
 
@@ -99,7 +111,7 @@ It is included if an argument with the _migrate_ tag is specified.
 For example:
 
 ```sh
-$ go run -tags migrate ./cmd/app
+go run -tags migrate ./cmd/app
 ```
 
 ### `internal/controller`
@@ -129,7 +141,8 @@ v2.NewRouter(handler, t)
 
 Instead of Gin, you can use any other http framework or even the standard `net/http` library.
 
-In `v1/router.go` and above the handler methods, there are comments for generating swagger documentation using [swag](https://github.com/swaggo/swag).
+In `v1/router.go` and above the handler methods, there are comments for generating swagger documentation
+using [swag](https://github.com/swaggo/swag).
 
 ### `internal/entity`
 
@@ -177,29 +190,30 @@ We can override the implementation of the interface without making changes to th
 package usecase
 
 import (
-    // Nothing!
+// Nothing!
 )
 
 type Repository interface {
-    Get()
+	Get()
 }
 
 type UseCase struct {
-    repo Repository
+	repo Repository
 }
 
-func New(r Repository) *UseCase{
-    return &UseCase{
-        repo: r,
-    }
+func New(r Repository) *UseCase {
+	return &UseCase{
+		repo: r,
+	}
 }
 
-func (uc *UseCase) Do()  {
-    uc.repo.Get()
+func (uc *UseCase) Do() {
+	uc.repo.Get()
 }
 ```
 
-It will also allow us to do auto-generation of mocks (for example with [mockery](https://github.com/vektra/mockery)) and easily write unit tests.
+It will also allow us to do auto-generation of mocks (for example with [mockery](https://github.com/vektra/mockery)) and
+easily write unit tests.
 
 > We are not tied to specific implementations in order to always be able to change one component to another.
 > If the new component implements the interface, nothing needs to be changed in the business logic.
@@ -236,7 +250,8 @@ Business logic has an interface for working with an _abstract_ database or _abst
 
 **The outer layer** has other limitations:
 
-- All components of this layer are unaware of each other's existence. How to call another from one tool? Not directly, only through the inner layer of business logic.
+- All components of this layer are unaware of each other's existence. How to call another from one tool? Not directly,
+  only through the inner layer of business logic.
 - All calls to the inner layer are made through the interface (!).
 - Data is transferred in a format that is convenient for business logic (`internal/entity`).
 
@@ -283,7 +298,8 @@ Or more complex business logic:
 - **Use Cases** is business logic located in `internal/usecase`.
 
 The layer with which business logic directly interacts is usually called the _infrastructure_ layer.
-These can be repositories `internal/usecase/repo`, external webapi `internal/usecase/webapi`, any pkg, and other microservices.
+These can be repositories `internal/usecase/repo`, external webapi `internal/usecase/webapi`, any pkg, and other
+microservices.
 In the template, the _infrastructure_ packages are located inside `internal/usecase`.
 
 You can choose how to call the entry points as you wish. The options are:
@@ -298,7 +314,9 @@ You can choose how to call the entry points as you wish. The options are:
 
 ### Additional layers
 
-The classic version of [Clean Architecture](https://blog.cleancoder.com/uncle-bob/2012/08/13/the-clean-architecture.html) was designed for building large monolithic applications and has 4 layers.
+The classic version
+of [Clean Architecture](https://blog.cleancoder.com/uncle-bob/2012/08/13/the-clean-architecture.html) was designed for
+building large monolithic applications and has 4 layers.
 
 In the original version, the outer layer is divided into two more, which also have an inversion of dependencies
 to each other (directed inward) and communicate through interfaces.

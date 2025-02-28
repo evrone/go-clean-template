@@ -17,7 +17,8 @@
 - где хранить бизнес-логику, что бы она оставалась независимой, чистой и расширяемой
 - как не потерять контроль при росте проекта
 
-[Go-clean-template](https://evrone.com/go-clean-template?utm_source=github&utm_campaign=go-clean-template) создан и поддерживается [Evrone](https://evrone.com/?utm_source=github&utm_campaign=go-clean-template).
+[Go-clean-template](https://evrone.com/go-clean-template?utm_source=github&utm_campaign=go-clean-template) создан и
+поддерживается [Evrone](https://evrone.com/?utm_source=github&utm_campaign=go-clean-template).
 
 ## Содержание
 
@@ -28,21 +29,32 @@
 
 ## Быстрый старт
 
-Локальная разработка:
+### Локальная разработка
 
 ```sh
 # Postgres, RabbitMQ
-$ make compose-up
+make compose-up
 # Запуск приложения и миграций
-$ make run
+make run
 ```
 
-Интеграционные тесты (может быть использовано с CI):
+### Интеграционные тесты (может быть использовано с CI)
 
 ```sh
 # DB, app + migrations, integration tests
-$ make compose-up-integration-test
+make compose-up-integration-test
 ```
+
+### Весь docker stack с reverse proxy:
+
+```sh
+make compose-up-all 
+```
+
+Проверьте URL-адреса:
+
+- http://app.lvh.me/healthz | http://app.lvh.me/metrics
+- http://rabbitmq.lvh.me (`guest`/`guest`)
 
 ## Структура проекта
 
@@ -79,7 +91,8 @@ Rest API удобно тестировать с помощью [go-hit](https://
 
 ### `internal/app`
 
-Здесь находится только одна _Run_ функция. Она размещена в файле `app.go` и является логическим продолжением функции _main_.
+Здесь находится только одна _Run_ функция. Она размещена в файле `app.go` и является логическим продолжением функции
+_main_.
 
 Здесь создаются все основные объекты.
 [Внедрение Зависимостей](#внедрение-зависимостей) происходит через конструктор "New ...".
@@ -95,7 +108,7 @@ Rest API удобно тестировать с помощью [go-hit](https://
 Пример:
 
 ```sh
-$ go run -tags migrate ./cmd/app
+go run -tags migrate ./cmd/app
 ```
 
 ### `internal/controller`
@@ -125,7 +138,8 @@ v2.NewRouter(handler, t)
 
 Вместо Gin можно использовать любой другой http фреймворк или стандартную `net/http` библиотеку.
 
-В файле `v1/router.go` над хэндлером написаны комментарии для генерации документации через swagger [swag](https://github.com/swaggo/swag).
+В файле `v1/router.go` над хэндлером написаны комментарии для генерации документации через
+swagger [swag](https://github.com/swaggo/swag).
 
 ### `internal/entity`
 
@@ -173,29 +187,30 @@ RabbitMQ RPC паттерн:
 package usecase
 
 import (
-    // Nothing!
+// Nothing!
 )
 
 type Repository interface {
-    Get()
+	Get()
 }
 
 type UseCase struct {
-    repo Repository
+	repo Repository
 }
 
-func New(r Repository) *UseCase{
-    return &UseCase{
-        repo: r,
-    }
+func New(r Repository) *UseCase {
+	return &UseCase{
+		repo: r,
+	}
 }
 
-func (uc *UseCase) Do()  {
-    uc.repo.Get()
+func (uc *UseCase) Do() {
+	uc.repo.Get()
 }
 ```
 
-Благодаря разделению через интерфейсы можно генерировать моки (например, используя [mockery](https://github.com/vektra/mockery)) и легко писать юнит-тесты.
+Благодаря разделению через интерфейсы можно генерировать моки (например,
+используя [mockery](https://github.com/vektra/mockery)) и легко писать юнит-тесты.
 
 > Мы не привязаны к конкретным реализациям и всегда можем заменить один компонент на другой.
 > Если новый компонент реализует интерфейс, то в бизнес-логике ничего не нужно менять.
@@ -232,7 +247,8 @@ func (uc *UseCase) Do()  {
 
 **Внешний слой** имеет ограничения:
 
-- Компоненты этого слоя не могут знать друг о друге и взаимодействать напрямую. Обращение друг к другу происходит через внутренний слой - слой бизнес-логики.
+- Компоненты этого слоя не могут знать друг о друге и взаимодействать напрямую. Обращение друг к другу происходит через
+  внутренний слой - слой бизнес-логики.
 - Вызовы во внутренний слой выполняются через интерфейсы (!).
 - Данные передаются в формате, удобном для бизнес-логики (структуры хранятся в `internal/entity`).
 
@@ -279,7 +295,8 @@ func (uc *UseCase) Do()  {
 - **Use Cases** это бизнес-логика. Располагается в папке `internal/usecase`.
 
 Слой, с которым бизнес-логика взаимодействует напрямую, обычно, называется _инфраструктурным_ слоем.
-Это может быть репозиторий `internal/usecase/repo`, внешнее webapi `internal/usecase/webapi`, любой пакет или микросервис.
+Это может быть репозиторий `internal/usecase/repo`, внешнее webapi `internal/usecase/webapi`, любой пакет или
+микросервис.
 В шаблоне пакеты _infrastructure_ размещены внутри `internal/usecase`.
 
 Вы можете выбирать, как называть точки входа, по своему усмотрению. Варианты такие:
@@ -294,9 +311,11 @@ func (uc *UseCase) Do()  {
 
 ### Дополнительные слои
 
-В классической версии [Чистой Архитектуры](https://blog.cleancoder.com/uncle-bob/2012/08/13/the-clean-architecture.html) для создания больших монолитных приложений предложено 4 слоя.
+В классической версии [Чистой Архитектуры](https://blog.cleancoder.com/uncle-bob/2012/08/13/the-clean-architecture.html)
+для создания больших монолитных приложений предложено 4 слоя.
 
-В исходной версии внешний слой делится на два, которые также имеют инверсию зависимостей в другие слои и взаимодействуют через интерфесы.
+В исходной версии внешний слой делится на два, которые также имеют инверсию зависимостей в другие слои и взаимодействуют
+через интерфесы.
 
 Внутренний слой также делится на два (с использованием интерфейсов) в случае сложной логики.
 

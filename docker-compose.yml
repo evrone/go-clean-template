@@ -1,46 +1,107 @@
-version: '3.9'
-services:
+version: "3.9"
 
-  postgres:
-    container_name: postgres
-    image: postgres
-    volumes:
-      - pg-data:/var/lib/postgresql/data
+
+x-db-environment: &x-db-environment
+  POSTGRES_SSL_MODE: "disable"
+  POSTGRES_HOST: "db"
+  POSTGRES_PORT: "5432"
+  POSTGRES_DB: "db"
+  POSTGRES_PASSWORD: "myAwEsOm3pa55@w0rd"
+  POSTGRES_USER: "user"
+
+x-rabbitmq-variables: &x-rabbitmq-variables
+  RABBITMQ_DEFAULT_USER: "guest"
+  RABBITMQ_DEFAULT_PASS: "guest"
+
+x-backend-app-environment: &x-backend-app-environment
+  GOMAXPROCS: "1"
+  GIN_MODE: "release"
+  # App
+  APP_NAME: "go-clean-template"
+  APP_VERSION: "1.0.0"
+  # HTTP settings
+  HTTP_PORT: "8080"
+  # Logger
+  LOG_LEVEL: "debug"
+  # PG
+  PG_POOL_MAX: "2"
+  PG_URL: "postgres://user:myAwEsOm3pa55@w0rd@db:5432/db"
+  # RMQ
+  RMQ_RPC_SERVER: "rpc_server"
+  RMQ_RPC_CLIENT: "rpc_client"
+  RMQ_URL: "amqp://guest:guest@rabbitmq:5672/"
+  # Swagger
+  DISABLE_SWAGGER_HTTP_HANDLER: "true"
+
+
+services:
+  db:
+    container_name: db
+    image: postgres:17-alpine
     environment:
-      POSTGRES_USER: 'user'
-      POSTGRES_PASSWORD: 'pass'
-      POSTGRES_DB: 'postgres'
+      <<: *x-db-environment
+    volumes:
+      - db_data:/var/lib/postgresql/data
     ports:
-      - 5432:5432
+      - "5432:5432"
+    networks:
+      app_network:
+        aliases:
+          - db.lvh.me
 
   rabbitmq:
     container_name: rabbitmq
-    image: rabbitmq:3.8.12-management
+    image: rabbitmq:3.13-management
+    environment:
+      <<: *x-rabbitmq-variables
     ports:
-      - 5672:5672
-      - 15672:15672
+      - "15672:15672"
+      - "5672:5672"
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+    networks:
+      app_network:
+        aliases:
+          - rabbitmq.lvh.me
 
   app:
-    build: .
     container_name: app
-    image: app
-    environment:
-      PG_URL: 'postgres://user:pass@postgres:5432/postgres'
-      RMQ_URL: 'amqp://guest:guest@rabbitmq:5672/'
-    ports:
-      - 8080:8080
-    depends_on:
-      - postgres
-      - rabbitmq
-
-  integration:
+    platform: linux/amd64
+    pid: "host"
     build:
       context: .
-      dockerfile: integration-test/Dockerfile
-    container_name: integration
-    image: integration
+    environment:
+      <<: *x-backend-app-environment
+    ports:
+      - "8080:8080"
     depends_on:
+      - db
+      - rabbitmq
+    networks:
+      app_network:
+        aliases:
+          - app.lvh.me
+
+  nginx:
+    image: nginx:1.27-alpine
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf
+    ports:
+      - "80:80"
+    depends_on:
+      - rabbitmq
       - app
+    networks:
+      app_network:
+        aliases:
+          - nginx.lvh.me
+
+
+networks:
+  app_network:
+    external: false
+
 
 volumes:
-  pg-data:
+  db_data:
+  rabbitmq_data:

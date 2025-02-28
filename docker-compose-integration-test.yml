@@ -1,0 +1,22 @@
+version: "3.9"
+
+
+services:
+  integration-test:
+    container_name: integration-test
+    platform: linux/amd64
+    pid: "host"
+    build:
+      context: .
+      dockerfile: integration-test/Dockerfile
+    depends_on:
+      - app
+    networks:
+      app_network:
+        aliases:
+          - test.lvh.me
+
+
+networks:
+  app_network:
+    external: false
