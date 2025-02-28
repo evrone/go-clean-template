@@ -45,7 +45,7 @@ make run
 make compose-up-integration-test
 ```
 
-### Весь docker stack с reverse proxy:
+### Весь docker stack с reverse proxy
 
 ```sh
 make compose-up-all 

@@ -49,7 +49,7 @@ make compose-up-integration-test
 
 ## Quick start
 
-### Local development:
+### Local development
 
 ```sh
 # Postgres, RabbitMQ
@@ -58,14 +58,14 @@ make compose-up
 make run
 ```
 
-### Integration tests (can be run in CI):
+### Integration tests (can be run in CI)
 
 ```sh
 # DB, app + migrations, integration tests
 make compose-up-integration-test
 ```
 
-### Full docker stack with reverse proxy:
+### Full docker stack with reverse proxy
 
 ```sh
 make compose-up-all 
