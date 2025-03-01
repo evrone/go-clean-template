@@ -41,7 +41,7 @@ format: ### Run code formatter
 .PHONY: format
 
 run: swag-v1 ### swag run
-	go mod tidy && go mod download && \
+	go mod tidy && go mod verify && go mod download && \
 	DISABLE_SWAGGER_HTTP_HANDLER='' GIN_MODE=debug CGO_ENABLED=0 go run -tags migrate ./cmd/app
 .PHONY: run
 
