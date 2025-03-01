@@ -8,7 +8,6 @@ require (
 	github.com/Masterminds/squirrel v1.5.4
 	github.com/gin-gonic/gin v1.10.0
 	github.com/golang-migrate/migrate/v4 v4.18.2
-	github.com/golang/mock v1.6.0
 	github.com/google/uuid v1.6.0
 	github.com/ilyakaznacheev/cleanenv v1.5.0
 	github.com/jackc/pgx/v4 v4.18.3
@@ -19,6 +18,7 @@ require (
 	github.com/swaggo/files v1.0.1
 	github.com/swaggo/gin-swagger v1.6.0
 	github.com/swaggo/swag v1.16.4
+	go.uber.org/mock v0.5.0
 )
 
 require (

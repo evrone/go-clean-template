@@ -1,28 +1,29 @@
-package usecase
+package translation
 
 import (
 	"context"
 	"fmt"
 
 	"github.com/evrone/go-clean-template/internal/entity"
+	"github.com/evrone/go-clean-template/internal/repo"
 )
 
-// TranslationUseCase -.
-type TranslationUseCase struct {
-	repo   TranslationRepo
-	webAPI TranslationWebAPI
+// UseCase -.
+type UseCase struct {
+	repo   repo.TranslationRepo
+	webAPI repo.TranslationWebAPI
 }
 
 // New -.
-func New(r TranslationRepo, w TranslationWebAPI) *TranslationUseCase {
-	return &TranslationUseCase{
+func New(r repo.TranslationRepo, w repo.TranslationWebAPI) *UseCase {
+	return &UseCase{
 		repo:   r,
 		webAPI: w,
 	}
 }
 
 // History - getting translate history from store.
-func (uc *TranslationUseCase) History(ctx context.Context) ([]entity.Translation, error) {
+func (uc *UseCase) History(ctx context.Context) ([]entity.Translation, error) {
 	translations, err := uc.repo.GetHistory(ctx)
 	if err != nil {
 		return nil, fmt.Errorf("TranslationUseCase - History - s.repo.GetHistory: %w", err)
@@ -32,7 +33,7 @@ func (uc *TranslationUseCase) History(ctx context.Context) ([]entity.Translation
 }
 
 // Translate -.
-func (uc *TranslationUseCase) Translate(ctx context.Context, t entity.Translation) (entity.Translation, error) {
+func (uc *UseCase) Translate(ctx context.Context, t entity.Translation) (entity.Translation, error) {
 	translation, err := uc.webAPI.Translate(t)
 	if err != nil {
 		return entity.Translation{}, fmt.Errorf("TranslationUseCase - Translate - s.webAPI.Translate: %w", err)

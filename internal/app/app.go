@@ -10,9 +10,9 @@ import (
 	"github.com/evrone/go-clean-template/config"
 	amqprpc "github.com/evrone/go-clean-template/internal/controller/amqp_rpc"
 	v1 "github.com/evrone/go-clean-template/internal/controller/http/v1"
-	"github.com/evrone/go-clean-template/internal/usecase"
-	"github.com/evrone/go-clean-template/internal/usecase/repo"
-	"github.com/evrone/go-clean-template/internal/usecase/webapi"
+	"github.com/evrone/go-clean-template/internal/repo/persistent"
+	"github.com/evrone/go-clean-template/internal/repo/webapi"
+	"github.com/evrone/go-clean-template/internal/usecase/translation"
 	"github.com/evrone/go-clean-template/pkg/httpserver"
 	"github.com/evrone/go-clean-template/pkg/logger"
 	"github.com/evrone/go-clean-template/pkg/postgres"
@@ -32,8 +32,8 @@ func Run(cfg *config.Config) {
 	defer pg.Close()
 
 	// Use case
-	translationUseCase := usecase.New(
-		repo.New(pg),
+	translationUseCase := translation.New(
+		persistent.New(pg),
 		webapi.New(),
 	)
 
