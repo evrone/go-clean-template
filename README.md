@@ -160,11 +160,11 @@ Business logic.
 Repositories, webapi, rpc, and other business logic structures are injected into business logic structures
 (see [Dependency Injection](#dependency-injection)).
 
-#### `internal/usecase/repo`
+#### `internal/repo/persistent`
 
 A repository is an abstract storage (database) that business logic works with.
 
-#### `internal/usecase/webapi`
+#### `internal/repo/webapi`
 
 It is an abstract web API that business logic works with.
 For example, it could be another microservice that business logic accesses via the REST API.

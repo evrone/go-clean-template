@@ -167,11 +167,11 @@ v2.NewRouter(handler, t)
   Repositories、webapi、rpc等业务逻辑结构被注入到业务逻辑结构中
   (阅读 [依赖注入](#dependency-injection)).
 
-#### `internal/usecase/repo`
+#### `internal/repo/persistent`
 
 是持久化存储的业务逻辑逻辑抽象,如数据库.
 
-#### `internal/usecase/webapi`
+#### `internal/repo/webapi`
 
 是webapi业务逻辑使用的抽象.
 例如，它可能是业务逻辑通过 REST API 访问的另一个微服务。

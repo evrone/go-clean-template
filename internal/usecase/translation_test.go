@@ -6,9 +6,9 @@ import (
 	"testing"
 
 	"github.com/evrone/go-clean-template/internal/entity"
-	"github.com/evrone/go-clean-template/internal/usecase"
-	"github.com/golang/mock/gomock"
+	"github.com/evrone/go-clean-template/internal/usecase/translation"
 	"github.com/stretchr/testify/require"
+	"go.uber.org/mock/gomock"
 )
 
 var errInternalServErr = errors.New("internal server error")
@@ -20,7 +20,7 @@ type test struct {
 	err  error
 }
 
-func translation(t *testing.T) (*usecase.TranslationUseCase, *MockTranslationRepo, *MockTranslationWebAPI) {
+func translationUseCase(t *testing.T) (*translation.UseCase, *MockTranslationRepo, *MockTranslationWebAPI) {
 	t.Helper()
 
 	mockCtl := gomock.NewController(t)
@@ -29,15 +29,15 @@ func translation(t *testing.T) (*usecase.TranslationUseCase, *MockTranslationRep
 	repo := NewMockTranslationRepo(mockCtl)
 	webAPI := NewMockTranslationWebAPI(mockCtl)
 
-	translation := usecase.New(repo, webAPI)
+	useCase := translation.New(repo, webAPI)
 
-	return translation, repo, webAPI
+	return useCase, repo, webAPI
 }
 
 func TestHistory(t *testing.T) { //nolint:tparallel // data races here
 	t.Parallel()
 
-	translation, repo, _ := translation(t)
+	translation, repo, _ := translationUseCase(t)
 
 	tests := []test{
 		{
@@ -75,7 +75,7 @@ func TestHistory(t *testing.T) { //nolint:tparallel // data races here
 func TestTranslate(t *testing.T) { //nolint:tparallel // data races here
 	t.Parallel()
 
-	translation, repo, webAPI := translation(t)
+	translation, repo, webAPI := translationUseCase(t)
 
 	tests := []test{
 		{
