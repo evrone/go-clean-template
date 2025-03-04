@@ -9,7 +9,7 @@ import (
 
 	"github.com/evrone/go-clean-template/config"
 	amqprpc "github.com/evrone/go-clean-template/internal/controller/amqp_rpc"
-	v1 "github.com/evrone/go-clean-template/internal/controller/http/v1"
+	v1 "github.com/evrone/go-clean-template/internal/controller/http"
 	"github.com/evrone/go-clean-template/internal/repo/persistent"
 	"github.com/evrone/go-clean-template/internal/repo/webapi"
 	"github.com/evrone/go-clean-template/internal/usecase/translation"
@@ -17,7 +17,6 @@ import (
 	"github.com/evrone/go-clean-template/pkg/logger"
 	"github.com/evrone/go-clean-template/pkg/postgres"
 	"github.com/evrone/go-clean-template/pkg/rabbitmq/rmq_rpc/server"
-	"github.com/gin-gonic/gin"
 )
 
 // Run creates objects via constructors.
@@ -46,9 +45,12 @@ func Run(cfg *config.Config) {
 	}
 
 	// HTTP Server
-	handler := gin.New()
-	v1.NewRouter(handler, l, translationUseCase)
-	httpServer := httpserver.New(handler, httpserver.Port(cfg.HTTP.Port))
+	httpServer := httpserver.New(httpserver.Port(cfg.HTTP.Port))
+	v1.NewRouter(httpServer.App, l, translationUseCase)
+
+	// Start servers
+	rmqServer.Start()
+	httpServer.Start()
 
 	// Waiting signal
 	interrupt := make(chan os.Signal, 1)

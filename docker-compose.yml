@@ -15,7 +15,6 @@ x-rabbitmq-variables: &x-rabbitmq-variables
 
 x-backend-app-environment: &x-backend-app-environment
   GOMAXPROCS: "1"
-  GIN_MODE: "release"
   # App
   APP_NAME: "go-clean-template"
   APP_VERSION: "1.0.0"

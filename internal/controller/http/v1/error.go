@@ -1,13 +1,13 @@
 package v1
 
 import (
-	"github.com/gin-gonic/gin"
+	"github.com/gofiber/fiber/v2"
 )
 
 type response struct {
 	Error string `json:"error" example:"message"`
 }
 
-func errorResponse(c *gin.Context, code int, msg string) {
-	c.AbortWithStatusJSON(code, response{msg})
+func errorResponse(ctx *fiber.Ctx, code int, msg string) error {
+	return ctx.Status(code).JSON(response{msg})
 }

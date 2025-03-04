@@ -58,9 +58,11 @@ func New(url, serverExchange string, router map[string]CallHandler, l logger.Int
 		return nil, fmt.Errorf("rmq_rpc server - NewServer - s.conn.AttemptConnect: %w", err)
 	}
 
-	go s.consumer()
-
 	return s, nil
+}
+
+func (s *Server) Start() {
+	go s.consumer()
 }
 
 func (s *Server) consumer() {
