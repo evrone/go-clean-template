@@ -2,37 +2,37 @@
 package httpserver
 
 import (
-	"context"
-	"net/http"
 	"time"
+
+	"github.com/gofiber/fiber/v2"
 )
 
 const (
+	_defaultAddr            = ":80"
 	_defaultReadTimeout     = 5 * time.Second
 	_defaultWriteTimeout    = 5 * time.Second
-	_defaultAddr            = ":80"
 	_defaultShutdownTimeout = 3 * time.Second
 )
 
 // Server -.
 type Server struct {
-	server          *http.Server
-	notify          chan error
+	App    *fiber.App
+	notify chan error
+
+	address         string
+	readTimeout     time.Duration
+	writeTimeout    time.Duration
 	shutdownTimeout time.Duration
 }
 
 // New -.
-func New(handler http.Handler, opts ...Option) *Server {
-	httpServer := &http.Server{
-		Handler:      handler,
-		ReadTimeout:  _defaultReadTimeout,
-		WriteTimeout: _defaultWriteTimeout,
-		Addr:         _defaultAddr,
-	}
-
+func New(opts ...Option) *Server {
 	s := &Server{
-		server:          httpServer,
+		App:             nil,
 		notify:          make(chan error, 1),
+		address:         _defaultAddr,
+		readTimeout:     _defaultReadTimeout,
+		writeTimeout:    _defaultWriteTimeout,
 		shutdownTimeout: _defaultShutdownTimeout,
 	}
 
@@ -41,14 +41,20 @@ func New(handler http.Handler, opts ...Option) *Server {
 		opt(s)
 	}
 
-	s.start()
+	app := fiber.New(fiber.Config{
+		Prefork:      false,
+		ReadTimeout:  s.readTimeout,
+		WriteTimeout: s.writeTimeout,
+	})
+
+	s.App = app
 
 	return s
 }
 
-func (s *Server) start() {
+func (s *Server) Start() {
 	go func() {
-		s.notify <- s.server.ListenAndServe()
+		s.notify <- s.App.Listen(s.address)
 		close(s.notify)
 	}()
 }
@@ -60,8 +66,5 @@ func (s *Server) Notify() <-chan error {
 
 // Shutdown -.
 func (s *Server) Shutdown() error {
-	ctx, cancel := context.WithTimeout(context.Background(), s.shutdownTimeout)
-	defer cancel()
-
-	return s.server.Shutdown(ctx)
+	return s.App.ShutdownWithTimeout(s.shutdownTimeout)
 }

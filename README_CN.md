@@ -144,13 +144,18 @@ go run -tags migrate ./cmd/app
 在文件 `internal/app` 中添加以下行：
 
 ```go
-handler := gin.New()
-v1.NewRouter(handler, t)
-v2.NewRouter(handler, t)
+apiV1Group := app.Group("/v1")
+{
+    v1.NewTranslationRoutes(apiV1Group, t, l)
+}
+apiV2Group := app.Group("/v2")
+{
+    v1.NewTranslationRoutesV2(apiV1Group, t, l)
+}
 ```
 
-除了 Gin，您可以使用任何其他 http 框架，甚至是标准的 `net/http` 库。
-在 `v1/router.go` 及以上的处理程序方法中，可以使用[swag](https://github.com/swaggo/swag) swagger 通过注释生成swagger文档.
+除了 [Fiber](https://github.com/gofiber/fiber)，您可以使用任何其他 http 框架。
+在 `router.go` 及以上的处理程序方法中，可以使用[swag](https://github.com/swaggo/swag) swagger 通过注释生成swagger文档.
 
 ### `internal/entity`
 

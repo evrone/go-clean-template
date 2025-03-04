@@ -119,7 +119,7 @@ go run -tags migrate ./cmd/app
 Server handler layer (MVC controllers). The template shows 2 servers:
 
 - RPC (RabbitMQ as transport)
-- REST http (Gin framework)
+- REST http ([Fiber](https://github.com/gofiber/fiber) framework)
 
 Server routers are written in the same style:
 
@@ -134,14 +134,19 @@ For v2, we will need to add the `http/v2` folder with the same content.
 And in the file `internal/app` add the line:
 
 ```go
-handler := gin.New()
-v1.NewRouter(handler, t)
-v2.NewRouter(handler, t)
+apiV1Group := app.Group("/v1")
+{
+	v1.NewTranslationRoutes(apiV1Group, t, l)
+}
+apiV2Group := app.Group("/v2")
+{
+	v1.NewTranslationRoutesV2(apiV1Group, t, l)
+}
 ```
 
-Instead of Gin, you can use any other http framework or even the standard `net/http` library.
+Instead of [Fiber](https://github.com/gofiber/fiber), you can use any other http framework.
 
-In `v1/router.go` and above the handler methods, there are comments for generating swagger documentation
+In `router.go` and above the handler methods, there are comments for generating swagger documentation
 using [swag](https://github.com/swaggo/swag).
 
 ### `internal/entity`

@@ -116,7 +116,7 @@ go run -tags migrate ./cmd/app
 Слой хэндлеров сервера (MVC контроллеры). В шаблоне показана работа 2х серверов:
 
 - RPC (RabbitMQ as transport)
-- REST http (Gin framework)
+- REST http ([Fiber](https://github.com/gofiber/fiber) framework)
 
 Маршрутизаторы http сервера пишутся в едином стиле:
 
@@ -131,14 +131,19 @@ go run -tags migrate ./cmd/app
 Добавить в файл `internal/app/app.go` строки:
 
 ```go
-handler := gin.New()
-v1.NewRouter(handler, t)
-v2.NewRouter(handler, t)
+apiV1Group := app.Group("/v1")
+{
+    v1.NewTranslationRoutes(apiV1Group, t, l)
+}
+apiV2Group := app.Group("/v2")
+{
+    v1.NewTranslationRoutesV2(apiV1Group, t, l)
+}
 ```
 
-Вместо Gin можно использовать любой другой http фреймворк или стандартную `net/http` библиотеку.
+Вместо [Fiber](https://github.com/gofiber/fiber) можно использовать любой другой http фреймворк.
 
-В файле `v1/router.go` над хэндлером написаны комментарии для генерации документации через
+В файле `router.go` над хэндлером написаны комментарии для генерации документации через
 swagger [swag](https://github.com/swaggo/swag).
 
 ### `internal/entity`

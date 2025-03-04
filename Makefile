@@ -35,14 +35,18 @@ swag-v1: ### swag init
 	swag init -g internal/controller/http/v1/router.go
 .PHONY: swag-v1
 
+deps: ### deps tidy + verify
+	go mod tidy && go mod verify
+.PHONY: swag-v1
+
 format: ### Run code formatter
 	gofumpt -l -w .
 	gci write . --skip-generated -s standard -s default
 .PHONY: format
 
-run: swag-v1 ### swag run
-	go mod tidy && go mod verify && go mod download && \
-	DISABLE_SWAGGER_HTTP_HANDLER='' GIN_MODE=debug CGO_ENABLED=0 go run -tags migrate ./cmd/app
+run: deps swag-v1 ### swag run
+	go mod download && \
+	DISABLE_SWAGGER_HTTP_HANDLER='' CGO_ENABLED=0 go run -tags migrate ./cmd/app
 .PHONY: run
 
 docker-rm-volume: ### remove docker volume
