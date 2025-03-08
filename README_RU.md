@@ -137,7 +137,7 @@ apiV1Group := app.Group("/v1")
 }
 apiV2Group := app.Group("/v2")
 {
-    v1.NewTranslationRoutesV2(apiV1Group, t, l)
+	v2.NewTranslationRoutes(apiV2Group, t, l)
 }
 ```
 
