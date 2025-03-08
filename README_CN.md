@@ -146,11 +146,11 @@ go run -tags migrate ./cmd/app
 ```go
 apiV1Group := app.Group("/v1")
 {
-    v1.NewTranslationRoutes(apiV1Group, t, l)
+	v1.NewTranslationRoutes(apiV1Group, t, l)
 }
 apiV2Group := app.Group("/v2")
 {
-    v1.NewTranslationRoutesV2(apiV1Group, t, l)
+	v2.NewTranslationRoutes(apiV2Group, t, l)
 }
 ```
 
