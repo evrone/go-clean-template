@@ -103,7 +103,6 @@ Swagger 文档。由  [swag](https://github.com/swaggo/swag) 库自动生成
 
 集成测试
 它会在应用容器旁启动独立的容器
-使用[go-hit](https://github.com/Eun/go-hit) 会很方便的测试Rest API
 
 ## `internal/app`
 

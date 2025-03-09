@@ -90,7 +90,6 @@ You don't need to correct anything by yourself.
 
 Integration tests.
 They are launched as a separate container, next to the application container.
-It is convenient to test the Rest API using [go-hit](https://github.com/Eun/go-hit).
 
 ### `internal/app`
 
