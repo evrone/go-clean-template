@@ -20,3 +20,9 @@ updates:
       interval: daily
       time: "02:00"
     open-pull-requests-limit: 10
+  - package-ecosystem: docker-compose
+    directory: "/"
+    schedule:
+      interval: daily
+      time: "02:00"
+    open-pull-requests-limit: 10
