@@ -10,7 +10,7 @@ jobs:
         uses: actions/checkout@v4
       - uses: actions/setup-go@v5
         with:
-          go-version: '1.23'
+          go-version: '1.24'
           cache: false
       - name: golangci-lint
         uses: golangci/golangci-lint-action@v6
@@ -62,14 +62,25 @@ jobs:
   tests:
     name: runner / tests
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        go-version:
+          - '1.23'
+          - '1.24'
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-go@v5
         with:
-          go-version: 1.23
+          go-version: ${{ matrix.go-version }}
       - name: Unit Tests
         run: "make test"
       - name: Upload coverage report
         run: bash <(curl -s https://codecov.io/bash)
+
+  integration-tests:
+    name: runner / integration-tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
       - name: Integration tests
         run: "make compose-up-integration-test"
