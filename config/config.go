@@ -3,55 +3,53 @@ package config
 import (
 	"fmt"
 
-	"github.com/ilyakaznacheev/cleanenv"
+	"github.com/caarlos0/env/v11"
 )
 
 type (
 	// Config -.
 	Config struct {
-		App  `yaml:"app"`
-		HTTP `yaml:"http"`
-		Log  `yaml:"logger"`
-		PG   `yaml:"postgres"`
-		RMQ  `yaml:"rabbitmq"`
+		App  App
+		HTTP HTTP
+		Log  Log
+		PG   PG
+		RMQ  RMQ
 	}
 
 	// App -.
 	App struct {
-		Name    string `env-required:"true" yaml:"name"    env:"APP_NAME"`
-		Version string `env-required:"true" yaml:"version" env:"APP_VERSION"`
+		Name    string `env:"APP_NAME,required"`
+		Version string `env:"APP_VERSION,required"`
 	}
 
 	// HTTP -.
 	HTTP struct {
-		Port string `env-required:"true" yaml:"port" env:"HTTP_PORT"`
+		Port string `env:"HTTP_PORT,required"`
 	}
 
 	// Log -.
 	Log struct {
-		Level string `env-required:"true" yaml:"log_level"   env:"LOG_LEVEL"`
+		Level string `env:"LOG_LEVEL,required"`
 	}
 
 	// PG -.
 	PG struct {
-		PoolMax int    `env-required:"true" yaml:"pool_max" env:"PG_POOL_MAX"`
-		URL     string `env-required:"true"                 env:"PG_URL"`
+		PoolMax int    `env:"PG_POOL_MAX,required"`
+		URL     string `env:"PG_URL,required"`
 	}
 
 	// RMQ -.
 	RMQ struct {
-		ServerExchange string `env-required:"true" yaml:"rpc_server_exchange" env:"RMQ_RPC_SERVER"`
-		ClientExchange string `env-required:"true" yaml:"rpc_client_exchange" env:"RMQ_RPC_CLIENT"`
-		URL            string `env-required:"true"                            env:"RMQ_URL"`
+		ServerExchange string `env:"RMQ_RPC_SERVER,required"`
+		ClientExchange string `env:"RMQ_RPC_CLIENT,required"`
+		URL            string `env:"RMQ_URL,required"`
 	}
 )
 
 // NewConfig returns app config.
 func NewConfig() (*Config, error) {
 	cfg := &Config{}
-
-	err := cleanenv.ReadConfig("./config/config.yml", cfg)
-	if err != nil {
+	if err := env.Parse(cfg); err != nil {
 		return nil, fmt.Errorf("config error: %w", err)
 	}
 

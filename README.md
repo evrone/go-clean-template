@@ -70,16 +70,16 @@ Configuration and logger initialization. Then the main function "continues" in
 
 ### `config`
 
-Configuration. First, `config.yml` is read, then environment variables overwrite the yaml config if they match.
-The config structure is in the `config.go`.
-The `env-required: true` tag obliges you to specify a value (either in yaml, or in environment variables).
+The twelve-factor app stores config in environment variables (often shortened to `env vars` or `env`). Env vars are easy 
+to change between deploys without changing any code; unlike config files, there is little chance of them being checked 
+into the code repo accidentally; and unlike custom config files, or other config mechanisms such as Java System 
+Properties, they are a language- and OS-agnostic standard.
 
-For configuration, we chose the [cleanenv](https://github.com/ilyakaznacheev/cleanenv) library.
-It does not have many stars on GitHub, but is simple and meets all the requirements.
+Config: [config.go](config/config.go)
 
-Reading the config from yaml contradicts the ideology of 12 factors, but in practice, it is more convenient than
-reading the entire config from ENV.
-It is assumed that default values are in yaml, and security-sensitive variables are defined in ENV.
+Example: [.env.example](.env.example)
+
+[docker-compose.yml](docker-compose.yml) uses `env` variables to configure services.
 
 ### `docs`
 
