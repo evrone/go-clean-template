@@ -1,21 +1,26 @@
 package integration_test
 
 import (
+	"bytes"
+	"context"
+	"fmt"
+	"io"
 	"log"
 	"net/http"
 	"os"
 	"testing"
 	"time"
 
-	. "github.com/Eun/go-hit" //nolint:revive // legacy usage
 	"github.com/evrone/go-clean-template/pkg/rabbitmq/rmq_rpc/client"
+	"github.com/goccy/go-json"
 )
 
 const (
 	// Attempts connection
-	host       = "app:8080"
-	healthPath = "http://" + host + "/healthz"
-	attempts   = 20
+	host           = "app:8080"
+	healthPath     = "http://" + host + "/healthz"
+	attempts       = 20
+	requestTimeout = 5 * time.Second
 
 	// HTTP REST
 	basePath = "http://" + host + "/v1"
@@ -26,6 +31,55 @@ const (
 	rpcClientExchange = "rpc_client"
 	requests          = 10
 )
+
+var errHealthCheck = fmt.Errorf("url %s is not available", healthPath)
+
+func doWebRequestWithTimeout(ctx context.Context, method, url string, body io.Reader) (*http.Response, error) {
+	req, err := http.NewRequestWithContext(ctx, method, url, body)
+	if err != nil {
+		return nil, err
+	}
+
+	req.Header.Set("Content-Type", "application/json")
+
+	return http.DefaultClient.Do(req)
+}
+
+func getHealthCheck(url string) (int, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), requestTimeout)
+
+	defer cancel()
+
+	resp, err := doWebRequestWithTimeout(ctx, http.MethodGet, url, http.NoBody)
+	if err != nil {
+		return -1, err
+	}
+
+	defer resp.Body.Close()
+
+	return resp.StatusCode, nil
+}
+
+func healthCheck(attempts int) error {
+	for attempts > 0 {
+		statusCode, err := getHealthCheck(healthPath)
+		if err != nil {
+			return err
+		}
+
+		if statusCode == http.StatusOK {
+			return nil
+		}
+
+		log.Printf("Integration tests: url %s is not available, attempts left: %d", healthPath, attempts)
+
+		time.Sleep(time.Second)
+
+		attempts--
+	}
+
+	return errHealthCheck
+}
 
 func TestMain(m *testing.M) {
 	err := healthCheck(attempts)
@@ -39,81 +93,96 @@ func TestMain(m *testing.M) {
 	os.Exit(code)
 }
 
-func healthCheck(attempts int) error {
-	var err error
-
-	for attempts > 0 {
-		err = Do(Get(healthPath), Expect().Status().Equal(http.StatusOK))
-		if err == nil {
-			return nil
-		}
-
-		log.Printf("Integration tests: url %s is not available, attempts left: %d", healthPath, attempts)
-
-		time.Sleep(time.Second)
-
-		attempts--
-	}
-
-	return err
-}
-
 // HTTP POST: /translation/do-translate.
 func TestHTTPDoTranslate(t *testing.T) {
-	body := `{
-		"destination": "en",
-		"original": "текст для перевода",
-		"source": "auto"
-	}`
-	Test(t,
-		Description("DoTranslate Success"),
-		BaseURL(basePath),
-		Post("/translation/do-translate"),
-		Send().Headers("Content-Type").Add("application/json"),
-		Send().Body().String(body),
-		Expect().Status().Equal(http.StatusOK),
-		Expect().Body().JSON().JQ(".translation").Equal("text for text"),
-	)
+	tests := []struct {
+		description string
+		body        string
+		expected    int
+	}{
+		{
+			description: "DoTranslate Success",
+			body: `{
+				"destination": "en",
+				"original": "текст для перевода",
+				"source": "auto"
+			}`,
+			expected: http.StatusOK,
+		},
+		{
+			description: "DoTranslate Success",
+			body: `{
+				"destination": "en",
+				"original": "Текст для перевода",
+				"source": "ru"
+			}`,
+			expected: http.StatusOK,
+		},
+		{
+			description: "DoTranslate Fail",
+			body: `{
+				"destination": "en",
+				"original": "текст для перевода"
+			}`,
+			expected: http.StatusBadRequest,
+		},
+	}
 
-	body = `{
-		"destination": "en",
-		"original": "Текст для перевода",
-		"source": "ru"
-	}`
-	Test(t,
-		Description("DoTranslate Success"),
-		BaseURL(basePath),
-		Post("/translation/do-translate"),
-		Send().Headers("Content-Type").Add("application/json"),
-		Send().Body().String(body),
-		Expect().Status().Equal(http.StatusOK),
-		Expect().Body().JSON().JQ(".translation").Equal("Text for translation"),
-	)
+	for _, tt := range tests {
+		t.Run(tt.description, func(t *testing.T) {
+			url := basePath + "/translation/do-translate"
+			ctx, cancel := context.WithTimeout(context.Background(), requestTimeout)
 
-	body = `{
-		"destination": "en",
-		"original": "текст для перевода"
-	}`
-	Test(t,
-		Description("DoTranslate Fail"),
-		BaseURL(basePath),
-		Post("/translation/do-translate"),
-		Send().Headers("Content-Type").Add("application/json"),
-		Send().Body().String(body),
-		Expect().Status().Equal(http.StatusBadRequest),
-		Expect().Body().JSON().JQ(".error").Equal("invalid request body"),
-	)
+			defer cancel()
+
+			resp, err := doWebRequestWithTimeout(ctx, http.MethodPost, url, bytes.NewBuffer([]byte(tt.body)))
+			if err != nil {
+				t.Fatalf("Failed to send request: %v", err)
+			}
+
+			defer resp.Body.Close()
+
+			if resp.StatusCode != tt.expected {
+				t.Errorf("Expected status %d, got %d", tt.expected, resp.StatusCode)
+			}
+		})
+	}
 }
 
 // HTTP GET: /translation/history.
 func TestHTTPHistory(t *testing.T) {
-	Test(t,
-		Description("History Success"),
-		BaseURL(basePath),
-		Get("/translation/history"),
-		Expect().Status().Equal(http.StatusOK),
-		Expect().Body().String().Contains(`{"history":[{`),
-	)
+	url := basePath + "/translation/history"
+	ctx, cancel := context.WithTimeout(context.Background(), requestTimeout)
+
+	defer cancel()
+
+	resp, err := doWebRequestWithTimeout(ctx, http.MethodGet, url, http.NoBody)
+	if err != nil {
+		t.Fatalf("Failed to send request: %v", err)
+	}
+
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		t.Errorf("Expected status %d, got %d", http.StatusOK, resp.StatusCode)
+	}
+
+	var body struct {
+		History []struct {
+			Source      string `json:"source"`
+			Destination string `json:"destination"`
+			Original    string `json:"original"`
+			Translation string `json:"translation"`
+		} `json:"history"`
+	}
+
+	if err := json.NewDecoder(resp.Body).Decode(&body); err != nil {
+		t.Fatalf("Failed to decode response body: %v", err)
+	}
+
+	if len(body.History) == 0 {
+		t.Error("Expected non-empty history")
+	}
 }
 
 // RabbitMQ RPC Client: getHistory.

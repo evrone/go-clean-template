@@ -4,6 +4,7 @@ package httpserver
 import (
 	"time"
 
+	"github.com/goccy/go-json"
 	"github.com/gofiber/fiber/v2"
 )
 
@@ -45,6 +46,8 @@ func New(opts ...Option) *Server {
 		Prefork:      false,
 		ReadTimeout:  s.readTimeout,
 		WriteTimeout: s.writeTimeout,
+		JSONDecoder:  json.Unmarshal,
+		JSONEncoder:  json.Marshal,
 	})
 
 	s.App = app
