@@ -50,7 +50,7 @@ services:
 
   rabbitmq:
     container_name: rabbitmq
-    image: rabbitmq:3.13-management
+    image: rabbitmq:4.0-management
     environment:
       <<: *x-rabbitmq-variables
     ports:
