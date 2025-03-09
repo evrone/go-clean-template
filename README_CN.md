@@ -84,14 +84,15 @@ Check URL's:
 
 ### `config`
 
-配置，首先读取 `config.yml`中的内容，如果环境变量里面有符合的变量，将其覆盖yml中的配置
-配置的结构在 `config.go`中
-`env-required:true` 标签强制你指定值（在yml文件或者环境变量中）
+12-Factor推荐将应用的配置存储于 环境变量 中（ `env vars`, `env` ）。环境变量可以非常方便地在不同的部署间做修改，却不动一行代码；
+与配置文件不同，不小心把它们签入代码库的概率微乎其微；与一些传统的解决配置问题的机制（比如 Java 的属性配置文件）相比，
+环境变量与语言和系统无关。
 
-对于配置，我们选择[cleanenv](https://github.com/ilyakaznacheev/cleanenv) 库
-cleanenv没有很多的starts数，但是它简单并能满足我们的需求
-从yaml配置文件中读取配置违背了12种原则。但是比起从环境变量种读取所有的配置，它确实是更加方便的。
-这种模式假设配置默认值在yaml文件种，对安全敏感的配置在环境变量种
+設定：[config.go](config/config.go)
+
+例如：[.env.example](.env.example)
+
+[docker-compose.yml](docker-compose.yml) 使用 `env` 變數來配置服務。
 
 ### `docs`
 
