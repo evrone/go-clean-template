@@ -20,7 +20,7 @@ golang服务的整洁架构模板
 使用了 Robert Martin 的原则
 
 [Go 整洁模板](https://evrone.com/go-clean-template?utm_source=github&utm_campaign=go-clean-template) 由
-创建和提供支持[Evrone](https://evrone.com/?utm_source=github&utm_campaign=go-clean-template).
+[Evrone](https://evrone.com/?utm_source=github&utm_campaign=go-clean-template)创建和提供支持.
 
 ## 内容
 
