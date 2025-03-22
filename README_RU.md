@@ -54,6 +54,7 @@ make compose-up-all
 Проверьте URL-адреса:
 
 - http://app.lvh.me/healthz | http://app.lvh.me/metrics
+- http://app.lvh.me/swagger | http://127.0.0.1:8080/swagger
 - http://rabbitmq.lvh.me (`guest`/`guest`)
 
 ## Структура проекта

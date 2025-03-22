@@ -9,11 +9,13 @@ import (
 type (
 	// Config -.
 	Config struct {
-		App  App
-		HTTP HTTP
-		Log  Log
-		PG   PG
-		RMQ  RMQ
+		App     App
+		HTTP    HTTP
+		Log     Log
+		PG      PG
+		RMQ     RMQ
+		Metrics Metrics
+		Swagger Swagger
 	}
 
 	// App -.
@@ -43,6 +45,14 @@ type (
 		ServerExchange string `env:"RMQ_RPC_SERVER,required"`
 		ClientExchange string `env:"RMQ_RPC_CLIENT,required"`
 		URL            string `env:"RMQ_URL,required"`
+	}
+
+	Metrics struct {
+		Enabled bool `env:"METRICS_ENABLED" envDefault:"true"`
+	}
+
+	Swagger struct {
+		Enabled bool `env:"SWAGGER_ENABLED" envDefault:"false"`
 	}
 )
 
