@@ -21,6 +21,7 @@ type Server struct {
 	notify chan error
 
 	address         string
+	prefork         bool
 	readTimeout     time.Duration
 	writeTimeout    time.Duration
 	shutdownTimeout time.Duration
@@ -43,7 +44,7 @@ func New(opts ...Option) *Server {
 	}
 
 	app := fiber.New(fiber.Config{
-		Prefork:      false,
+		Prefork:      s.prefork,
 		ReadTimeout:  s.readTimeout,
 		WriteTimeout: s.writeTimeout,
 		JSONDecoder:  json.Unmarshal,

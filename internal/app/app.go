@@ -45,7 +45,7 @@ func Run(cfg *config.Config) {
 	}
 
 	// HTTP Server
-	httpServer := httpserver.New(httpserver.Port(cfg.HTTP.Port))
+	httpServer := httpserver.New(httpserver.Port(cfg.HTTP.Port), httpserver.Prefork(cfg.HTTP.UsePreforkMode))
 	v1.NewRouter(httpServer.App, cfg, l, translationUseCase)
 
 	// Start servers
