@@ -46,7 +46,7 @@ func Run(cfg *config.Config) {
 
 	// HTTP Server
 	httpServer := httpserver.New(httpserver.Port(cfg.HTTP.Port))
-	v1.NewRouter(httpServer.App, l, translationUseCase)
+	v1.NewRouter(httpServer.App, cfg, l, translationUseCase)
 
 	// Start servers
 	rmqServer.Start()

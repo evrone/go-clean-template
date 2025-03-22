@@ -37,16 +37,20 @@ swag-v1: ### swag init
 
 deps: ### deps tidy + verify
 	go mod tidy && go mod verify
-.PHONY: swag-v1
+.PHONY: deps
+
+deps-audit: ### check dependencies vulnerabilities
+	govulncheck ./...
+.PHONY: deps-audit
 
 format: ### Run code formatter
 	gofumpt -l -w .
 	gci write . --skip-generated -s standard -s default
 .PHONY: format
 
-run: deps swag-v1 ### swag run
+run: deps swag-v1 ### swag run for API v1
 	go mod download && \
-	DISABLE_SWAGGER_HTTP_HANDLER='' CGO_ENABLED=0 go run -tags migrate ./cmd/app
+	CGO_ENABLED=0 go run -tags migrate ./cmd/app
 .PHONY: run
 
 docker-rm-volume: ### remove docker volume
@@ -86,6 +90,7 @@ migrate-up: ### migration up
 	migrate -path migrations -database '$(PG_URL)?sslmode=disable' up
 .PHONY: migrate-up
 
-bin-deps:
+bin-deps: ### install tools
 	GOBIN=$(LOCAL_BIN) go install -tags 'postgres' github.com/golang-migrate/migrate/v4/cmd/migrate@latest
 	GOBIN=$(LOCAL_BIN) go install github.com/golang/mock/mockgen@latest
+.PHONY: bin-deps

@@ -29,8 +29,10 @@ x-backend-app-environment: &x-backend-app-environment
   RMQ_RPC_SERVER: "rpc_server"
   RMQ_RPC_CLIENT: "rpc_client"
   RMQ_URL: "amqp://guest:guest@rabbitmq:5672/"
+  # Metrics
+  METRICS_ENABLED: "true"
   # Swagger
-  DISABLE_SWAGGER_HTTP_HANDLER: "true"
+  SWAGGER_ENABLED: "true"
 
 
 services:
