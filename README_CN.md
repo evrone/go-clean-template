@@ -73,9 +73,11 @@ make compose-up-all
 
 Check URL's:
 
-- http://app.lvh.me/healthz | http://app.lvh.me/metrics
+- http://app.lvh.me/healthz | http://127.0.0.1:8080/healthz
+- http://app.lvh.me/metrics | http://127.0.0.1:8080/metrics
 - http://app.lvh.me/swagger | http://127.0.0.1:8080/swagger
-- http://rabbitmq.lvh.me (`guest`/`guest`)
+- http://rabbitmq.lvh.me | http://127.0.0.1:15672
+  - Credentials: `guest` / `guest`
 
 ## 工程架构
 
