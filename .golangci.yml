@@ -1,60 +1,21 @@
-linters-settings:
-  dupl:
-    threshold: 100
-  errorlint:
-    errorf: true
-  errcheck:
-    check-type-assertions: true
-    check-blank: true
-  exhaustive:
-    check-generated: false
-    default-signifies-exhaustive: false
-  funlen:
-    lines: 65
-    statements: 40
-  gocognit:
-    min-complexity: 15
-  gocyclo:
-    min-complexity: 10
-  goconst:
-    min-len: 2
-    min-occurrences: 2
-  gocritic:
-    enabled-tags:
-      - diagnostic
-      - experimental
-      - opinionated
-      - performance
-      - style
-    disabled-checks:
-      - dupImport
-      - unnecessaryBlock
-  gofumpt:
-    extra-rules: true
-  misspell:
-    locale: US
-  nestif:
-    min-complexity: 4
-  nolintlint:
-    require-explanation: true
-    require-specific: true
+version: "2"
 
 linters:
-  disable-all: true
+  default: none
   enable:
     - asciicheck
     - bodyclose
+    - copyloopvar
     - cyclop
-    - unused
     - dogsled
     - dupl
     - durationcheck
+    - err113
     - errcheck
     - errorlint
     - exhaustive
     - forbidigo
     - funlen
-    - gci
     - gochecknoglobals
     - gochecknoinits
     - gocognit
@@ -63,19 +24,14 @@ linters:
     - gocyclo
     - godot
     - godox
-    - err113
-    - gofmt
-    - gofumpt
-    - goimports
-    - mnd
     - gomodguard
     - goprintffuncname
     - gosec
-    - gosimple
     - govet
     - ineffassign
     - makezero
     - misspell
+    - mnd
     - nakedret
     - nestif
     - nlreturn
@@ -87,31 +43,84 @@ linters:
     - rowserrcheck
     - sqlclosecheck
     - staticcheck
-    - stylecheck
-    - tparallel
     - thelper
-    - typecheck
+    - tparallel
     - unconvert
     - unparam
     - unused
-    - wsl
     - whitespace
-    - copyloopvar
+    - wsl
+  settings:
+    dupl:
+      threshold: 100
+    errcheck:
+      check-type-assertions: true
+      check-blank: true
+    errorlint:
+      errorf: true
+    exhaustive:
+      default-signifies-exhaustive: false
+    funlen:
+      lines: 65
+      statements: 40
+    gocognit:
+      min-complexity: 15
+    goconst:
+      min-len: 2
+      min-occurrences: 2
+    gocritic:
+      disabled-checks:
+        - dupImport
+        - unnecessaryBlock
+      enabled-tags:
+        - diagnostic
+        - experimental
+        - opinionated
+        - performance
+        - style
+    gocyclo:
+      min-complexity: 10
+    misspell:
+      locale: US
+    nestif:
+      min-complexity: 4
+    nolintlint:
+      require-explanation: true
+      require-specific: true
+  exclusions:
+    generated: lax
+    presets:
+      - comments
+      - common-false-positives
+      - legacy
+      - std-error-handling
+    rules:
+      - linters:
+          - godot
+          - paralleltest
+        path: integration-test
+      - linters:
+          - godot
+        path: internal/controller/http
+    paths:
+      - bin/
+      - third_party$
+      - builtin$
+      - examples$
 
-# disable:
-#    - exhaustivestruct
-#    - ifshort
-#    - goheader
-#    - prealloc
-#    - testpackage
-#    - wrapcheck
-
-issues:
-  exclude-rules:
-    - path: integration-test
-      linters:
-        - paralleltest
-        - godot
-    - path: internal/controller/http
-      linters:
-        - godot
+formatters:
+  enable:
+    - gci
+    - gofmt
+    - gofumpt
+    - goimports
+  settings:
+    gofumpt:
+      extra-rules: true
+  exclusions:
+    generated: lax
+    paths:
+      - bin/
+      - third_party$
+      - builtin$
+      - examples$
