@@ -2,7 +2,6 @@ include .env.example
 export
 
 LOCAL_BIN:=$(CURDIR)/bin
-PATH:=$(LOCAL_BIN):$(PATH)
 BASE_STACK = docker compose -f docker-compose.yml
 INTEGRATION_TEST_STACK = $(BASE_STACK) -f docker-compose-integration-test.yml
 ALL_STACK = $(INTEGRATION_TEST_STACK)
@@ -92,5 +91,13 @@ migrate-up: ### migration up
 
 bin-deps: ### install tools
 	GOBIN=$(LOCAL_BIN) go install -tags 'postgres' github.com/golang-migrate/migrate/v4/cmd/migrate@latest
-	GOBIN=$(LOCAL_BIN) go install github.com/golang/mock/mockgen@latest
+	GOBIN=$(LOCAL_BIN) go install go.uber.org/mock/mockgen@latest
+	GOBIN=$(LOCAL_BIN) go install github.com/swaggo/swag/cmd/swag@latest
+	GOBIN=$(LOCAL_BIN) go install github.com/daixiang0/gci@latest
+	GOBIN=$(LOCAL_BIN) go install mvdan.cc/gofumpt@latest
+	GOBIN=$(LOCAL_BIN) go install github.com/golangci/golangci-lint/v2/cmd/golangci-lint@latest
+	GOBIN=$(LOCAL_BIN) go install golang.org/x/vuln/cmd/govulncheck@latest
 .PHONY: bin-deps
+
+pre-commit: swag-v1 mock format linter-golangci test ### run pre-commit
+.PHONY: pre-commit
