@@ -6,15 +6,6 @@ BASE_STACK = docker compose -f docker-compose.yml
 INTEGRATION_TEST_STACK = $(BASE_STACK) -f docker-compose-integration-test.yml
 ALL_STACK = $(INTEGRATION_TEST_STACK)
 
-# go tool
-GCI = go tool github.com/daixiang0/gci
-MIGRATE = go tool github.com/golang-migrate/migrate/v4/cmd/migrate
-GOLANGCI-LINT = go tool github.com/golangci/golangci-lint/v2/cmd/golangci-lint
-SWAG = go tool github.com/swaggo/swag/cmd/swag
-MOCKGEN = go tool go.uber.org/mock/mockgen
-GOVULNCHECK = go tool golang.org/x/vuln/cmd/govulncheck
-GOFUMPT = go tool mvdan.cc/gofumpt
-
 # HELP =================================================================================================================
 # This will output the help for each task
 # thanks to https://marmelab.com/blog/2016/02/29/auto-documented-makefile.html
@@ -40,7 +31,7 @@ compose-down: ### Down docker compose
 .PHONY: compose-down
 
 swag-v1: ### swag init
-	$(SWAG) init -g internal/controller/http/router.go
+	swag init -g internal/controller/http/router.go
 .PHONY: swag-v1
 
 deps: ### deps tidy + verify
@@ -52,8 +43,8 @@ deps-audit: ### check dependencies vulnerabilities
 .PHONY: deps-audit
 
 format: ### Run code formatter
-	$(GOFUMPT) -l -w .
-	$(GCI) write . --skip-generated -s standard -s default
+	gofumpt -l -w .
+	gci write . --skip-generated -s standard -s default
 .PHONY: format
 
 run: deps swag-v1 ### swag run for API v1
@@ -66,7 +57,7 @@ docker-rm-volume: ### remove docker volume
 .PHONY: docker-rm-volume
 
 linter-golangci: ### check by golangci linter
-	$(GOLANGCI-LINT) run
+	golangci-lint run
 .PHONY: linter-golangci
 
 linter-hadolint: ### check by hadolint linter
@@ -86,16 +77,16 @@ integration-test: ### run integration-test
 .PHONY: integration-test
 
 mock: ### run mockgen
-	$(MOCKGEN) -source ./internal/repo/contracts.go -package usecase_test > ./internal/usecase/mocks_repo_test.go
-	$(MOCKGEN) -source ./internal/usecase/contracts.go -package usecase_test > ./internal/usecase/mocks_usecase_test.go
+	mockgen -source ./internal/repo/contracts.go -package usecase_test > ./internal/usecase/mocks_repo_test.go
+	mockgen -source ./internal/usecase/contracts.go -package usecase_test > ./internal/usecase/mocks_usecase_test.go
 .PHONY: mock
 
 migrate-create:  ### create new migration
-	$(MIGRATE) create -ext sql -dir migrations '$(word 2,$(MAKECMDGOALS))'
+	migrate create -ext sql -dir migrations '$(word 2,$(MAKECMDGOALS))'
 .PHONY: migrate-create
 
 migrate-up: ### migration up
-	$(MIGRATE) -path migrations -database '$(PG_URL)?sslmode=disable' up
+	migrate -path migrations -database '$(PG_URL)?sslmode=disable' up
 .PHONY: migrate-up
 
 bin-deps: ### install tools
