@@ -37,7 +37,7 @@ func translationUseCase(t *testing.T) (*translation.UseCase, *MockTranslationRep
 func TestHistory(t *testing.T) { //nolint:tparallel // data races here
 	t.Parallel()
 
-	translation, repo, _ := translationUseCase(t)
+	translationUseCase, repo, _ := translationUseCase(t)
 
 	tests := []test{
 		{
@@ -64,7 +64,7 @@ func TestHistory(t *testing.T) { //nolint:tparallel // data races here
 		t.Run(localTc.name, func(t *testing.T) {
 			localTc.mock()
 
-			res, err := translation.History(context.Background())
+			res, err := translationUseCase.History(context.Background())
 
 			require.Equal(t, res, localTc.res)
 			require.ErrorIs(t, err, localTc.err)
@@ -75,7 +75,7 @@ func TestHistory(t *testing.T) { //nolint:tparallel // data races here
 func TestTranslate(t *testing.T) { //nolint:tparallel // data races here
 	t.Parallel()
 
-	translation, repo, webAPI := translationUseCase(t)
+	translationUseCase, repo, webAPI := translationUseCase(t)
 
 	tests := []test{
 		{
@@ -112,7 +112,7 @@ func TestTranslate(t *testing.T) { //nolint:tparallel // data races here
 		t.Run(localTc.name, func(t *testing.T) {
 			localTc.mock()
 
-			res, err := translation.Translate(context.Background(), entity.Translation{})
+			res, err := translationUseCase.Translate(context.Background(), entity.Translation{})
 
 			require.EqualValues(t, res, localTc.res)
 			require.ErrorIs(t, err, localTc.err)

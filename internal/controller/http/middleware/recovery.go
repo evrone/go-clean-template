@@ -24,9 +24,9 @@ func buildPanicMessage(ctx *fiber.Ctx, err interface{}) string {
 	return result.String()
 }
 
-func logPanic(logger logger.Interface) func(c *fiber.Ctx, err interface{}) {
+func logPanic(l logger.Interface) func(c *fiber.Ctx, err interface{}) {
 	return func(ctx *fiber.Ctx, err interface{}) {
-		logger.Error(buildPanicMessage(ctx, err))
+		l.Error(buildPanicMessage(ctx, err))
 	}
 }
 
