@@ -90,13 +90,7 @@ migrate-up: ### migration up
 .PHONY: migrate-up
 
 bin-deps: ### install tools
-	GOBIN=$(LOCAL_BIN) go install -tags 'postgres' github.com/golang-migrate/migrate/v4/cmd/migrate@latest
-	GOBIN=$(LOCAL_BIN) go install go.uber.org/mock/mockgen@latest
-	GOBIN=$(LOCAL_BIN) go install github.com/swaggo/swag/cmd/swag@latest
-	GOBIN=$(LOCAL_BIN) go install github.com/daixiang0/gci@latest
-	GOBIN=$(LOCAL_BIN) go install mvdan.cc/gofumpt@latest
-	GOBIN=$(LOCAL_BIN) go install github.com/golangci/golangci-lint/v2/cmd/golangci-lint@latest
-	GOBIN=$(LOCAL_BIN) go install golang.org/x/vuln/cmd/govulncheck@latest
+	GOBIN=$(LOCAL_BIN) go install tool
 .PHONY: bin-deps
 
 pre-commit: swag-v1 mock format linter-golangci test ### run pre-commit
