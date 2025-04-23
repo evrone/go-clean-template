@@ -15,7 +15,14 @@ definitions:
         example: text for translation
         type: string
     type: object
-  v1.doTranslateRequest:
+  entity.TranslationHistory:
+    properties:
+      history:
+        items:
+          $ref: '#/definitions/entity.Translation'
+        type: array
+    type: object
+  request.Translate:
     properties:
       destination:
         example: en
@@ -31,14 +38,7 @@ definitions:
     - original
     - source
     type: object
-  v1.historyResponse:
-    properties:
-      history:
-        items:
-          $ref: '#/definitions/entity.Translation'
-        type: array
-    type: object
-  v1.response:
+  response.Error:
     properties:
       error:
         example: message
@@ -63,7 +63,7 @@ paths:
         name: request
         required: true
         schema:
-          $ref: '#/definitions/v1.doTranslateRequest'
+          $ref: '#/definitions/request.Translate'
       produces:
       - application/json
       responses:
@@ -74,11 +74,11 @@ paths:
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/v1.response'
+            $ref: '#/definitions/response.Error'
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/v1.response'
+            $ref: '#/definitions/response.Error'
       summary: Translate
       tags:
       - translation
@@ -94,11 +94,11 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/v1.historyResponse'
+            $ref: '#/definitions/entity.TranslationHistory'
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/v1.response'
+            $ref: '#/definitions/response.Error'
       summary: Show history
       tags:
       - translation

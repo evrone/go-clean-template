@@ -36,7 +36,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/v1.doTranslateRequest"
+                            "$ref": "#/definitions/request.Translate"
                         }
                     }
                 ],
@@ -50,13 +50,13 @@ const docTemplate = `{
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/v1.response"
+                            "$ref": "#/definitions/response.Error"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/v1.response"
+                            "$ref": "#/definitions/response.Error"
                         }
                     }
                 }
@@ -80,13 +80,13 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/v1.historyResponse"
+                            "$ref": "#/definitions/entity.TranslationHistory"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/v1.response"
+                            "$ref": "#/definitions/response.Error"
                         }
                     }
                 }
@@ -115,7 +115,18 @@ const docTemplate = `{
                 }
             }
         },
-        "v1.doTranslateRequest": {
+        "entity.TranslationHistory": {
+            "type": "object",
+            "properties": {
+                "history": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/entity.Translation"
+                    }
+                }
+            }
+        },
+        "request.Translate": {
             "type": "object",
             "required": [
                 "destination",
@@ -137,18 +148,7 @@ const docTemplate = `{
                 }
             }
         },
-        "v1.historyResponse": {
-            "type": "object",
-            "properties": {
-                "history": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/entity.Translation"
-                    }
-                }
-            }
-        },
-        "v1.response": {
+        "response.Error": {
             "type": "object",
             "properties": {
                 "error": {

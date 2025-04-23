@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/evrone/go-clean-template/internal/entity"
 	"github.com/evrone/go-clean-template/internal/usecase"
 	"github.com/evrone/go-clean-template/pkg/rabbitmq/rmq_rpc/server"
 	amqp "github.com/rabbitmq/amqp091-go"
@@ -21,19 +20,13 @@ func newTranslationRoutes(routes map[string]server.CallHandler, t usecase.Transl
 	}
 }
 
-type historyResponse struct {
-	History []entity.Translation `json:"history"`
-}
-
 func (r *translationRoutes) getHistory() server.CallHandler {
 	return func(_ *amqp.Delivery) (interface{}, error) {
-		translations, err := r.translationUseCase.History(context.Background())
+		translationHistory, err := r.translationUseCase.History(context.Background())
 		if err != nil {
 			return nil, fmt.Errorf("amqp_rpc - translationRoutes - getHistory - r.translationUseCase.History: %w", err)
 		}
 
-		response := historyResponse{translations}
-
-		return response, nil
+		return translationHistory, nil
 	}
 }
