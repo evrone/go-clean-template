@@ -45,7 +45,7 @@ func TestHistory(t *testing.T) { //nolint:tparallel // data races here
 			mock: func() {
 				repo.EXPECT().GetHistory(context.Background()).Return(nil, nil)
 			},
-			res: []entity.Translation(nil),
+			res: entity.TranslationHistory{},
 			err: nil,
 		},
 		{
@@ -53,7 +53,7 @@ func TestHistory(t *testing.T) { //nolint:tparallel // data races here
 			mock: func() {
 				repo.EXPECT().GetHistory(context.Background()).Return(nil, errInternalServErr)
 			},
-			res: []entity.Translation(nil),
+			res: entity.TranslationHistory{},
 			err: errInternalServErr,
 		},
 	}
