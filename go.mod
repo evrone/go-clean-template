@@ -28,7 +28,7 @@ require (
 	github.com/rs/zerolog v1.34.0
 	github.com/stretchr/testify v1.10.0
 	github.com/swaggo/swag v1.16.4
-	go.uber.org/mock v0.5.1
+	go.uber.org/mock v0.5.2
 )
 
 require (
