@@ -9,6 +9,17 @@ golang服务的整洁架构模板
 [![Release](https://img.shields.io/github/v/release/evrone/go-clean-template.svg)](https://github.com/evrone/go-clean-template/releases/)
 [![codecov](https://codecov.io/gh/evrone/go-clean-template/branch/master/graph/badge.svg?token=XE3E0X3EVQ)](https://codecov.io/gh/evrone/go-clean-template)
 
+[![Web Framework](https://img.shields.io/badge/Fiber-Web%20Framework-blue)](https://github.com/gofiber/fiber)
+[![API Documentation](https://img.shields.io/badge/Swagger-API%20Documentation-blue)](https://github.com/swaggo/swag)
+[![Validation](https://img.shields.io/badge/Validator-Data%20Integrity-yellowgreen)](https://github.com/go-playground/validator)
+[![JSON Handling](https://img.shields.io/badge/Go--JSON-Fast%20Serialization-orange)](https://github.com/goccy/go-json)
+[![Query Builder](https://img.shields.io/badge/Squirrel-SQL%20Query%20Builder-lightgrey)](https://github.com/Masterminds/squirrel)
+[![Database Migrations](https://img.shields.io/badge/Migrations-Seamless%20Schema%20Updates-yellow)](https://github.com/golang-migrate/migrate)
+[![Logging](https://img.shields.io/badge/ZeroLog-Structured%20Logging-green)](https://github.com/rs/zerolog)
+[![Metrics](https://img.shields.io/badge/Prometheus-Metrics%20Integration-blue)](https://github.com/ansrivas/fiberprometheus)
+[![Testing](https://img.shields.io/badge/Testify-Testing%20Framework-success)](https://github.com/stretchr/testify)
+[![Mocking](https://img.shields.io/badge/Mock-Mocking%20Library-9cf)](https://go.uber.org/mock)
+
 ## 综述
 
 模板的目的为了展示：
