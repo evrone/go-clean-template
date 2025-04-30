@@ -38,7 +38,7 @@ supported by [Evrone](https://evrone.com/?utm_source=github&utm_campaign=go-clea
 
 This template implements three types of servers:
 
-- AMQP RPC (based on RabbitMQ as transport)
+- AMQP RPC (based on RabbitMQ as [transport](https://github.com/rabbitmq/amqp091-go))
 - gRPC ([gRPC](https://grpc.io/) framework based on protobuf)
 - REST API ([Fiber](https://github.com/gofiber/fiber) framework)
 
