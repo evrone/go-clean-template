@@ -33,7 +33,7 @@
 
 Этот шаблон поддерживает три типа серверов:
 
-- AMQP RPC (на основе RabbitMQ в качестве транспорта)
+- AMQP RPC (на основе RabbitMQ в качестве [транспорта](https://github.com/rabbitmq/amqp091-go))
 - gRPC ([gRPC](https://grpc.io/) фреймворк на основе protobuf)
 - REST API ([Fiber](https://github.com/gofiber/fiber) фреймворк)
 
