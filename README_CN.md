@@ -33,6 +33,12 @@ golang服务的整洁架构模板
 [Go 整洁模板](https://evrone.com/go-clean-template?utm_source=github&utm_campaign=go-clean-template) 由
 [Evrone](https://evrone.com/?utm_source=github&utm_campaign=go-clean-template) 创建和提供支持.
 
+此模板实现了三种类型的服务器：
+
+- AMQP RPC（基于 RabbitMQ 作为传输）
+- gRPC（基于 protobuf 的 [gRPC](https://grpc.io/) 框架）
+- REST http（基于 [Fiber](https://github.com/gofiber/fiber) 框架）
+
 ## 内容
 
 - [快速开始](#快速开始)
@@ -82,12 +88,23 @@ make compose-up-integration-test
 make compose-up-all 
 ```
 
-Check URL's:
+Check services:
 
-- http://app.lvh.me/healthz | http://127.0.0.1:8080/healthz
-- http://app.lvh.me/metrics | http://127.0.0.1:8080/metrics
-- http://app.lvh.me/swagger | http://127.0.0.1:8080/swagger
-- http://rabbitmq.lvh.me | http://127.0.0.1:15672
+- AMQP RPC:
+  - URL: `amqp://guest:guest@127.0.0.1:5672/`
+  - Client Exchange: `rpc_client`
+  - Server Exchange: `rpc_server`
+- REST API:
+  - http://app.lvh.me/healthz | http://127.0.0.1:8080/healthz
+  - http://app.lvh.me/metrics | http://127.0.0.1:8080/metrics
+  - http://app.lvh.me/swagger | http://127.0.0.1:8080/swagger
+- gRPC:
+  - URL: `tcp://grpc.lvh.me:8081` | `tcp://127.0.0.1:8081`
+  - Proto: [v1/translation.history.proto](docs/proto/v1/translation.history.proto)
+- PostgreSQL:
+  - `postgres://user:myAwEsOm3pa55@w0rd@127.0.0.1:5432/db`
+- RabbitMQ:
+  - http://rabbitmq.lvh.me | http://127.0.0.1:15672
   - Credentials: `guest` / `guest`
 
 ## 工程架构
@@ -112,6 +129,12 @@ Check URL's:
 
 Swagger 文档。由  [swag](https://github.com/swaggo/swag) 库自动生成
 你不需要自己修改任何内容
+
+#### `docs/proto`
+
+Protobuf 文件。它们用于为 gRPC 服务生成 Go 代码。
+这些 proto 文件也用于生成 gRPC 服务的文档。
+您不需要自己修改任何内容。
 
 ### `integration-test`
 
@@ -140,22 +163,60 @@ go run -tags migrate ./cmd/app
 
 ### `internal/controller`
 
-服务器处理层（MVC 控制层），这个模块展示两个服务
+服务器处理层（MVC 控制器）。模板展示了 3 种服务器：
 
-- RPC
-- REST http
+- AMQP RPC（基于 RabbitMQ 作为传输）
+- gRPC（基于 protobuf 的 [gRPC](https://grpc.io/) 框架）
+- REST http（基于 [Fiber](https://github.com/gofiber/fiber) 框架）
 
-服务的路由用同样的风格进行编写
+服务器路由器以相同的风格编写：
 
-- handler 按照应用领域进行分组（又共同的基础）
-- 对于每一个分组，创建自己的路由结构体和请求path路径
-- 业务逻辑的结构被注入到路由器结构中，它将被处理程序调用
+- 处理程序按应用领域分组（基于共同的基础）
+- 为每个组创建自己的路由器结构，其方法处理路径
+- 业务逻辑的结构被注入到路由器结构中，处理程序将调用它
+
+#### `internal/controller/amqp_rpc`
+
+简单的 RPC 版本控制。  
+对于 v2，我们需要添加 `amqp_rpc/v2` 文件夹，内容相同。  
+并在文件 `internal/controller/amqp_rpc/router.go` 中添加以下行：
+
+```go
+routes := make(map[string]server.CallHandler)
+
+{
+    v1.NewTranslationRoutes(routes, t, l)
+}
+
+{
+    v2.NewTranslationRoutes(routes, t, l)
+}
+```
+
+#### `internal/controller/grpc`
+
+简单的 gRPC 版本控制。  
+对于 v2，我们需要添加 `grpc/v2` 文件夹，内容相同。  
+还需要将 `v2` 文件夹添加到 `docs/proto` 中的 proto 文件中。  
+并在文件 `internal/controller/grpc/router.go` 中添加以下行：
+
+```go
+{
+    v1.NewTranslationRoutes(app, t, l)
+}
+
+{
+    v2.NewTranslationRoutes(app, t, l)
+}
+
+reflection.Register(app)
+```
 
 #### `internal/controller/http`
 
 简单的 REST 版本控制
 对于v2版本，我们需要添加`http/v2`文件夹，内容相同
-在文件 `internal/app` 中添加以下行：
+在文件 `internal/controller/http/router.go` 中添加以下行：
 
 ```go
 apiV1Group := app.Group("/v1")

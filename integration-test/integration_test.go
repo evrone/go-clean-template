@@ -11,25 +11,37 @@ import (
 	"testing"
 	"time"
 
+	protov1 "github.com/evrone/go-clean-template/docs/proto/v1"
 	"github.com/evrone/go-clean-template/pkg/rabbitmq/rmq_rpc/client"
 	"github.com/goccy/go-json"
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials/insecure"
 )
 
 const (
+	// Base settings
+	host     = "app"
+	attempts = 20
+
 	// Attempts connection
-	host           = "app:8080"
-	healthPath     = "http://" + host + "/healthz"
-	attempts       = 20
+	httpURL        = "http://" + host + ":8080"
+	healthPath     = httpURL + "/healthz"
 	requestTimeout = 5 * time.Second
 
 	// HTTP REST
-	basePath = "http://" + host + "/v1"
+	basePathV1 = httpURL + "/v1"
+
+	// gRPC
+	grpcURL = host + ":8081"
 
 	// RabbitMQ RPC
 	rmqURL            = "amqp://guest:guest@rabbitmq:5672/"
 	rpcServerExchange = "rpc_server"
 	rpcClientExchange = "rpc_client"
 	requests          = 10
+
+	// Test data
+	expectedOriginal = "текст для перевода"
 )
 
 var errHealthCheck = fmt.Errorf("url %s is not available", healthPath)
@@ -84,17 +96,17 @@ func healthCheck(attempts int) error {
 func TestMain(m *testing.M) {
 	err := healthCheck(attempts)
 	if err != nil {
-		log.Fatalf("Integration tests: host %s is not available: %s", host, err)
+		log.Fatalf("Integration tests: httpURL %s is not available: %s", httpURL, err)
 	}
 
-	log.Printf("Integration tests: host %s is available", host)
+	log.Printf("Integration tests: httpURL %s is available", httpURL)
 
 	code := m.Run()
 	os.Exit(code)
 }
 
-// HTTP POST: /translation/do-translate.
-func TestHTTPDoTranslate(t *testing.T) {
+// HTTP POST: /v1/translation/do-translate.
+func TestHTTPDoTranslateV1(t *testing.T) {
 	tests := []struct {
 		description string
 		body        string
@@ -130,7 +142,7 @@ func TestHTTPDoTranslate(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.description, func(t *testing.T) {
-			url := basePath + "/translation/do-translate"
+			url := basePathV1 + "/translation/do-translate"
 			ctx, cancel := context.WithTimeout(context.Background(), requestTimeout)
 
 			defer cancel()
@@ -149,9 +161,9 @@ func TestHTTPDoTranslate(t *testing.T) {
 	}
 }
 
-// HTTP GET: /translation/history.
-func TestHTTPHistory(t *testing.T) {
-	url := basePath + "/translation/history"
+// HTTP GET: /v1/translation/history.
+func TestHTTPHistoryV1(t *testing.T) {
+	url := basePathV1 + "/translation/history"
 	ctx, cancel := context.WithTimeout(context.Background(), requestTimeout)
 
 	defer cancel()
@@ -185,11 +197,43 @@ func TestHTTPHistory(t *testing.T) {
 	}
 }
 
-// RabbitMQ RPC Client: getHistory.
-func TestRMQClientRPC(t *testing.T) {
+// gRPC Client V1: GetHistory.
+func TestClientGRPCV1(t *testing.T) {
+	grpcConn, err := grpc.NewClient(grpcURL, grpc.WithTransportCredentials(insecure.NewCredentials()))
+	if err != nil {
+		t.Fatal("gRPC Client - init error - grpc.NewClient", err)
+	}
+
+	defer func() {
+		err = grpcConn.Close()
+		if err != nil {
+			t.Fatal("gRPC Client - shutdown error - grpcClientV1.GetHistory", err)
+		}
+	}()
+
+	grpcClientV1 := protov1.NewTranslationClient(grpcConn)
+
+	for i := 0; i < requests; i++ {
+		history, err := grpcClientV1.GetHistory(t.Context(), &protov1.GetHistoryRequest{})
+		if err != nil {
+			t.Fatal("gRPC Client - remote call error - grpcClientV1.GetHistory", err)
+		}
+
+		if len(history.History) == 0 {
+			t.Fatal("History slice is empty, expected at least one entry")
+		}
+
+		if history.History[0].Original != expectedOriginal {
+			t.Fatalf("Original mismatch: expected %q, got %q", expectedOriginal, history.History[0].Original)
+		}
+	}
+}
+
+// RabbitMQ RPC Client V1: getHistory.
+func TestClientRMQRPCV1(t *testing.T) {
 	rmqClient, err := client.New(rmqURL, rpcServerExchange, rpcClientExchange)
 	if err != nil {
-		t.Fatal("RabbitMQ RPC Client - init error - client.New")
+		t.Fatal("RabbitMQ RPC Client - init error - client.New", err)
 	}
 
 	defer func() {
@@ -213,13 +257,17 @@ func TestRMQClientRPC(t *testing.T) {
 	for i := 0; i < requests; i++ {
 		var history historyResponse
 
-		err = rmqClient.RemoteCall("getHistory", nil, &history)
+		err = rmqClient.RemoteCall("v1.getHistory", nil, &history)
 		if err != nil {
 			t.Fatal("RabbitMQ RPC Client - remote call error - rmqClient.RemoteCall", err)
 		}
 
-		if history.History[0].Original != "текст для перевода" {
-			t.Fatal("Original != текст для перевода")
+		if len(history.History) == 0 {
+			t.Fatal("History slice is empty, expected at least one entry")
+		}
+
+		if history.History[0].Original != expectedOriginal {
+			t.Fatalf("Original mismatch: expected %q, got %q", expectedOriginal, history.History[0].Original)
 		}
 	}
 }

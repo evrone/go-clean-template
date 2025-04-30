@@ -26,6 +26,8 @@ x-backend-app-environment: &x-backend-app-environment
   # PG
   PG_POOL_MAX: "2"
   PG_URL: "postgres://user:myAwEsOm3pa55@w0rd@db:5432/db"
+  # gRPC
+  GRPC_PORT: "8081"
   # RMQ
   RMQ_RPC_SERVER: "rpc_server"
   RMQ_RPC_CLIENT: "rpc_client"
@@ -76,6 +78,7 @@ services:
       <<: *x-backend-app-environment
     ports:
       - "8080:8080"
+      - "8081:8081"
     depends_on:
       - db
       - rabbitmq

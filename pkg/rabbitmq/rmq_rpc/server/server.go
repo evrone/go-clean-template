@@ -61,6 +61,7 @@ func New(url, serverExchange string, router map[string]CallHandler, l logger.Int
 	return s, nil
 }
 
+// Start -.
 func (s *Server) Start() {
 	go s.consumer()
 }

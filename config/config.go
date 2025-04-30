@@ -13,6 +13,7 @@ type (
 		HTTP    HTTP
 		Log     Log
 		PG      PG
+		GRPC    GRPC
 		RMQ     RMQ
 		Metrics Metrics
 		Swagger Swagger
@@ -41,6 +42,11 @@ type (
 		URL     string `env:"PG_URL,required"`
 	}
 
+	// GRPC -.
+	GRPC struct {
+		Port string `env:"GRPC_PORT,required"`
+	}
+
 	// RMQ -.
 	RMQ struct {
 		ServerExchange string `env:"RMQ_RPC_SERVER,required"`
@@ -48,10 +54,12 @@ type (
 		URL            string `env:"RMQ_URL,required"`
 	}
 
+	// Metrics -.
 	Metrics struct {
 		Enabled bool `env:"METRICS_ENABLED" envDefault:"true"`
 	}
 
+	// Swagger -.
 	Swagger struct {
 		Enabled bool `env:"SWAGGER_ENABLED" envDefault:"false"`
 	}

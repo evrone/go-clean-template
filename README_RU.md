@@ -31,6 +31,12 @@
 [Go-clean-template](https://evrone.com/go-clean-template?utm_source=github&utm_campaign=go-clean-template) создан и
 поддерживается [Evrone](https://evrone.com/?utm_source=github&utm_campaign=go-clean-template).
 
+Этот шаблон поддерживает три типа серверов:
+
+- AMQP RPC (на основе RabbitMQ в качестве транспорта)
+- gRPC ([gRPC](https://grpc.io/) фреймворк на основе protobuf)
+- REST HTTP ([Fiber](https://github.com/gofiber/fiber) фреймворк)
+
 ## Содержание
 
 - [Быстрый старт](#быстрый-старт)
@@ -62,12 +68,23 @@ make compose-up-integration-test
 make compose-up-all 
 ```
 
-Проверьте URL-адреса:
+Проверьте сервисы:
 
-- http://app.lvh.me/healthz | http://127.0.0.1:8080/healthz
-- http://app.lvh.me/metrics | http://127.0.0.1:8080/metrics
-- http://app.lvh.me/swagger | http://127.0.0.1:8080/swagger
-- http://rabbitmq.lvh.me | http://127.0.0.1:15672
+- AMQP RPC:
+  - URL: `amqp://guest:guest@127.0.0.1:5672/`
+  - Client Exchange: `rpc_client`
+  - Server Exchange: `rpc_server`
+- REST API:
+  - http://app.lvh.me/healthz | http://127.0.0.1:8080/healthz
+  - http://app.lvh.me/metrics | http://127.0.0.1:8080/metrics
+  - http://app.lvh.me/swagger | http://127.0.0.1:8080/swagger
+- gRPC:
+  - URL: `tcp://grpc.lvh.me:8081` | `tcp://127.0.0.1:8081`
+  - [v1/translation.history.proto](docs/proto/v1/translation.history.proto)
+- PostgreSQL:
+  - `postgres://user:myAwEsOm3pa55@w0rd@127.0.0.1:5432/db`
+- RabbitMQ:
+  - http://rabbitmq.lvh.me | http://127.0.0.1:15672
   - Credentials: `guest` / `guest`
 
 ## Структура проекта
@@ -94,6 +111,12 @@ make compose-up-all
 
 Документация Swagger. Генерируется автоматически с помощью библиотеки [swag](https://github.com/swaggo/swag).
 Вам не нужно ничего редактировать вручную.
+
+#### `docs/proto`
+
+Protobuf файлы. Они используются для генерации Go-кода для gRPC сервисов.
+Protobuf файлы также используются для генерации документации для gRPC сервисов.
+Вам не нужно ничего исправлять самостоятельно.
 
 ### `integration-test`
 
@@ -124,10 +147,11 @@ go run -tags migrate ./cmd/app
 
 ### `internal/controller`
 
-Слой хэндлеров сервера (MVC контроллеры). В шаблоне показана работа 2х серверов:
+Слой хэндлеров сервера (MVC контроллеры). В шаблоне показана работа 3х серверов:
 
-- RPC (RabbitMQ as transport)
-- REST http ([Fiber](https://github.com/gofiber/fiber) framework)
+- AMQP RPC (на основе RabbitMQ в качестве транспорта)
+- gRPC ([gRPC](https://grpc.io/) фреймворк на основе protobuf)
+- REST HTTP ([Fiber](https://github.com/gofiber/fiber) фреймворк)
 
 Маршрутизаторы http сервера пишутся в едином стиле:
 
@@ -135,11 +159,48 @@ go run -tags migrate ./cmd/app
 - Для каждый группы создается свой маршрутизатор
 - Объект бизнес-логики передается в маршрутизатор, что бы быть доступным внутри хэндлеров
 
-#### `internal/controller/http/v1`
+#### `internal/controller/amqp_rpc`
 
-Папка, как простой способ версионировать REST API.
+Простое версионирование RPC.
+Для версии v2 нужно будет добавить папку `amqp_rpc/v2` с таким же содержимым.
+А в файле `internal/controller/amqp_rpc/router.go` добавить строку:
+
+```go
+routes := make(map[string]server.CallHandler)
+
+{
+    v1.NewTranslationRoutes(routes, t, l)
+}
+
+{
+    v2.NewTranslationRoutes(routes, t, l)
+}
+```
+
+#### `internal/controller/grpc`
+
+Простое версионирование gRPC.  
+Для версии v2 нужно будет добавить папку `grpc/v2` с таким же содержимым.  
+Также добавьте папку `v2` в proto-файлы в `docs/proto`.  
+И в файле `internal/controller/grpc/router.go` добавьте строку:
+
+```go
+{
+    v1.NewTranslationRoutes(app, t, l)
+}
+
+{
+    v2.NewTranslationRoutes(app, t, l)
+}
+
+reflection.Register(app)
+```
+
+#### `internal/controller/http`
+
+Простое версионирование REST API.
 Для создания версии v2, нужно создать папку `http/v2` с таким же содержимым.
-Добавить в файл `internal/app/app.go` строки:
+Добавить в файл `internal/controller/http/router.go` строки:
 
 ```go
 apiV1Group := app.Group("/v1")
