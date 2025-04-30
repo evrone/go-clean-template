@@ -40,7 +40,7 @@ This template implements three types of servers:
 
 - AMQP RPC (based on RabbitMQ as transport)
 - gRPC ([gRPC](https://grpc.io/) framework based on protobuf)
-- REST http ([Fiber](https://github.com/gofiber/fiber) framework)
+- REST API ([Fiber](https://github.com/gofiber/fiber) framework)
 
 ## Content
 
@@ -156,7 +156,7 @@ Server handler layer (MVC controllers). The template shows 3 servers:
 
 - AMQP RPC (based on RabbitMQ as transport)
 - gRPC ([gRPC](https://grpc.io/) framework based on protobuf)
-- REST http ([Fiber](https://github.com/gofiber/fiber) framework)
+- REST API ([Fiber](https://github.com/gofiber/fiber) framework)
 
 Server routers are written in the same style:
 

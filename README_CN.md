@@ -37,7 +37,7 @@ golang服务的整洁架构模板
 
 - AMQP RPC（基于 RabbitMQ 作为传输）
 - gRPC（基于 protobuf 的 [gRPC](https://grpc.io/) 框架）
-- REST http（基于 [Fiber](https://github.com/gofiber/fiber) 框架）
+- REST API（基于 [Fiber](https://github.com/gofiber/fiber) 框架）
 
 ## 内容
 
@@ -167,7 +167,7 @@ go run -tags migrate ./cmd/app
 
 - AMQP RPC（基于 RabbitMQ 作为传输）
 - gRPC（基于 protobuf 的 [gRPC](https://grpc.io/) 框架）
-- REST http（基于 [Fiber](https://github.com/gofiber/fiber) 框架）
+- REST API（基于 [Fiber](https://github.com/gofiber/fiber) 框架）
 
 服务器路由器以相同的风格编写：
 
