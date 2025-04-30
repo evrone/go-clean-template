@@ -22,7 +22,7 @@ import (
 // @version     1.0
 // @host        localhost:8080
 // @BasePath    /v1
-func NewRouter(app *fiber.App, cfg *config.Config, l logger.Interface, t usecase.Translation) {
+func NewRouter(app *fiber.App, cfg *config.Config, t usecase.Translation, l logger.Interface) {
 	// Options
 	app.Use(middleware.Logger(l))
 	app.Use(middleware.Recovery(l))
@@ -45,6 +45,6 @@ func NewRouter(app *fiber.App, cfg *config.Config, l logger.Interface, t usecase
 	// Routers
 	apiV1Group := app.Group("/v1")
 	{
-		v1.NewTranslationRouter(apiV1Group, t, l)
+		v1.NewTranslationRoutes(apiV1Group, t, l)
 	}
 }

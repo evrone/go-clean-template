@@ -42,10 +42,10 @@ func (m *MockTranslation) EXPECT() *MockTranslationMockRecorder {
 }
 
 // History mocks base method.
-func (m *MockTranslation) History(arg0 context.Context) ([]entity.Translation, error) {
+func (m *MockTranslation) History(arg0 context.Context) (entity.TranslationHistory, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "History", arg0)
-	ret0, _ := ret[0].([]entity.Translation)
+	ret0, _ := ret[0].(entity.TranslationHistory)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }

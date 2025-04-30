@@ -17,7 +17,7 @@ import (
 // @Success     200 {object} entity.TranslationHistory
 // @Failure     500 {object} response.Error
 // @Router      /translation/history [get]
-func (r *translationRoutes) history(ctx *fiber.Ctx) error {
+func (r *V1) history(ctx *fiber.Ctx) error {
 	translationHistory, err := r.t.History(ctx.UserContext())
 	if err != nil {
 		r.l.Error(err, "http - v1 - history")
@@ -39,7 +39,7 @@ func (r *translationRoutes) history(ctx *fiber.Ctx) error {
 // @Failure     400 {object} response.Error
 // @Failure     500 {object} response.Error
 // @Router      /translation/do-translate [post]
-func (r *translationRoutes) doTranslate(ctx *fiber.Ctx) error {
+func (r *V1) doTranslate(ctx *fiber.Ctx) error {
 	var body request.Translate
 
 	if err := ctx.BodyParser(&body); err != nil {

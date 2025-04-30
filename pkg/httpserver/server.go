@@ -56,6 +56,7 @@ func New(opts ...Option) *Server {
 	return s
 }
 
+// Start -.
 func (s *Server) Start() {
 	go func() {
 		s.notify <- s.App.Listen(s.address)

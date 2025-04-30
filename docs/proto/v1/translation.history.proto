@@ -1,0 +1,29 @@
+syntax = "proto3";
+
+package grpc.v1;
+
+option go_package = "docs/proto/v1";
+
+// The Translation service definition.
+service Translation {
+  // RPC method to get translation history.
+  rpc GetHistory (GetHistoryRequest) returns (GetHistoryResponse);
+}
+
+// Request message for GetHistory.
+message GetHistoryRequest {
+  // Add fields if needed in the future.
+}
+
+// Response message for GetHistory.
+message GetHistoryResponse {
+  repeated TranslationHistory history = 1;
+}
+
+// Translation message structure.
+message TranslationHistory {
+  string source = 1;
+  string destination = 2;
+  string original = 3;
+  string translation = 4;
+}

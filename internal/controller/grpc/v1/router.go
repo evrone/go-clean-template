@@ -1,20 +1,18 @@
 package v1
 
 import (
+	v1 "github.com/evrone/go-clean-template/docs/proto/v1"
 	"github.com/evrone/go-clean-template/internal/usecase"
 	"github.com/evrone/go-clean-template/pkg/logger"
 	"github.com/go-playground/validator/v10"
-	"github.com/gofiber/fiber/v2"
+	pbgrpc "google.golang.org/grpc"
 )
 
 // NewTranslationRoutes -.
-func NewTranslationRoutes(apiV1Group fiber.Router, t usecase.Translation, l logger.Interface) {
+func NewTranslationRoutes(app *pbgrpc.Server, t usecase.Translation, l logger.Interface) {
 	r := &V1{t: t, l: l, v: validator.New(validator.WithRequiredStructEnabled())}
 
-	translationGroup := apiV1Group.Group("/translation")
-
 	{
-		translationGroup.Get("/history", r.history)
-		translationGroup.Post("/do-translate", r.doTranslate)
+		v1.RegisterTranslationServer(app, r)
 	}
 }
