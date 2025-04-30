@@ -35,7 +35,7 @@
 
 - AMQP RPC (на основе RabbitMQ в качестве транспорта)
 - gRPC ([gRPC](https://grpc.io/) фреймворк на основе protobuf)
-- REST HTTP ([Fiber](https://github.com/gofiber/fiber) фреймворк)
+- REST API ([Fiber](https://github.com/gofiber/fiber) фреймворк)
 
 ## Содержание
 
@@ -151,7 +151,7 @@ go run -tags migrate ./cmd/app
 
 - AMQP RPC (на основе RabbitMQ в качестве транспорта)
 - gRPC ([gRPC](https://grpc.io/) фреймворк на основе protobuf)
-- REST HTTP ([Fiber](https://github.com/gofiber/fiber) фреймворк)
+- REST API ([Fiber](https://github.com/gofiber/fiber) фреймворк)
 
 Маршрутизаторы http сервера пишутся в едином стиле:
 
