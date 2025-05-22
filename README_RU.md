@@ -49,6 +49,8 @@
 ### Локальная разработка
 
 ```sh
+# Create .env
+cp .env.example .env
 # Postgres, RabbitMQ
 make compose-up
 # Запуск приложения и миграций

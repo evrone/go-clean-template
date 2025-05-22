@@ -1,5 +1,9 @@
-include .env.example
+ifneq ($(wildcard .env),)
+include .env
 export
+else
+$(error .env file not found! Please create a .env in the project root before running make)
+endif
 
 LOCAL_BIN:=$(CURDIR)/bin
 BASE_STACK = docker compose -f docker-compose.yml
