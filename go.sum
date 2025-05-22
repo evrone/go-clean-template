@@ -1027,8 +1027,8 @@ github.com/gocql/gocql v0.0.0-20210515062232-b7ef815b4556/go.mod h1:DL0ekTmBSTdl
 github.com/godbus/dbus v0.0.0-20190726142602-4481cbc300e2 h1:ZpnhV/YsD2/4cESfV5+Hoeu/iUR3ruzNvZ+yQfO03a0=
 github.com/godbus/dbus v0.0.0-20190726142602-4481cbc300e2/go.mod h1:bBOAhwG1umN6/6ZUMtDFBMQR8jRg9O75tm9K00oMsK4=
 github.com/godbus/dbus/v5 v5.0.4/go.mod h1:xhWf0FNVPg57R7Z0UbKHbJfkEywrmjJnf7w5xrFpKfA=
-github.com/gofiber/fiber/v2 v2.52.6 h1:Rfp+ILPiYSvvVuIPvxrBns+HJp8qGLDnLJawAu27XVI=
-github.com/gofiber/fiber/v2 v2.52.6/go.mod h1:YEcBbO/FB+5M1IZNBP9FO3J9281zgPAreiI1oqg8nDw=
+github.com/gofiber/fiber/v2 v2.52.7 h1:6xJpE4sSqErvMiEZo9ZpJLRSVcpkNBvioeqAHKwhTZY=
+github.com/gofiber/fiber/v2 v2.52.7/go.mod h1:YEcBbO/FB+5M1IZNBP9FO3J9281zgPAreiI1oqg8nDw=
 github.com/gofiber/swagger v1.1.1 h1:FZVhVQQ9s1ZKLHL/O0loLh49bYB5l1HEAgxDlcTtkRA=
 github.com/gofiber/swagger v1.1.1/go.mod h1:vtvY/sQAMc/lGTUCg0lqmBL7Ht9O7uzChpbvJeJQINw=
 github.com/gofrs/flock v0.12.1 h1:MTLVXXHf8ekldpJk3AKicLij9MdwOWkZ+a/jHHZby9E=
