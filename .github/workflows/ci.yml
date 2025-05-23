@@ -67,8 +67,6 @@ jobs:
       - uses: actions/setup-go@v5
         with:
           go-version: 1.24
-      - name: Prepare environment file
-        run: cp .env.example .env
       - name: Unit Tests
         run: "make test"
       - name: Upload coverage report
@@ -79,7 +77,5 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Prepare environment file
-        run: cp .env.example .env
       - name: Integration tests
         run: "make compose-up-integration-test"

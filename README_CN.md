@@ -51,8 +51,6 @@ golang服务的整洁架构模板
 本地开发
 
 ```sh
-# Create .env
-cp .env.example .env
 # Postgres, RabbitMQ
 make compose-up
 # Run app with migrations

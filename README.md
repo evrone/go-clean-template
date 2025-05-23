@@ -54,8 +54,6 @@ This template implements three types of servers:
 ### Local development
 
 ```sh
-# Create .env
-cp .env.example .env
 # Postgres, RabbitMQ
 make compose-up
 # Run app with migrations
