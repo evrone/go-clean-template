@@ -2,7 +2,9 @@ ifneq ($(wildcard .env),)
 include .env
 export
 else
-$(error .env file not found! Please create a .env in the project root before running make)
+$(warning WARNING: .env file not found! Using .env.example)
+include .env.example
+export
 endif
 
 LOCAL_BIN:=$(CURDIR)/bin
