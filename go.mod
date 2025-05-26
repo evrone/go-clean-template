@@ -17,7 +17,7 @@ tool (
 require (
 	github.com/Conight/go-googletrans v0.2.4
 	github.com/Masterminds/squirrel v1.5.4
-	github.com/ansrivas/fiberprometheus/v2 v2.9.1
+	github.com/ansrivas/fiberprometheus/v2 v2.10.0
 	github.com/caarlos0/env/v11 v11.3.1
 	github.com/go-playground/validator/v10 v10.26.0
 	github.com/goccy/go-json v0.10.5
@@ -356,9 +356,9 @@ require (
 	go.opentelemetry.io/auto/sdk v1.1.0 // indirect
 	go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc v0.59.0 // indirect
 	go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp v0.60.0 // indirect
-	go.opentelemetry.io/otel v1.35.0 // indirect
-	go.opentelemetry.io/otel/metric v1.35.0 // indirect
-	go.opentelemetry.io/otel/trace v1.35.0 // indirect
+	go.opentelemetry.io/otel v1.36.0 // indirect
+	go.opentelemetry.io/otel/metric v1.36.0 // indirect
+	go.opentelemetry.io/otel/trace v1.36.0 // indirect
 	go.uber.org/atomic v1.11.0 // indirect
 	go.uber.org/automaxprocs v1.6.0 // indirect
 	go.uber.org/multierr v1.6.0 // indirect
