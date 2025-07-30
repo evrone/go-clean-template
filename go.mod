@@ -29,7 +29,7 @@ require (
 	github.com/rabbitmq/amqp091-go v1.10.0
 	github.com/rs/zerolog v1.34.0
 	github.com/stretchr/testify v1.10.0
-	github.com/swaggo/swag v1.16.5
+	github.com/swaggo/swag v1.16.6
 	go.uber.org/mock v0.5.2
 	google.golang.org/grpc v1.74.2
 	google.golang.org/protobuf v1.36.6
