@@ -129,6 +129,7 @@ func (s *Server) reconnect() {
 	err := s.conn.AttemptConnect()
 	if err != nil {
 		s.error <- err
+
 		close(s.error)
 
 		return

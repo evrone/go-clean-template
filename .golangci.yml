@@ -3,6 +3,7 @@ version: "2"
 linters:
   default: none
   enable:
+    - wsl_v5
     - asciicheck
     - bodyclose
     - copyloopvar
@@ -49,8 +50,11 @@ linters:
     - unparam
     - unused
     - whitespace
-    - wsl
   settings:
+    wsl_v5:
+      allow-first-in-block: true
+      allow-whole-block: false
+      branch-max-lines: 2
     dupl:
       threshold: 100
     errcheck:

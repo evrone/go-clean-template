@@ -115,6 +115,7 @@ func (c *Client) RemoteCall(handler string, request, response interface{}) error
 	select {
 	case <-c.stop:
 		time.Sleep(c.timeout)
+
 		select {
 		case <-c.stop:
 			return ErrConnectionClosed
@@ -186,6 +187,7 @@ func (c *Client) reconnect() {
 	err := c.conn.AttemptConnect()
 	if err != nil {
 		c.error <- err
+
 		close(c.error)
 
 		return
