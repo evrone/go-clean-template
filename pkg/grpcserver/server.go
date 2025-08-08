@@ -2,6 +2,7 @@
 package grpcserver
 
 import (
+	"context"
 	"fmt"
 	"net"
 
@@ -38,15 +39,19 @@ func New(opts ...Option) *Server {
 // Start -.
 func (s *Server) Start() {
 	go func() {
-		ln, err := net.Listen("tcp", s.address)
+		var lc net.ListenConfig
+
+		ln, err := lc.Listen(context.Background(), "tcp", s.address)
 		if err != nil {
 			s.notify <- fmt.Errorf("failed to listen: %w", err)
+
 			close(s.notify)
 
 			return
 		}
 
 		s.notify <- s.App.Serve(ln)
+
 		close(s.notify)
 	}()
 }
