@@ -88,7 +88,7 @@ services:
           - app.lvh.me
 
   nginx:
-    image: nginx:1.29-alpine
+    image: nginx:1.29.1-alpine
     volumes:
       - ./nginx/nginx.conf:/etc/nginx/nginx.conf
     ports:
