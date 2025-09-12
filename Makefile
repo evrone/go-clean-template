@@ -104,6 +104,7 @@ migrate-up: ### migration up
 
 bin-deps: ### install tools
 	go install tool
+	go install -tags 'postgres' github.com/golang-migrate/migrate/v4/cmd/migrate
 .PHONY: bin-deps
 
 pre-commit: swag-v1 proto-v1 mock format linter-golangci test ### run pre-commit
