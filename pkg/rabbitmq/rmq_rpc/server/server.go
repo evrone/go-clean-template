@@ -1,6 +1,9 @@
+// Package server implements RabbitMQ RPC server.
 package server
 
 import (
+	"context"
+	"errors"
 	"fmt"
 	"time"
 
@@ -8,6 +11,7 @@ import (
 	rmqrpc "github.com/evrone/go-clean-template/pkg/rabbitmq/rmq_rpc"
 	"github.com/goccy/go-json"
 	amqp "github.com/rabbitmq/amqp091-go"
+	"golang.org/x/sync/errgroup"
 )
 
 const (
@@ -21,10 +25,13 @@ type CallHandler func(*amqp.Delivery) (interface{}, error)
 
 // Server -.
 type Server struct {
+	ctx context.Context
+	eg  *errgroup.Group
+
 	conn   *rmqrpc.Connection
-	error  chan error
-	stop   chan struct{}
 	router map[string]CallHandler
+	stop   chan struct{}
+	notify chan error
 
 	timeout time.Duration
 
@@ -33,6 +40,9 @@ type Server struct {
 
 // New -.
 func New(url, serverExchange string, router map[string]CallHandler, l logger.Interface, opts ...Option) (*Server, error) {
+	group, ctx := errgroup.WithContext(context.Background())
+	group.SetLimit(1) // Run only one goroutine
+
 	cfg := rmqrpc.Config{
 		URL:      url,
 		WaitTime: _defaultWaitTime,
@@ -40,10 +50,12 @@ func New(url, serverExchange string, router map[string]CallHandler, l logger.Int
 	}
 
 	s := &Server{
+		ctx:     ctx,
+		eg:      group,
 		conn:    rmqrpc.New(serverExchange, cfg),
-		error:   make(chan error),
-		stop:    make(chan struct{}),
 		router:  router,
+		stop:    make(chan struct{}),
+		notify:  make(chan error, 1),
 		timeout: _defaultTimeout,
 		logger:  l,
 	}
@@ -63,29 +75,84 @@ func New(url, serverExchange string, router map[string]CallHandler, l logger.Int
 
 // Start -.
 func (s *Server) Start() {
-	go s.consumer()
+	s.eg.Go(func() error {
+		err := s.handleMessages()
+		if err != nil {
+			s.notify <- err
+
+			close(s.notify)
+
+			return err
+		}
+
+		return nil
+	})
+
+	s.logger.Info("rmq_rpc server - Server - Started")
 }
 
-func (s *Server) consumer() {
+// Notify -.
+func (s *Server) Notify() <-chan error {
+	return s.notify
+}
+
+// Shutdown -.
+func (s *Server) Shutdown() error {
+	var shutdownErrors []error
+
+	close(s.stop)
+
+	// Wait for all goroutines to finish and get any error
+	err := s.eg.Wait()
+	if err != nil && !errors.Is(err, context.Canceled) {
+		s.logger.Error(err, "rmq_rpc server - Server - Shutdown - s.eg.Wait")
+
+		shutdownErrors = append(shutdownErrors, err)
+	}
+
+	// Close connection
+
+	err = s.conn.Connection.Close()
+	if err != nil {
+		s.logger.Error(err, "rmq_rpc server - Server - Shutdown - s.Connection.Close")
+
+		shutdownErrors = append(shutdownErrors, err)
+	}
+
+	s.logger.Info("rmq_rpc server - Server - Shutdown")
+
+	return errors.Join(shutdownErrors...)
+}
+
+func (s *Server) handleMessages() error {
 	for {
 		select {
+		case <-s.ctx.Done():
+			return s.ctx.Err()
 		case <-s.stop:
-			return
+			return nil
 		case d, opened := <-s.conn.Delivery:
 			if !opened {
-				s.reconnect()
+				err := s.reconnect()
+				if err != nil {
+					return err
+				}
 
-				return
+				break
 			}
-
-			_ = d.Ack(false) //nolint:errcheck // don't need this
 
 			s.serveCall(&d)
 		}
 	}
 }
 
+func (s *Server) reconnect() error {
+	return s.conn.AttemptConnect()
+}
+
 func (s *Server) serveCall(d *amqp.Delivery) {
+	defer s.ack(d, false)
+
 	callHandler, ok := s.router[d.Type]
 	if !ok {
 		s.publish(d, nil, rmqrpc.ErrBadHandler.Error())
@@ -110,56 +177,27 @@ func (s *Server) serveCall(d *amqp.Delivery) {
 	s.publish(d, body, rmqrpc.Success)
 }
 
+func (s *Server) ack(d *amqp.Delivery, multiple bool) {
+	err := d.Ack(multiple)
+	if err != nil {
+		s.logger.Error(err, "rmq_rpc server - Server - ack - d.Ack")
+	}
+}
+
 func (s *Server) publish(d *amqp.Delivery, body []byte, status string) {
-	err := s.conn.Channel.Publish(d.ReplyTo, "", false, false,
+	err := s.conn.Channel.Publish(
+		d.ReplyTo,
+		"",
+		false,
+		false,
 		amqp.Publishing{
 			ContentType:   "application/json",
 			CorrelationId: d.CorrelationId,
 			Type:          status,
 			Body:          body,
-		})
+		},
+	)
 	if err != nil {
 		s.logger.Error(err, "rmq_rpc server - Server - publish - s.conn.Channel.Publish")
 	}
-}
-
-func (s *Server) reconnect() {
-	close(s.stop)
-
-	err := s.conn.AttemptConnect()
-	if err != nil {
-		s.error <- err
-
-		close(s.error)
-
-		return
-	}
-
-	s.stop = make(chan struct{})
-
-	go s.consumer()
-}
-
-// Notify -.
-func (s *Server) Notify() <-chan error {
-	return s.error
-}
-
-// Shutdown -.
-func (s *Server) Shutdown() error {
-	select {
-	case <-s.error:
-		return nil
-	default:
-	}
-
-	close(s.stop)
-	time.Sleep(s.timeout)
-
-	err := s.conn.Connection.Close()
-	if err != nil {
-		return fmt.Errorf("rmq_rpc server - Server - Shutdown - s.Connection.Close: %w", err)
-	}
-
-	return nil
 }

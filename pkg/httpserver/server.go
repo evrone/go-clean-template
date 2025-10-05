@@ -2,10 +2,14 @@
 package httpserver
 
 import (
+	"context"
+	"errors"
 	"time"
 
+	"github.com/evrone/go-clean-template/pkg/logger"
 	"github.com/goccy/go-json"
 	"github.com/gofiber/fiber/v2"
+	"golang.org/x/sync/errgroup"
 )
 
 const (
@@ -17,6 +21,9 @@ const (
 
 // Server -.
 type Server struct {
+	ctx context.Context
+	eg  *errgroup.Group
+
 	App    *fiber.App
 	notify chan error
 
@@ -25,17 +32,25 @@ type Server struct {
 	readTimeout     time.Duration
 	writeTimeout    time.Duration
 	shutdownTimeout time.Duration
+
+	logger logger.Interface
 }
 
 // New -.
-func New(opts ...Option) *Server {
+func New(l logger.Interface, opts ...Option) *Server {
+	group, ctx := errgroup.WithContext(context.Background())
+	group.SetLimit(1) // Run only one goroutine
+
 	s := &Server{
+		ctx:             ctx,
+		eg:              group,
 		App:             nil,
 		notify:          make(chan error, 1),
 		address:         _defaultAddr,
 		readTimeout:     _defaultReadTimeout,
 		writeTimeout:    _defaultWriteTimeout,
 		shutdownTimeout: _defaultShutdownTimeout,
+		logger:          l,
 	}
 
 	// Custom options
@@ -58,11 +73,20 @@ func New(opts ...Option) *Server {
 
 // Start -.
 func (s *Server) Start() {
-	go func() {
-		s.notify <- s.App.Listen(s.address)
+	s.eg.Go(func() error {
+		err := s.App.Listen(s.address)
+		if err != nil {
+			s.notify <- err
 
-		close(s.notify)
-	}()
+			close(s.notify)
+
+			return err
+		}
+
+		return nil
+	})
+
+	s.logger.Info("http server - Server - Started")
 }
 
 // Notify -.
@@ -72,5 +96,24 @@ func (s *Server) Notify() <-chan error {
 
 // Shutdown -.
 func (s *Server) Shutdown() error {
-	return s.App.ShutdownWithTimeout(s.shutdownTimeout)
+	var shutdownErrors []error
+
+	err := s.App.ShutdownWithTimeout(s.shutdownTimeout)
+	if err != nil && !errors.Is(err, context.Canceled) {
+		s.logger.Error(err, "http server - Server - Shutdown - s.App.ShutdownWithTimeout")
+
+		shutdownErrors = append(shutdownErrors, err)
+	}
+
+	// Wait for all goroutines to finish and get any error
+	err = s.eg.Wait()
+	if err != nil && !errors.Is(err, context.Canceled) {
+		s.logger.Error(err, "http server - Server - Shutdown - s.eg.Wait")
+
+		shutdownErrors = append(shutdownErrors, err)
+	}
+
+	s.logger.Info("http server - Server - Shutdown")
+
+	return errors.Join(shutdownErrors...)
 }
