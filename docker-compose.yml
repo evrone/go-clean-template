@@ -99,12 +99,21 @@ services:
     depends_on:
       - db
       - rabbitmq
+    deploy:
+      resources:
+        limits:
+          cpus: '1.00'
+          memory: '2Gb'
+        reservations:
+          cpus: '0.60'
+          memory: '1Gb'
     networks:
       app_network:
         aliases:
           - app.lvh.me
 
   nginx:
+    container_name: nginx
     image: nginx:1.29.2-alpine
     volumes:
       - ./nginx/nginx.conf:/etc/nginx/nginx.conf
