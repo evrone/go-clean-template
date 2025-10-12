@@ -38,8 +38,10 @@ supported by [Evrone](https://evrone.com/?utm_source=github&utm_campaign=go-clea
 
 This template implements three types of servers:
 
-- AMQP RPC (based on RabbitMQ as [transport](https://github.com/rabbitmq/amqp091-go))
-- MQ RPC (based on NATS as [transport](https://github.com/nats-io/nats.go))
+- AMQP RPC (based on RabbitMQ as [transport](https://github.com/rabbitmq/amqp091-go)
+  and [Request-Reply pattern](https://www.enterpriseintegrationpatterns.com/patterns/messaging/RequestReply.html))
+- MQ RPC (based on NATS as [transport](https://github.com/nats-io/nats.go)
+  and [Request-Reply pattern](https://www.enterpriseintegrationpatterns.com/patterns/messaging/RequestReply.html))
 - gRPC ([gRPC](https://grpc.io/) framework based on protobuf)
 - REST API ([Fiber](https://github.com/gofiber/fiber) framework)
 
@@ -108,9 +110,9 @@ Configuration and logger initialization. Then the main function "continues" in
 
 ### `config`
 
-The twelve-factor app stores config in environment variables (often shortened to `env vars` or `env`). Env vars are easy 
-to change between deploys without changing any code; unlike config files, there is little chance of them being checked 
-into the code repo accidentally; and unlike custom config files, or other config mechanisms such as Java System 
+The twelve-factor app stores config in environment variables (often shortened to `env vars` or `env`). Env vars are easy
+to change between deploys without changing any code; unlike config files, there is little chance of them being checked
+into the code repo accidentally; and unlike custom config files, or other config mechanisms such as Java System
 Properties, they are a language- and OS-agnostic standard.
 
 Config: [config.go](config/config.go)
@@ -192,7 +194,7 @@ routes := make(map[string]server.CallHandler)
 #### `internal/controller/grpc`
 
 Simple gRPC versioning.
-For v2, we will need to add the `grpc/v2` folder with the same content. 
+For v2, we will need to add the `grpc/v2` folder with the same content.
 Also add the `v2` folder to the proto files in `docs/proto`.
 And in the file `internal/controller/grpc/router.go` add the line:
 
