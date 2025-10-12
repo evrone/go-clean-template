@@ -39,6 +39,7 @@ supported by [Evrone](https://evrone.com/?utm_source=github&utm_campaign=go-clea
 This template implements three types of servers:
 
 - AMQP RPC (based on RabbitMQ as [transport](https://github.com/rabbitmq/amqp091-go))
+- MQ RPC (based on NATS as [transport](https://github.com/nats-io/nats.go))
 - gRPC ([gRPC](https://grpc.io/) framework based on protobuf)
 - REST API ([Fiber](https://github.com/gofiber/fiber) framework)
 
@@ -54,7 +55,7 @@ This template implements three types of servers:
 ### Local development
 
 ```sh
-# Postgres, RabbitMQ
+# Postgres, RabbitMQ, NATS
 make compose-up
 # Run app with migrations
 make run
@@ -79,6 +80,9 @@ Check services:
   - URL: `amqp://guest:guest@127.0.0.1:5672/`
   - Client Exchange: `rpc_client`
   - Server Exchange: `rpc_server`
+- NATS RPC:
+  - URL: `nats://guest:guest@127.0.0.1:4222/`
+  - Server Exchange: `rpc_server`
 - REST API:
   - http://app.lvh.me/healthz | http://127.0.0.1:8080/healthz
   - http://app.lvh.me/metrics | http://127.0.0.1:8080/metrics
@@ -90,6 +94,9 @@ Check services:
   - `postgres://user:myAwEsOm3pa55@w0rd@127.0.0.1:5432/db`
 - RabbitMQ:
   - http://rabbitmq.lvh.me | http://127.0.0.1:15672
+  - Credentials: `guest` / `guest`
+- NATS monitoring:
+  - http://nats.lvh.me | http://127.0.0.1:8222/
   - Credentials: `guest` / `guest`
 
 ## Project structure

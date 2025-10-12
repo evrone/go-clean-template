@@ -11,18 +11,20 @@ import (
 	amqprpc "github.com/evrone/go-clean-template/internal/controller/amqp_rpc"
 	"github.com/evrone/go-clean-template/internal/controller/grpc"
 	"github.com/evrone/go-clean-template/internal/controller/http"
+	natsrpc "github.com/evrone/go-clean-template/internal/controller/nats_rpc"
 	"github.com/evrone/go-clean-template/internal/repo/persistent"
 	"github.com/evrone/go-clean-template/internal/repo/webapi"
 	"github.com/evrone/go-clean-template/internal/usecase/translation"
 	"github.com/evrone/go-clean-template/pkg/grpcserver"
 	"github.com/evrone/go-clean-template/pkg/httpserver"
 	"github.com/evrone/go-clean-template/pkg/logger"
+	natsRPCServer "github.com/evrone/go-clean-template/pkg/nats/nats_rpc/server"
 	"github.com/evrone/go-clean-template/pkg/postgres"
-	"github.com/evrone/go-clean-template/pkg/rabbitmq/rmq_rpc/server"
+	rmqRPCServer "github.com/evrone/go-clean-template/pkg/rabbitmq/rmq_rpc/server"
 )
 
 // Run creates objects via constructors.
-func Run(cfg *config.Config) {
+func Run(cfg *config.Config) { //nolint: gocyclo,cyclop,funlen,gocritic,nolintlint
 	l := logger.New(cfg.Log.Level)
 
 	// Repository
@@ -41,9 +43,17 @@ func Run(cfg *config.Config) {
 	// RabbitMQ RPC Server
 	rmqRouter := amqprpc.NewRouter(translationUseCase, l)
 
-	rmqServer, err := server.New(cfg.RMQ.URL, cfg.RMQ.ServerExchange, rmqRouter, l)
+	rmqServer, err := rmqRPCServer.New(cfg.RMQ.URL, cfg.RMQ.ServerExchange, rmqRouter, l)
 	if err != nil {
 		l.Fatal(fmt.Errorf("app - Run - rmqServer - server.New: %w", err))
+	}
+
+	// NATS RPC Server
+	natsRouter := natsrpc.NewRouter(translationUseCase, l)
+
+	natsServer, err := natsRPCServer.New(cfg.NATS.URL, cfg.NATS.ServerExchange, natsRouter, l)
+	if err != nil {
+		l.Fatal(fmt.Errorf("app - Run - natsServer - server.New: %w", err))
 	}
 
 	// gRPC Server
@@ -56,6 +66,7 @@ func Run(cfg *config.Config) {
 
 	// Start servers
 	rmqServer.Start()
+	natsServer.Start()
 	grpcServer.Start()
 	httpServer.Start()
 
@@ -72,6 +83,8 @@ func Run(cfg *config.Config) {
 		l.Error(fmt.Errorf("app - Run - grpcServer.Notify: %w", err))
 	case err = <-rmqServer.Notify():
 		l.Error(fmt.Errorf("app - Run - rmqServer.Notify: %w", err))
+	case err = <-natsServer.Notify():
+		l.Error(fmt.Errorf("app - Run - natsServer.Notify: %w", err))
 	}
 
 	// Shutdown
@@ -88,5 +101,10 @@ func Run(cfg *config.Config) {
 	err = rmqServer.Shutdown()
 	if err != nil {
 		l.Error(fmt.Errorf("app - Run - rmqServer.Shutdown: %w", err))
+	}
+
+	err = natsServer.Shutdown()
+	if err != nil {
+		l.Error(fmt.Errorf("app - Run - natsServer.Shutdown: %w", err))
 	}
 }

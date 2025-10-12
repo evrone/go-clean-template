@@ -36,6 +36,7 @@ golang服务的整洁架构模板
 此模板实现了三种类型的服务器：
 
 - AMQP RPC（基于 RabbitMQ 作为传输）
+- NATS RPC（基于 NATS 作为传输）
 - gRPC（基于 protobuf 的 [gRPC](https://grpc.io/) 框架）
 - REST API（基于 [Fiber](https://github.com/gofiber/fiber) 框架）
 
@@ -46,30 +47,12 @@ golang服务的整洁架构模板
 - [依赖注入](#依赖注入)
 - [整洁架构](#整洁架构)
 
-## 快速开始
-
-本地开发
-
-```sh
-# Postgres, RabbitMQ
-make compose-up
-# Run app with migrations
-make run
-```
-
-集成测试（可以在CI中运行）
-
-```sh
-# DB, app + migrations, integration tests
-make compose-up-integration-test
-```
-
 ## Quick start
 
 ### Local development
 
 ```sh
-# Postgres, RabbitMQ
+# Postgres, RabbitMQ, NATS
 make compose-up
 # Run app with migrations
 make run
@@ -94,6 +77,9 @@ Check services:
   - URL: `amqp://guest:guest@127.0.0.1:5672/`
   - Client Exchange: `rpc_client`
   - Server Exchange: `rpc_server`
+- NATS RPC:
+  - URL: `nats://guest:guest@127.0.0.1:4222/`
+  - Server Exchange: `rpc_server`
 - REST API:
   - http://app.lvh.me/healthz | http://127.0.0.1:8080/healthz
   - http://app.lvh.me/metrics | http://127.0.0.1:8080/metrics
@@ -105,6 +91,9 @@ Check services:
   - `postgres://user:myAwEsOm3pa55@w0rd@127.0.0.1:5432/db`
 - RabbitMQ:
   - http://rabbitmq.lvh.me | http://127.0.0.1:15672
+  - Credentials: `guest` / `guest`
+- NATS monitoring:
+  - http://nats.lvh.me | http://127.0.0.1:8222/
   - Credentials: `guest` / `guest`
 
 ## 工程架构

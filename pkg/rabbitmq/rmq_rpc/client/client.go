@@ -138,20 +138,17 @@ func (c *Client) RemoteCall(handler string, request, response interface{}) error
 		return fmt.Errorf("rmq_rpc client - Client - RemoteCall - c.remoteCallWait: %w", err)
 	}
 
-	if call.status == rmqrpc.Success {
+	switch call.status {
+	case rmqrpc.Success:
 		err = json.Unmarshal(call.body, &response)
 		if err != nil {
 			return fmt.Errorf("rmq_rpc client - Client - RemoteCall - json.Unmarshal: %w", err)
 		}
 
 		return nil
-	}
-
-	if call.status == rmqrpc.ErrBadHandler.Error() {
+	case rmqrpc.ErrBadHandler.Error():
 		return rmqrpc.ErrBadHandler
-	}
-
-	if call.status == rmqrpc.ErrInternalServer.Error() {
+	case rmqrpc.ErrInternalServer.Error():
 		return rmqrpc.ErrInternalServer
 	}
 

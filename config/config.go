@@ -15,6 +15,7 @@ type (
 		PG      PG
 		GRPC    GRPC
 		RMQ     RMQ
+		NATS    NATS
 		Metrics Metrics
 		Swagger Swagger
 	}
@@ -52,6 +53,12 @@ type (
 		ServerExchange string `env:"RMQ_RPC_SERVER,required"`
 		ClientExchange string `env:"RMQ_RPC_CLIENT,required"`
 		URL            string `env:"RMQ_URL,required"`
+	}
+
+	// NATS -.
+	NATS struct {
+		ServerExchange string `env:"NATS_RPC_SERVER,required"`
+		URL            string `env:"NATS_URL,required"`
 	}
 
 	// Metrics -.
