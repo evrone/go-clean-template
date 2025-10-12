@@ -32,6 +32,9 @@ x-backend-app-environment: &x-backend-app-environment
   RMQ_RPC_SERVER: "rpc_server"
   RMQ_RPC_CLIENT: "rpc_client"
   RMQ_URL: "amqp://guest:guest@rabbitmq:5672/"
+  # NATS
+  NATS_RPC_SERVER: "rpc_server"
+  NATS_URL: "nats://guest:guest@nats:4222/"
   # Metrics
   METRICS_ENABLED: "true"
   # Swagger
@@ -67,6 +70,20 @@ services:
       app_network:
         aliases:
           - rabbitmq.lvh.me
+
+  nats:
+    container_name: nats
+    image: nats:2.11-alpine
+    command: [ "-m", "8222", "-sd", "/nats-data", "-user", "guest", "-pass", "guest" ]
+    ports:
+      - "4222:4222"
+      - "8222:8222"
+    volumes:
+      - nats_data:/nats-data
+    networks:
+      app_network:
+        aliases:
+          - nats.lvh.me
 
   app:
     container_name: app
@@ -110,3 +127,4 @@ networks:
 volumes:
   db_data:
   rabbitmq_data:
+  nats_data:
