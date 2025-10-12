@@ -33,8 +33,10 @@
 
 Этот шаблон поддерживает три типа серверов:
 
-- AMQP RPC (на основе RabbitMQ в качестве [транспорта](https://github.com/rabbitmq/amqp091-go))
-- NATS RPC (на основе NATS в качестве [транспорта](https://github.com/nats-io/nats.go))
+- AMQP RPC (на основе RabbitMQ в качестве [транспорта](https://github.com/rabbitmq/amqp091-go)
+  и [Request-Reply паттерна]((https://www.enterpriseintegrationpatterns.com/patterns/messaging/RequestReply.html)))
+- NATS RPC (на основе NATS в качестве [транспорта](https://github.com/nats-io/nats.go)
+  и [Request-Reply паттерна]((https://www.enterpriseintegrationpatterns.com/patterns/messaging/RequestReply.html))))
 - gRPC ([gRPC](https://grpc.io/) фреймворк на основе protobuf)
 - REST API ([Fiber](https://github.com/gofiber/fiber) фреймворк)
 
@@ -331,8 +333,8 @@ func (uc *UseCase) Do() {
 
 **Внешний слой** имеет ограничения:
 
-- Компоненты этого слоя не могут знать друг о друге и взаимодействовать напрямую. Обращение друг к другу происходит через
-  внутренний слой - слой бизнес-логики.
+- Компоненты этого слоя не могут знать друг о друге и взаимодействовать напрямую. Обращение друг к другу происходит
+  через внутренний слой - слой бизнес-логики.
 - Вызовы во внутренний слой выполняются через интерфейсы (!).
 - Данные передаются в формате, удобном для бизнес-логики (структуры хранятся в `internal/entity`).
 
