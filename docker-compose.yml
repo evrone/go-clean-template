@@ -114,7 +114,7 @@ services:
 
   nginx:
     container_name: nginx
-    image: nginx:1.29.2-alpine
+    image: nginx:1.29.3-alpine
     volumes:
       - ./nginx/nginx.conf:/etc/nginx/nginx.conf
     ports:
