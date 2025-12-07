@@ -105,7 +105,7 @@ linters:
         path: integration-test
       - linters:
           - godot
-        path: internal/controller/http
+        path: internal
     paths:
       - bin/
       - third_party$
