@@ -86,7 +86,7 @@ func (s *Server) Start() {
 		return nil
 	})
 
-	s.logger.Info("http server - Server - Started")
+	s.logger.Info("restapi server - Server - Started")
 }
 
 // Notify -.
@@ -100,7 +100,7 @@ func (s *Server) Shutdown() error {
 
 	err := s.App.ShutdownWithTimeout(s.shutdownTimeout)
 	if err != nil && !errors.Is(err, context.Canceled) {
-		s.logger.Error(err, "http server - Server - Shutdown - s.App.ShutdownWithTimeout")
+		s.logger.Error(err, "restapi server - Server - Shutdown - s.App.ShutdownWithTimeout")
 
 		shutdownErrors = append(shutdownErrors, err)
 	}
@@ -108,12 +108,12 @@ func (s *Server) Shutdown() error {
 	// Wait for all goroutines to finish and get any error
 	err = s.eg.Wait()
 	if err != nil && !errors.Is(err, context.Canceled) {
-		s.logger.Error(err, "http server - Server - Shutdown - s.eg.Wait")
+		s.logger.Error(err, "restapi server - Server - Shutdown - s.eg.Wait")
 
 		shutdownErrors = append(shutdownErrors, err)
 	}
 
-	s.logger.Info("http server - Server - Shutdown")
+	s.logger.Info("restapi server - Server - Shutdown")
 
 	return errors.Join(shutdownErrors...)
 }

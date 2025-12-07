@@ -10,8 +10,8 @@ import (
 	"github.com/evrone/go-clean-template/config"
 	amqprpc "github.com/evrone/go-clean-template/internal/controller/amqp_rpc"
 	"github.com/evrone/go-clean-template/internal/controller/grpc"
-	"github.com/evrone/go-clean-template/internal/controller/http"
 	natsrpc "github.com/evrone/go-clean-template/internal/controller/nats_rpc"
+	"github.com/evrone/go-clean-template/internal/controller/restapi"
 	"github.com/evrone/go-clean-template/internal/repo/persistent"
 	"github.com/evrone/go-clean-template/internal/repo/webapi"
 	"github.com/evrone/go-clean-template/internal/usecase/translation"
@@ -62,7 +62,7 @@ func Run(cfg *config.Config) { //nolint: gocyclo,cyclop,funlen,gocritic,nolintli
 
 	// HTTP Server
 	httpServer := httpserver.New(l, httpserver.Port(cfg.HTTP.Port), httpserver.Prefork(cfg.HTTP.UsePreforkMode))
-	http.NewRouter(httpServer.App, cfg, translationUseCase, l)
+	restapi.NewRouter(httpServer.App, cfg, translationUseCase, l)
 
 	// Start servers
 	rmqServer.Start()

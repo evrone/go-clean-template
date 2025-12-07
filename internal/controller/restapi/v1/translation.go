@@ -3,7 +3,7 @@ package v1
 import (
 	"net/http"
 
-	"github.com/evrone/go-clean-template/internal/controller/http/v1/request"
+	"github.com/evrone/go-clean-template/internal/controller/restapi/v1/request"
 	"github.com/evrone/go-clean-template/internal/entity"
 	"github.com/gofiber/fiber/v2"
 )
@@ -20,7 +20,7 @@ import (
 func (r *V1) history(ctx *fiber.Ctx) error {
 	translationHistory, err := r.t.History(ctx.UserContext())
 	if err != nil {
-		r.l.Error(err, "http - v1 - history")
+		r.l.Error(err, "restapi - v1 - history")
 
 		return errorResponse(ctx, http.StatusInternalServerError, "database problems")
 	}
@@ -43,13 +43,13 @@ func (r *V1) doTranslate(ctx *fiber.Ctx) error {
 	var body request.Translate
 
 	if err := ctx.BodyParser(&body); err != nil {
-		r.l.Error(err, "http - v1 - doTranslate")
+		r.l.Error(err, "restapi - v1 - doTranslate")
 
 		return errorResponse(ctx, http.StatusBadRequest, "invalid request body")
 	}
 
 	if err := r.v.Struct(body); err != nil {
-		r.l.Error(err, "http - v1 - doTranslate")
+		r.l.Error(err, "restapi - v1 - doTranslate")
 
 		return errorResponse(ctx, http.StatusBadRequest, "invalid request body")
 	}
@@ -63,7 +63,7 @@ func (r *V1) doTranslate(ctx *fiber.Ctx) error {
 		},
 	)
 	if err != nil {
-		r.l.Error(err, "http - v1 - doTranslate")
+		r.l.Error(err, "restapi - v1 - doTranslate")
 
 		return errorResponse(ctx, http.StatusInternalServerError, "translation service problems")
 	}
