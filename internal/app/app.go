@@ -2,6 +2,7 @@
 package app
 
 import (
+	"context"
 	"fmt"
 	"os"
 	"os/signal"
@@ -12,6 +13,7 @@ import (
 	"github.com/evrone/go-clean-template/internal/controller/grpc"
 	natsrpc "github.com/evrone/go-clean-template/internal/controller/nats_rpc"
 	"github.com/evrone/go-clean-template/internal/controller/restapi"
+	"github.com/evrone/go-clean-template/internal/entity"
 	"github.com/evrone/go-clean-template/internal/repo/persistent"
 	"github.com/evrone/go-clean-template/internal/repo/webapi"
 	"github.com/evrone/go-clean-template/internal/usecase/translation"
@@ -26,6 +28,11 @@ import (
 // Run creates objects via constructors.
 func Run(cfg *config.Config) { //nolint: gocyclo,cyclop,funlen,gocritic,nolintlint
 	l := logger.New(cfg.Log.Level)
+
+	// AWS Simple Email Service
+	if err := entity.InitSES(context.Background()); err != nil {
+		l.Fatal(fmt.Errorf("app - Run - InitSES: %w", err))
+	}
 
 	// Repository
 	pg, err := postgres.New(cfg.PG.URL, postgres.MaxPoolSize(cfg.PG.PoolMax))
