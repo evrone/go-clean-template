@@ -201,11 +201,29 @@ routes := make(map[string]server.CallHandler)
 reflection.Register(app)
 ```
 
-#### `internal/controller/http`
+#### `internal/controller/nats_rpc`
+
+简单的 RPC 版本控制。  
+对于 v2，我们需要添加 `nats_rpc/v2` 文件夹，内容相同。  
+并在文件 `internal/controller/nats_rpc/router.go` 中添加以下行：
+
+```go
+routes := make(map[string]server.CallHandler)
+
+{
+    v1.NewTranslationRoutes(routes, t, l)
+}
+
+{
+    v2.NewTranslationRoutes(routes, t, l)
+}
+```
+
+#### `internal/controller/restapi`
 
 简单的 REST 版本控制
-对于v2版本，我们需要添加`http/v2`文件夹，内容相同
-在文件 `internal/controller/http/router.go` 中添加以下行：
+对于v2版本，我们需要添加`restapi/v2`文件夹，内容相同
+在文件 `internal/controller/restapi/router.go` 中添加以下行：
 
 ```go
 apiV1Group := app.Group("/v1")

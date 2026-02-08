@@ -210,11 +210,29 @@ And in the file `internal/controller/grpc/router.go` add the line:
 reflection.Register(app)
 ```
 
-#### `internal/controller/http`
+#### `internal/controller/nats_rpc`
+
+Simple RPC versioning.
+For v2, we will need to add the `nats_rpc/v2` folder with the same content.
+And in the file `internal/controller/nats_rpc/router.go` add the line:
+
+```go
+routes := make(map[string]server.CallHandler)
+
+{
+    v1.NewTranslationRoutes(routes, t, l)
+}
+
+{
+    v2.NewTranslationRoutes(routes, t, l)
+}
+```
+
+#### `internal/controller/restapi`
 
 Simple REST versioning.
-For v2, we will need to add the `http/v2` folder with the same content.
-And in the file `internal/controller/http/router.go` add the line:
+For v2, we will need to add the `restapi/v2` folder with the same content.
+And in the file `internal/controller/restapi/router.go` add the line:
 
 ```go
 apiV1Group := app.Group("/v1")
