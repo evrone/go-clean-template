@@ -205,11 +205,29 @@ routes := make(map[string]server.CallHandler)
 reflection.Register(app)
 ```
 
-#### `internal/controller/http`
+#### `internal/controller/nats_rpc`
+
+Простое версионирование RPC.
+Для версии v2 нужно будет добавить папку `nats_rpc/v2` с таким же содержимым.
+А в файле `internal/controller/nats_rpc/router.go` добавить строку:
+
+```go
+routes := make(map[string]server.CallHandler)
+
+{
+    v1.NewTranslationRoutes(routes, t, l)
+}
+
+{
+    v2.NewTranslationRoutes(routes, t, l)
+}
+```
+
+#### `internal/controller/restapi`
 
 Простое версионирование REST API.
-Для создания версии v2 нужно создать папку `http/v2` с таким же содержимым.
-Добавить в файл `internal/controller/http/router.go` строки:
+Для создания версии v2 нужно создать папку `restapi/v2` с таким же содержимым.
+Добавить в файл `internal/controller/restapi/router.go` строки:
 
 ```go
 apiV1Group := app.Group("/v1")
