@@ -44,7 +44,7 @@ x-backend-app-environment: &x-backend-app-environment
 services:
   db:
     container_name: db
-    image: postgres:18.1-alpine
+    image: postgres:18.2-alpine
     environment:
       <<: *x-db-environment
     volumes:
