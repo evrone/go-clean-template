@@ -55,7 +55,12 @@ deps-audit: ### check dependencies vulnerabilities
 	govulncheck ./...
 .PHONY: deps-audit
 
+fix-diff: ### Show code changes by `go fix`
+	go fix -diff ./...
+.PHONY: fix-diff
+
 format: ### Run code formatter
+	go fix ./...
 	gofumpt -l -w .
 	gci write . --skip-generated -s standard -s default
 .PHONY: format

@@ -115,7 +115,7 @@ func (c *Client) Shutdown() error {
 }
 
 // RemoteCall -.
-func (c *Client) RemoteCall(handler string, request, response interface{}) error {
+func (c *Client) RemoteCall(handler string, request, response any) error {
 	err := c.preRemoteCallWait()
 	if err != nil {
 		return fmt.Errorf("rmq_rpc client - Client - RemoteCall - c.preWait: %w", err)
@@ -269,7 +269,7 @@ func (c *Client) ack(d *amqp.Delivery, multiple bool) {
 	d.Ack(multiple) //nolint:errcheck // we can't do anything with this error
 }
 
-func (c *Client) publish(corrID, handler string, request interface{}) error {
+func (c *Client) publish(corrID, handler string, request any) error {
 	var (
 		requestBody []byte
 		err         error

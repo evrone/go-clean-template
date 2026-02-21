@@ -41,10 +41,10 @@ const (
 	requests          = 10
 
 	// RabbitMQ RPC
-	rmqURL = "amqp://guest:guest@rabbitmq:5672/"
+	rmqURL = "amqp://guest:guest@rabbitmq:5672/" //nolint: gosec,gocritic // no credentials are used
 
 	// RabbitMQ RPC
-	natsURL = "nats://guest:guest@nats:4222/"
+	natsURL = "nats://guest:guest@nats:4222/" //nolint: gosec,gocritic // no credentials are used
 
 	// Test data
 	expectedOriginal = "текст для перевода"
@@ -60,7 +60,7 @@ func doWebRequestWithTimeout(ctx context.Context, method, url string, body io.Re
 
 	req.Header.Set("Content-Type", "application/json")
 
-	return http.DefaultClient.Do(req)
+	return http.DefaultClient.Do(req) //nolint: gosec,gocritic // no credentials are used
 }
 
 func getHealthCheck(url string) (int, error) {
@@ -219,7 +219,7 @@ func TestClientGRPCV1(t *testing.T) {
 
 	grpcClientV1 := protov1.NewTranslationClient(grpcConn)
 
-	for i := 0; i < requests; i++ {
+	for range requests {
 		history, err := grpcClientV1.GetHistory(t.Context(), &protov1.GetHistoryRequest{})
 		if err != nil {
 			t.Fatal("gRPC Client - remote call error - grpcClientV1.GetHistory", err)
@@ -260,7 +260,7 @@ func TestClientRMQRPCV1(t *testing.T) { //nolint: dupl,gocritic,nolintlint
 		History []Translation `json:"history"`
 	}
 
-	for i := 0; i < requests; i++ {
+	for range requests {
 		var history historyResponse
 
 		err = client.RemoteCall("v1.getHistory", nil, &history)
@@ -303,7 +303,7 @@ func TestClientNATSRPCV1(t *testing.T) { //nolint: dupl,gocritic,nolintlint
 		History []Translation `json:"history"`
 	}
 
-	for i := 0; i < requests; i++ {
+	for range requests {
 		var history historyResponse
 
 		err = client.RemoteCall("v1.getHistory", nil, &history)

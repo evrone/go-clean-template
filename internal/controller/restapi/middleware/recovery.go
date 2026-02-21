@@ -10,7 +10,7 @@ import (
 	fiberRecover "github.com/gofiber/fiber/v2/middleware/recover"
 )
 
-func buildPanicMessage(ctx *fiber.Ctx, err interface{}) string {
+func buildPanicMessage(ctx *fiber.Ctx, err any) string {
 	var result strings.Builder
 
 	result.WriteString(ctx.IP())
@@ -19,13 +19,13 @@ func buildPanicMessage(ctx *fiber.Ctx, err interface{}) string {
 	result.WriteString(" ")
 	result.WriteString(ctx.OriginalURL())
 	result.WriteString(" PANIC DETECTED: ")
-	result.WriteString(fmt.Sprintf("%v\n%s\n", err, debug.Stack()))
+	result.WriteString(fmt.Sprintf("%v\n%s\n", err, debug.Stack())) //nolint: staticcheck,gocritic // it's okay for panic
 
 	return result.String()
 }
 
-func logPanic(l logger.Interface) func(c *fiber.Ctx, err interface{}) {
-	return func(ctx *fiber.Ctx, err interface{}) {
+func logPanic(l logger.Interface) func(c *fiber.Ctx, err any) {
+	return func(ctx *fiber.Ctx, err any) {
 		l.Error(buildPanicMessage(ctx, err))
 	}
 }

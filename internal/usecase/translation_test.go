@@ -16,7 +16,7 @@ var errInternalServErr = errors.New("internal server error")
 type test struct {
 	name string
 	mock func()
-	res  interface{}
+	res  any
 	err  error
 }
 

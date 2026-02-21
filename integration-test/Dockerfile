@@ -1,5 +1,5 @@
 # Step 1: Modules caching
-FROM golang:1.25-alpine3.21 AS modules
+FROM golang:1.26-alpine3.23 AS modules
 
 COPY go.mod go.sum /modules/
 
@@ -8,7 +8,7 @@ WORKDIR /modules
 RUN go mod download
 
 # Step 2: Tests
-FROM golang:1.25-alpine3.21
+FROM golang:1.26-alpine3.23
 
 COPY --from=modules /go/pkg /go/pkg
 COPY . /app

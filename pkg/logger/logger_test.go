@@ -21,7 +21,7 @@ func newBufferedLogger(level string) (*Logger, *bytes.Buffer) {
 	// Recreate the zerolog.Logger to write into buffer while keeping similar options
 	// We keep the same skip frame count so caller field exists, but we don't assert its value
 	zl := zerolog.New(buf).With().Timestamp().Logger()
-	l.logger = &zl
+	l.logger = new(zl)
 
 	return l, buf
 }
@@ -188,9 +188,7 @@ func TestFatal_ExitsAndLogs(t *testing.T) {
 		t.Fatalf("expected non-nil error due to os.Exit in Fatal, got nil; output: %s", string(out))
 	}
 
-	var exitErr *exec.ExitError
-
-	if !errors.As(err, &exitErr) {
+	if exitErr, ok := errors.AsType[*exec.ExitError](err); !ok {
 		// Confirm exit code is non-zero; os.Exit(1) specifically
 		if status := exitErr.ExitCode(); status != 1 {
 			t.Fatalf("expected exit code 1, got %d; output: %s", status, string(out))

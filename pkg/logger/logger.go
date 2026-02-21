@@ -10,11 +10,11 @@ import (
 
 // Interface -.
 type Interface interface {
-	Debug(message interface{}, args ...interface{})
-	Info(message string, args ...interface{})
-	Warn(message string, args ...interface{})
-	Error(message interface{}, args ...interface{})
-	Fatal(message interface{}, args ...interface{})
+	Debug(message any, args ...any)
+	Info(message string, args ...any)
+	Warn(message string, args ...any)
+	Error(message any, args ...any)
+	Fatal(message any, args ...any)
 }
 
 // Logger -.
@@ -52,22 +52,22 @@ func New(level string) *Logger {
 }
 
 // Debug -.
-func (l *Logger) Debug(message interface{}, args ...interface{}) {
+func (l *Logger) Debug(message any, args ...any) {
 	l.msg(zerolog.DebugLevel, message, args...)
 }
 
 // Info -.
-func (l *Logger) Info(message string, args ...interface{}) {
+func (l *Logger) Info(message string, args ...any) {
 	l.log(zerolog.InfoLevel, message, args...)
 }
 
 // Warn -.
-func (l *Logger) Warn(message string, args ...interface{}) {
+func (l *Logger) Warn(message string, args ...any) {
 	l.log(zerolog.WarnLevel, message, args...)
 }
 
 // Error -.
-func (l *Logger) Error(message interface{}, args ...interface{}) {
+func (l *Logger) Error(message any, args ...any) {
 	if l.logger.GetLevel() == zerolog.DebugLevel {
 		l.Debug(message, args...)
 	}
@@ -76,13 +76,13 @@ func (l *Logger) Error(message interface{}, args ...interface{}) {
 }
 
 // Fatal -.
-func (l *Logger) Fatal(message interface{}, args ...interface{}) {
+func (l *Logger) Fatal(message any, args ...any) {
 	l.msg(zerolog.FatalLevel, message, args...)
 
 	os.Exit(1)
 }
 
-func (l *Logger) log(level zerolog.Level, message string, args ...interface{}) {
+func (l *Logger) log(level zerolog.Level, message string, args ...any) {
 	if len(args) == 0 {
 		l.logger.WithLevel(level).Msg(message)
 	} else {
@@ -90,7 +90,7 @@ func (l *Logger) log(level zerolog.Level, message string, args ...interface{}) {
 	}
 }
 
-func (l *Logger) msg(level zerolog.Level, message interface{}, args ...interface{}) {
+func (l *Logger) msg(level zerolog.Level, message any, args ...any) {
 	switch msg := message.(type) {
 	case error:
 		l.log(level, msg.Error(), args...)
