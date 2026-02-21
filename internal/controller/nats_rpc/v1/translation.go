@@ -9,7 +9,7 @@ import (
 )
 
 func (r *V1) getHistory() server.CallHandler {
-	return func(_ *nats.Msg) (interface{}, error) {
+	return func(_ *nats.Msg) (any, error) {
 		translationHistory, err := r.t.History(context.Background())
 		if err != nil {
 			r.l.Error(err, "amqp_rpc - V1 - getHistory")

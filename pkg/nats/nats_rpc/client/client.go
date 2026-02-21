@@ -65,7 +65,7 @@ func (c *Client) Shutdown() error {
 }
 
 // RemoteCall -.
-func (c *Client) RemoteCall(handler string, request, response interface{}) error {
+func (c *Client) RemoteCall(handler string, request, response any) error {
 	var (
 		requestBody []byte
 		err         error

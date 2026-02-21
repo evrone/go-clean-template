@@ -21,7 +21,7 @@ const (
 )
 
 // CallHandler -.
-type CallHandler func(*nats.Msg) (interface{}, error)
+type CallHandler func(*nats.Msg) (any, error)
 
 // Server -.
 type Server struct {

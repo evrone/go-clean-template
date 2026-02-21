@@ -21,7 +21,7 @@ const (
 )
 
 // CallHandler -.
-type CallHandler func(*amqp.Delivery) (interface{}, error)
+type CallHandler func(*amqp.Delivery) (any, error)
 
 // Server -.
 type Server struct {
