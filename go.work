@@ -1,0 +1,13 @@
+go 1.26
+
+use (
+	./common_packages/pkg
+	./common_packages/middleware
+	./services/translation
+	./services/todo
+)
+
+replace (
+	evrone.local/common-pkg v0.0.0 => ./common_packages/pkg
+	evrone.local/common-middleware v0.0.0 => ./common_packages/middleware
+)

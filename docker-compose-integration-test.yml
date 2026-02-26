@@ -8,7 +8,7 @@ services:
     pid: "host"
     build:
       context: .
-      dockerfile: integration-test/Dockerfile
+      dockerfile: services/translation/integration-test/Dockerfile
     depends_on:
       - app
     networks:

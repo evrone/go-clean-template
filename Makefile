@@ -1,116 +1,161 @@
-ifneq ($(wildcard .env),)
-include .env
-export
-else
-$(warning WARNING: .env file not found! Using .env.example)
-include .env.example
-export
-endif
+SHELL := /bin/bash
 
-BASE_STACK = docker compose -f docker-compose.yml
-INTEGRATION_TEST_STACK = $(BASE_STACK) -f docker-compose-integration-test.yml
-ALL_STACK = $(INTEGRATION_TEST_STACK)
+BASE_STACK     = docker compose -f docker-compose.yml
+INT_TEST_STACK = $(BASE_STACK) -f docker-compose-integration-test.yml
 
 # HELP =================================================================================================================
-# This will output the help for each task
-# thanks to https://marmelab.com/blog/2016/02/29/auto-documented-makefile.html
 .PHONY: help
-
 help: ## Display this help screen
 	@awk 'BEGIN {FS = ":.*##"; printf "\nUsage:\n  make \033[36m<target>\033[0m\n"} /^[a-zA-Z_-]+:.*?##/ { printf "  \033[36m%-15s\033[0m %s\n", $$1, $$2 } /^##@/ { printf "\n\033[1m%s\033[0m\n", substr($$0, 5) } ' $(MAKEFILE_LIST)
 
-compose-up: ### Run docker compose (without backend and reverse proxy)
+##@ Docker Compose
+
+compose-up: ## Start infrastructure only (db, rabbitmq, nats)
 	$(BASE_STACK) up --build -d db rabbitmq nats && docker compose logs -f
 .PHONY: compose-up
 
-compose-up-all: ### Run docker compose (with backend and reverse proxy)
+compose-up-all: ## Start all services (translation + todo + infra)
 	$(BASE_STACK) up --build -d
 .PHONY: compose-up-all
 
-compose-up-integration-test: ### Run docker compose with integration test
-	$(INTEGRATION_TEST_STACK) up --build --abort-on-container-exit --exit-code-from integration-test
+compose-up-integration-test: ## Run integration tests via docker compose
+	$(INT_TEST_STACK) up --build --abort-on-container-exit --exit-code-from integration-test
 .PHONY: compose-up-integration-test
 
-compose-down: ### Down docker compose
-	$(ALL_STACK) down --remove-orphans
+compose-down: ## Stop and remove all containers
+	$(INT_TEST_STACK) down --remove-orphans
 .PHONY: compose-down
 
-swag-v1: ### swag init
-	swag init -g internal/controller/restapi/router.go
-.PHONY: swag-v1
+docker-rm-volume: ## Remove persistent docker volumes
+	docker volume rm go-clean-template_db_data go-clean-template_rabbitmq_data go-clean-template_nats_data
+.PHONY: docker-rm-volume
 
-proto-v1: ### generate source files from proto
+##@ Run (local — requires infra via compose-up)
+
+run-translation: ## Run translation service locally with auto-migration
+	cd services/translation && set -a && . ./.env && set +a && \
+	CGO_ENABLED=0 go run -tags migrate ./cmd/app
+.PHONY: run-translation
+
+run-todo: ## Run todo service locally with auto-migration
+	cd services/todo && set -a && . ./.env && set +a && \
+	CGO_ENABLED=0 go run -tags migrate ./cmd/todo
+.PHONY: run-todo
+
+##@ Migrations
+
+migrate-up-translation: ## Apply translation migrations (requires PG running)
+	cd services/translation && set -a && . ./.env && set +a && \
+	migrate -path migrations -database "$$PG_URL?sslmode=disable" up
+.PHONY: migrate-up-translation
+
+migrate-up-todo: ## Apply todo migrations (requires PG running)
+	cd services/todo && set -a && . ./.env && set +a && \
+	migrate -path migrations -database "$$PG_URL?sslmode=disable" up
+.PHONY: migrate-up-todo
+
+migrate-create-translation: ## Create translation migration: make migrate-create-translation NAME=add_column
+	migrate create -ext sql -dir services/translation/migrations $(NAME)
+.PHONY: migrate-create-translation
+
+migrate-create-todo: ## Create todo migration: make migrate-create-todo NAME=add_column
+	migrate create -ext sql -dir services/todo/migrations $(NAME)
+.PHONY: migrate-create-todo
+
+##@ Code Generation
+
+swag-translation: ## Regenerate swagger docs for translation service
+	cd services/translation && \
+	~/go/bin/swag init -g internal/controller/restapi/router.go -o docs/
+.PHONY: swag-translation
+
+proto-translation: ## Regenerate gRPC stubs for translation service
+	cd services/translation && \
 	protoc --go_out=. \
 		--go_opt=paths=source_relative \
 		--go-grpc_out=. \
 		--go-grpc_opt=paths=source_relative \
 		docs/proto/v1/*.proto
-.PHONY: proto-v1
+.PHONY: proto-translation
 
-deps: ### deps tidy + verify
-	go mod tidy && go mod verify
+mock-translation: ## Regenerate mocks for translation service
+	cd services/translation && \
+	mockgen -source ./internal/repo/contracts.go -package usecase_test > ./internal/usecase/mocks_repo_test.go && \
+	mockgen -source ./internal/usecase/contracts.go -package usecase_test > ./internal/usecase/mocks_usecase_test.go
+.PHONY: mock-translation
+
+mock-todo: ## Regenerate mocks for todo service
+	cd services/todo && \
+	mockgen -source ./internal/repo/contracts.go -package usecase_test > ./internal/usecase/mocks_repo_test.go && \
+	mockgen -source ./internal/usecase/contracts.go -package usecase_test > ./internal/usecase/mocks_usecase_test.go
+.PHONY: mock-todo
+
+mock: mock-translation mock-todo ## Regenerate all mocks
+.PHONY: mock
+
+##@ Dependencies
+
+deps: ## Run go mod tidy for all workspace modules
+	cd common_packages/pkg        && go mod tidy
+	cd common_packages/middleware && go mod tidy
+	cd services/translation       && go mod tidy
+	cd services/todo              && go mod tidy
 .PHONY: deps
 
-deps-audit: ### check dependencies vulnerabilities
-	govulncheck ./...
+deps-audit: ## Check all modules for vulnerabilities
+	cd services/translation && govulncheck ./...
+	cd services/todo        && govulncheck ./...
 .PHONY: deps-audit
 
-fix-diff: ### Show code changes by `go fix`
-	go fix -diff ./...
-.PHONY: fix-diff
+##@ Testing
 
-format: ### Run code formatter
-	go fix ./...
+test-translation: ## Run translation unit tests
+	cd services/translation && \
+	go test -v -race -covermode atomic -coverprofile=coverage.txt ./internal/...
+.PHONY: test-translation
+
+test-todo: ## Run todo unit tests
+	cd services/todo && \
+	go test -v -race -covermode atomic -coverprofile=coverage.txt ./internal/...
+.PHONY: test-todo
+
+test: test-translation test-todo ## Run all unit tests
+.PHONY: test
+
+integration-test: ## Run translation integration tests locally
+	cd services/translation && go clean -testcache && go test -v ./integration-test/...
+.PHONY: integration-test
+
+##@ Linting & Formatting
+
+linter-golangci: ## Run golangci-lint across all services
+	cd services/translation && golangci-lint run
+	cd services/todo        && golangci-lint run
+.PHONY: linter-golangci
+
+linter-hadolint: ## Lint all Dockerfiles with hadolint
+	git ls-files --exclude='Dockerfile*' --ignored | xargs hadolint
+.PHONY: linter-hadolint
+
+linter-dotenv: ## Lint .env.example files with dotenv-linter
+	dotenv-linter services/translation/.env.example services/todo/.env.example
+.PHONY: linter-dotenv
+
+format: ## Format all Go code
 	gofumpt -l -w .
 	gci write . --skip-generated -s standard -s default
 .PHONY: format
 
-run: deps swag-v1 proto-v1 ### swag run for API v1
-	go mod download && \
-	CGO_ENABLED=0 go run -tags migrate ./cmd/app
-.PHONY: run
+##@ Tools
 
-docker-rm-volume: ### remove docker volume
-	docker volume rm go-clean-template_pg-data
-.PHONY: docker-rm-volume
-
-linter-golangci: ### check by golangci linter
-	golangci-lint run
-.PHONY: linter-golangci
-
-linter-hadolint: ### check by hadolint linter
-	git ls-files --exclude='Dockerfile*' --ignored | xargs hadolint
-.PHONY: linter-hadolint
-
-linter-dotenv: ### check by dotenv linter
-	dotenv-linter
-.PHONY: linter-dotenv
-
-test: ### run test
-	go test -v -race -covermode atomic -coverprofile=coverage.txt ./internal/... ./pkg/...
-.PHONY: test
-
-integration-test: ### run integration-test
-	go clean -testcache && go test -v ./integration-test/...
-.PHONY: integration-test
-
-mock: ### run mockgen
-	mockgen -source ./internal/repo/contracts.go -package usecase_test > ./internal/usecase/mocks_repo_test.go
-	mockgen -source ./internal/usecase/contracts.go -package usecase_test > ./internal/usecase/mocks_usecase_test.go
-.PHONY: mock
-
-migrate-create:  ### create new migration
-	migrate create -ext sql -dir migrations '$(word 2,$(MAKECMDGOALS))'
-.PHONY: migrate-create
-
-migrate-up: ### migration up
-	migrate -path migrations -database '$(PG_URL)?sslmode=disable' up
-.PHONY: migrate-up
-
-bin-deps: ### install tools
-	go install tool
-	go install -tags 'postgres' github.com/golang-migrate/migrate/v4/cmd/migrate
+bin-deps: ## Install required dev tools
+	go install -tags 'postgres' github.com/golang-migrate/migrate/v4/cmd/migrate@latest
+	go install github.com/swaggo/swag/cmd/swag@latest
+	go install go.uber.org/mock/mockgen@latest
+	go install mvdan.cc/gofumpt@latest
+	go install github.com/daixiang0/gci@latest
+	go install github.com/golangci/golangci-lint/cmd/golangci-lint@latest
 .PHONY: bin-deps
 
-pre-commit: swag-v1 proto-v1 mock format linter-golangci test ### run pre-commit
+pre-commit: swag-translation proto-translation mock format linter-golangci test ## Run all pre-commit checks
 .PHONY: pre-commit

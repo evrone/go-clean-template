@@ -2,8 +2,9 @@
 .idea
 .vscode
 
-# Config
+# Config — commit .env.example, never .env
 .env
+services/**/.env
 
 # Binaries for programs and plugins
 *.exe

@@ -13,33 +13,6 @@ x-rabbitmq-variables: &x-rabbitmq-variables
   RABBITMQ_DEFAULT_USER: "guest"
   RABBITMQ_DEFAULT_PASS: "guest"
 
-x-backend-app-environment: &x-backend-app-environment
-  GOMAXPROCS: "1"
-  # App
-  APP_NAME: "go-clean-template"
-  APP_VERSION: "1.0.0"
-  # HTTP settings
-  HTTP_PORT: "8080"
-  HTTP_USE_PREFORK_MODE: "false"
-  # Logger
-  LOG_LEVEL: "debug"
-  # PG
-  PG_POOL_MAX: "2"
-  PG_URL: "postgres://user:myAwEsOm3pa55@w0rd@db:5432/db"
-  # gRPC
-  GRPC_PORT: "8081"
-  # RMQ
-  RMQ_RPC_SERVER: "rpc_server"
-  RMQ_RPC_CLIENT: "rpc_client"
-  RMQ_URL: "amqp://guest:guest@rabbitmq:5672/"
-  # NATS
-  NATS_RPC_SERVER: "rpc_server"
-  NATS_URL: "nats://guest:guest@nats:4222/"
-  # Metrics
-  METRICS_ENABLED: "true"
-  # Swagger
-  SWAGGER_ENABLED: "true"
-
 
 services:
   db:
@@ -85,20 +58,23 @@ services:
         aliases:
           - nats.lvh.me
 
+  # Translation service (HTTP :8080, gRPC :8081)
   app:
     container_name: app
     platform: linux/amd64
     pid: "host"
     build:
       context: .
-    environment:
-      <<: *x-backend-app-environment
+      dockerfile: services/translation/Dockerfile
+    env_file:
+      - services/translation/.env
     ports:
       - "8080:8080"
       - "8081:8081"
     depends_on:
       - db
       - rabbitmq
+      - nats
     deploy:
       resources:
         limits:
@@ -112,6 +88,33 @@ services:
         aliases:
           - app.lvh.me
 
+  # Todo service (HTTP :8082)
+  todo:
+    container_name: todo
+    platform: linux/amd64
+    pid: "host"
+    build:
+      context: .
+      dockerfile: services/todo/Dockerfile
+    env_file:
+      - services/todo/.env
+    ports:
+      - "8082:8082"
+    depends_on:
+      - db
+    deploy:
+      resources:
+        limits:
+          cpus: '1.00'
+          memory: '2Gb'
+        reservations:
+          cpus: '0.60'
+          memory: '1Gb'
+    networks:
+      app_network:
+        aliases:
+          - todo.lvh.me
+
   nginx:
     container_name: nginx
     image: nginx:1.29.5-alpine
@@ -120,8 +123,8 @@ services:
     ports:
       - "80:80"
     depends_on:
-      - rabbitmq
       - app
+      - todo
     networks:
       app_network:
         aliases:
