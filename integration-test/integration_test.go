@@ -60,7 +60,7 @@ func doWebRequestWithTimeout(ctx context.Context, method, url string, body io.Re
 
 	req.Header.Set("Content-Type", "application/json")
 
-	return http.DefaultClient.Do(req) //nolint: gosec,gocritic // no credentials are used
+	return http.DefaultClient.Do(req)
 }
 
 func getHealthCheck(url string) (int, error) {
