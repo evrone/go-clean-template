@@ -1,4 +1,3 @@
-// Package v1 implements routing paths. Each services in own file.
 package restapi
 
 import (
@@ -10,6 +9,7 @@ import (
 	"github.com/evrone/go-clean-template/internal/controller/restapi/middleware"
 	v1 "github.com/evrone/go-clean-template/internal/controller/restapi/v1"
 	"github.com/evrone/go-clean-template/internal/usecase"
+	"github.com/evrone/go-clean-template/pkg/jwt"
 	"github.com/evrone/go-clean-template/pkg/logger"
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/swagger"
@@ -17,12 +17,16 @@ import (
 
 // NewRouter -.
 // Swagger spec:
-// @title       Go Clean Template API
-// @description Using a translation service as an example
-// @version     1.0
-// @host        localhost:8080
-// @BasePath    /v1
-func NewRouter(app *fiber.App, cfg *config.Config, t usecase.Translation, l logger.Interface) {
+//
+//	@title       Go Clean Template API
+//	@description Multi-domain clean architecture template with translation, user, and task management
+//	@version     1.0
+//	@host        localhost:8080
+//	@BasePath    /v1
+//	@securityDefinitions.apikey BearerAuth
+//	@in header
+//	@name Authorization
+func NewRouter(app *fiber.App, cfg *config.Config, t usecase.Translation, u usecase.User, tk usecase.Task, jwtManager *jwt.Manager, l logger.Interface) {
 	// Options
 	app.Use(middleware.Logger(l))
 	app.Use(middleware.Recovery(l))
@@ -45,6 +49,6 @@ func NewRouter(app *fiber.App, cfg *config.Config, t usecase.Translation, l logg
 	// Routers
 	apiV1Group := app.Group("/v1")
 	{
-		v1.NewTranslationRoutes(apiV1Group, t, l)
+		v1.NewRoutes(apiV1Group, t, u, tk, jwtManager, l)
 	}
 }

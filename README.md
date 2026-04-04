@@ -45,6 +45,14 @@ This template implements three types of servers:
 - gRPC ([gRPC](https://grpc.io/) framework based on protobuf)
 - REST API ([Fiber](https://github.com/gofiber/fiber) framework)
 
+The template includes three domains to demonstrate multi-service architecture:
+
+- **User Authentication** — registration, login, JWT-based authorization
+- **Task Management** — CRUD operations with status transitions (todo, in_progress, done)
+- **Translation** — text translation with history tracking
+
+All domains are available across all four transports (REST, gRPC, AMQP RPC, NATS RPC).
+
 ## Content
 
 - [Quick start](#quick-start)
@@ -91,6 +99,8 @@ Check services:
   - http://app.lvh.me/swagger | http://127.0.0.1:8080/swagger
 - gRPC:
   - URL: `tcp://grpc.lvh.me:8081` | `tcp://127.0.0.1:8081`
+  - [v1/auth.proto](docs/proto/v1/auth.proto)
+  - [v1/task.proto](docs/proto/v1/task.proto)
   - [v1/translation.history.proto](docs/proto/v1/translation.history.proto)
 - PostgreSQL:
   - `postgres://user:myAwEsOm3pa55@w0rd@127.0.0.1:5432/db`

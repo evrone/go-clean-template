@@ -21,7 +21,6 @@ const (
 	_ = protoimpl.EnforceVersion(protoimpl.MaxVersion - 20)
 )
 
-// Request message for GetHistory.
 type GetHistoryRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	unknownFields protoimpl.UnknownFields
@@ -58,7 +57,6 @@ func (*GetHistoryRequest) Descriptor() ([]byte, []int) {
 	return file_docs_proto_v1_translation_history_proto_rawDescGZIP(), []int{0}
 }
 
-// Response message for GetHistory.
 type GetHistoryResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	History       []*TranslationHistory  `protobuf:"bytes,1,rep,name=history,proto3" json:"history,omitempty"`
@@ -103,7 +101,6 @@ func (x *GetHistoryResponse) GetHistory() []*TranslationHistory {
 	return nil
 }
 
-// Translation message structure.
 type TranslationHistory struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Source        string                 `protobuf:"bytes,1,opt,name=source,proto3" json:"source,omitempty"`
@@ -172,6 +169,134 @@ func (x *TranslationHistory) GetTranslation() string {
 	return ""
 }
 
+type TranslateRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Source        string                 `protobuf:"bytes,1,opt,name=source,proto3" json:"source,omitempty"`
+	Destination   string                 `protobuf:"bytes,2,opt,name=destination,proto3" json:"destination,omitempty"`
+	Original      string                 `protobuf:"bytes,3,opt,name=original,proto3" json:"original,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *TranslateRequest) Reset() {
+	*x = TranslateRequest{}
+	mi := &file_docs_proto_v1_translation_history_proto_msgTypes[3]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *TranslateRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*TranslateRequest) ProtoMessage() {}
+
+func (x *TranslateRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_docs_proto_v1_translation_history_proto_msgTypes[3]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use TranslateRequest.ProtoReflect.Descriptor instead.
+func (*TranslateRequest) Descriptor() ([]byte, []int) {
+	return file_docs_proto_v1_translation_history_proto_rawDescGZIP(), []int{3}
+}
+
+func (x *TranslateRequest) GetSource() string {
+	if x != nil {
+		return x.Source
+	}
+	return ""
+}
+
+func (x *TranslateRequest) GetDestination() string {
+	if x != nil {
+		return x.Destination
+	}
+	return ""
+}
+
+func (x *TranslateRequest) GetOriginal() string {
+	if x != nil {
+		return x.Original
+	}
+	return ""
+}
+
+type TranslateResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Source        string                 `protobuf:"bytes,1,opt,name=source,proto3" json:"source,omitempty"`
+	Destination   string                 `protobuf:"bytes,2,opt,name=destination,proto3" json:"destination,omitempty"`
+	Original      string                 `protobuf:"bytes,3,opt,name=original,proto3" json:"original,omitempty"`
+	Translation   string                 `protobuf:"bytes,4,opt,name=translation,proto3" json:"translation,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *TranslateResponse) Reset() {
+	*x = TranslateResponse{}
+	mi := &file_docs_proto_v1_translation_history_proto_msgTypes[4]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *TranslateResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*TranslateResponse) ProtoMessage() {}
+
+func (x *TranslateResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_docs_proto_v1_translation_history_proto_msgTypes[4]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use TranslateResponse.ProtoReflect.Descriptor instead.
+func (*TranslateResponse) Descriptor() ([]byte, []int) {
+	return file_docs_proto_v1_translation_history_proto_rawDescGZIP(), []int{4}
+}
+
+func (x *TranslateResponse) GetSource() string {
+	if x != nil {
+		return x.Source
+	}
+	return ""
+}
+
+func (x *TranslateResponse) GetDestination() string {
+	if x != nil {
+		return x.Destination
+	}
+	return ""
+}
+
+func (x *TranslateResponse) GetOriginal() string {
+	if x != nil {
+		return x.Original
+	}
+	return ""
+}
+
+func (x *TranslateResponse) GetTranslation() string {
+	if x != nil {
+		return x.Translation
+	}
+	return ""
+}
+
 var File_docs_proto_v1_translation_history_proto protoreflect.FileDescriptor
 
 const file_docs_proto_v1_translation_history_proto_rawDesc = "" +
@@ -184,10 +309,20 @@ const file_docs_proto_v1_translation_history_proto_rawDesc = "" +
 	"\x06source\x18\x01 \x01(\tR\x06source\x12 \n" +
 	"\vdestination\x18\x02 \x01(\tR\vdestination\x12\x1a\n" +
 	"\boriginal\x18\x03 \x01(\tR\boriginal\x12 \n" +
-	"\vtranslation\x18\x04 \x01(\tR\vtranslation2T\n" +
+	"\vtranslation\x18\x04 \x01(\tR\vtranslation\"h\n" +
+	"\x10TranslateRequest\x12\x16\n" +
+	"\x06source\x18\x01 \x01(\tR\x06source\x12 \n" +
+	"\vdestination\x18\x02 \x01(\tR\vdestination\x12\x1a\n" +
+	"\boriginal\x18\x03 \x01(\tR\boriginal\"\x8b\x01\n" +
+	"\x11TranslateResponse\x12\x16\n" +
+	"\x06source\x18\x01 \x01(\tR\x06source\x12 \n" +
+	"\vdestination\x18\x02 \x01(\tR\vdestination\x12\x1a\n" +
+	"\boriginal\x18\x03 \x01(\tR\boriginal\x12 \n" +
+	"\vtranslation\x18\x04 \x01(\tR\vtranslation2\x98\x01\n" +
 	"\vTranslation\x12E\n" +
 	"\n" +
-	"GetHistory\x12\x1a.grpc.v1.GetHistoryRequest\x1a\x1b.grpc.v1.GetHistoryResponseB\x0fZ\rdocs/proto/v1b\x06proto3"
+	"GetHistory\x12\x1a.grpc.v1.GetHistoryRequest\x1a\x1b.grpc.v1.GetHistoryResponse\x12B\n" +
+	"\tTranslate\x12\x19.grpc.v1.TranslateRequest\x1a\x1a.grpc.v1.TranslateResponseB\x0fZ\rdocs/proto/v1b\x06proto3"
 
 var (
 	file_docs_proto_v1_translation_history_proto_rawDescOnce sync.Once
@@ -201,18 +336,22 @@ func file_docs_proto_v1_translation_history_proto_rawDescGZIP() []byte {
 	return file_docs_proto_v1_translation_history_proto_rawDescData
 }
 
-var file_docs_proto_v1_translation_history_proto_msgTypes = make([]protoimpl.MessageInfo, 3)
+var file_docs_proto_v1_translation_history_proto_msgTypes = make([]protoimpl.MessageInfo, 5)
 var file_docs_proto_v1_translation_history_proto_goTypes = []any{
 	(*GetHistoryRequest)(nil),  // 0: grpc.v1.GetHistoryRequest
 	(*GetHistoryResponse)(nil), // 1: grpc.v1.GetHistoryResponse
 	(*TranslationHistory)(nil), // 2: grpc.v1.TranslationHistory
+	(*TranslateRequest)(nil),   // 3: grpc.v1.TranslateRequest
+	(*TranslateResponse)(nil),  // 4: grpc.v1.TranslateResponse
 }
 var file_docs_proto_v1_translation_history_proto_depIdxs = []int32{
 	2, // 0: grpc.v1.GetHistoryResponse.history:type_name -> grpc.v1.TranslationHistory
 	0, // 1: grpc.v1.Translation.GetHistory:input_type -> grpc.v1.GetHistoryRequest
-	1, // 2: grpc.v1.Translation.GetHistory:output_type -> grpc.v1.GetHistoryResponse
-	2, // [2:3] is the sub-list for method output_type
-	1, // [1:2] is the sub-list for method input_type
+	3, // 2: grpc.v1.Translation.Translate:input_type -> grpc.v1.TranslateRequest
+	1, // 3: grpc.v1.Translation.GetHistory:output_type -> grpc.v1.GetHistoryResponse
+	4, // 4: grpc.v1.Translation.Translate:output_type -> grpc.v1.TranslateResponse
+	3, // [3:5] is the sub-list for method output_type
+	1, // [1:3] is the sub-list for method input_type
 	1, // [1:1] is the sub-list for extension type_name
 	1, // [1:1] is the sub-list for extension extendee
 	0, // [0:1] is the sub-list for field type_name
@@ -229,7 +368,7 @@ func file_docs_proto_v1_translation_history_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_docs_proto_v1_translation_history_proto_rawDesc), len(file_docs_proto_v1_translation_history_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   3,
+			NumMessages:   5,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

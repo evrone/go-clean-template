@@ -15,22 +15,23 @@ type TranslationRepo struct {
 	*postgres.Postgres
 }
 
-// New -.
-func New(pg *postgres.Postgres) *TranslationRepo {
+// NewTranslationRepo -.
+func NewTranslationRepo(pg *postgres.Postgres) *TranslationRepo {
 	return &TranslationRepo{pg}
 }
 
 // GetHistory -.
-func (r *TranslationRepo) GetHistory(ctx context.Context) ([]entity.Translation, error) {
-	sql, _, err := r.Builder.
+func (r *TranslationRepo) GetHistory(ctx context.Context, userID string) ([]entity.Translation, error) {
+	sql, args, err := r.Builder.
 		Select("source, destination, original, translation").
 		From("history").
+		Where("user_id = ?", userID).
 		ToSql()
 	if err != nil {
 		return nil, fmt.Errorf("TranslationRepo - GetHistory - r.Builder: %w", err)
 	}
 
-	rows, err := r.Pool.Query(ctx, sql)
+	rows, err := r.Pool.Query(ctx, sql, args...)
 	if err != nil {
 		return nil, fmt.Errorf("TranslationRepo - GetHistory - r.Pool.Query: %w", err)
 	}
@@ -53,11 +54,11 @@ func (r *TranslationRepo) GetHistory(ctx context.Context) ([]entity.Translation,
 }
 
 // Store -.
-func (r *TranslationRepo) Store(ctx context.Context, t entity.Translation) error {
+func (r *TranslationRepo) Store(ctx context.Context, userID string, t entity.Translation) error {
 	sql, args, err := r.Builder.
 		Insert("history").
-		Columns("source, destination, original, translation").
-		Values(t.Source, t.Destination, t.Original, t.Translation).
+		Columns("user_id, source, destination, original, translation").
+		Values(userID, t.Source, t.Destination, t.Original, t.Translation).
 		ToSql()
 	if err != nil {
 		return fmt.Errorf("TranslationRepo - Store - r.Builder: %w", err)

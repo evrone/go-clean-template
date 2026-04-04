@@ -8,4 +8,4 @@ type Translation struct {
 	Destination string `json:"destination"  example:"en"`
 	Original    string `json:"original"     example:"текст для перевода"`
 	Translation string `json:"translation"  example:"text for translation"`
-}
+} // @name entity.Translation
