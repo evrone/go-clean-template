@@ -36,7 +36,7 @@ Using the principles of Robert Martin (aka Uncle Bob).
 [Go-clean-template](https://evrone.com/go-clean-template?utm_source=github&utm_campaign=go-clean-template) is created &
 supported by [Evrone](https://evrone.com/?utm_source=github&utm_campaign=go-clean-template).
 
-This template implements three types of servers:
+This template implements four types of servers:
 
 - AMQP RPC (based on RabbitMQ as [transport](https://github.com/rabbitmq/amqp091-go)
   and [Request-Reply pattern](https://www.enterpriseintegrationpatterns.com/patterns/messaging/RequestReply.html))
@@ -55,10 +55,55 @@ All domains are available across all four transports (REST, gRPC, AMQP RPC, NATS
 
 ## Content
 
+- [Domains](#domains)
 - [Quick start](#quick-start)
 - [Project structure](#project-structure)
 - [Dependency Injection](#dependency-injection)
 - [Clean Architecture](#clean-architecture)
+
+## Domains
+
+The template includes three fully implemented domains, each available across all four transports (REST, gRPC, AMQP RPC, NATS RPC).
+
+### User Authentication
+
+Registration, login, and JWT-based authorization.
+
+| Operation   | REST                     | gRPC                     |
+|-------------|--------------------------|--------------------------|
+| Register    | `POST /v1/auth/register` | `AuthService/Register`   |
+| Login       | `POST /v1/auth/login`    | `AuthService/Login`      |
+| Get profile | `GET /v1/user/profile`   | `AuthService/GetProfile` |
+
+- Passwords hashed with bcrypt
+- JWT tokens with configurable expiry
+- Auth middleware on all transports
+
+### Task Management
+
+CRUD operations with a status state machine.
+
+| Operation  | REST                         | gRPC                         |
+|------------|------------------------------|------------------------------|
+| Create     | `POST /v1/tasks`             | `TaskService/CreateTask`     |
+| List       | `GET /v1/tasks`              | `TaskService/ListTasks`      |
+| Get        | `GET /v1/tasks/:id`          | `TaskService/GetTask`        |
+| Update     | `PUT /v1/tasks/:id`          | `TaskService/UpdateTask`     |
+| Transition | `PATCH /v1/tasks/:id/status` | `TaskService/TransitionTask` |
+| Delete     | `DELETE /v1/tasks/:id`       | `TaskService/DeleteTask`     |
+
+- Status transitions: `todo` → `in_progress` → `done` (and `in_progress` → `todo`)
+- Pagination with `limit`/`offset` and optional status filter
+- Tasks scoped to the authenticated user
+
+### Translation
+
+Text translation via external API with history tracking.
+
+| Operation | REST                                | gRPC                                    |
+|-----------|-------------------------------------|-----------------------------------------|
+| Translate | `POST /v1/translation/do-translate` | `TranslationHistoryService/DoTranslate` |
+| History   | `GET /v1/translation/history`       | `TranslationHistoryService/ShowHistory` |
 
 ## Quick start
 
@@ -171,9 +216,10 @@ go run -tags migrate ./cmd/app
 
 ### `internal/controller`
 
-Server handler layer (MVC controllers). The template shows 3 servers:
+Server handler layer (MVC controllers). The template shows 4 servers:
 
 - AMQP RPC (based on RabbitMQ as transport)
+- NATS RPC (based on NATS as transport)
 - gRPC ([gRPC](https://grpc.io/) framework based on protobuf)
 - REST API ([Fiber](https://github.com/gofiber/fiber) framework)
 
@@ -193,7 +239,7 @@ And in the file `internal/controller/amqp_rpc/router.go` add the line:
 routes := make(map[string]server.CallHandler)
 
 {
-    v1.NewTranslationRoutes(routes, t, l)
+    v1.NewRoutes(routes, t, u, tk, j, l)
 }
 
 {
@@ -210,10 +256,14 @@ And in the file `internal/controller/grpc/router.go` add the line:
 
 ```go
 {
+    v1.NewAuthRoutes(app, u, l)
+    v1.NewTaskRoutes(app, tk, l)
     v1.NewTranslationRoutes(app, t, l)
 }
 
 {
+    v2.NewAuthRoutes(app, u, l)
+    v2.NewTaskRoutes(app, tk, l)
     v2.NewTranslationRoutes(app, t, l)
 }
 
@@ -230,7 +280,7 @@ And in the file `internal/controller/nats_rpc/router.go` add the line:
 routes := make(map[string]server.CallHandler)
 
 {
-    v1.NewTranslationRoutes(routes, t, l)
+    v1.NewRoutes(routes, t, u, tk, j, l)
 }
 
 {
@@ -247,11 +297,11 @@ And in the file `internal/controller/restapi/router.go` add the line:
 ```go
 apiV1Group := app.Group("/v1")
 {
-	v1.NewTranslationRoutes(apiV1Group, t, l)
+	v1.NewRoutes(apiV1Group, t, u, tk, jwtManager, l)
 }
 apiV2Group := app.Group("/v2")
 {
-	v2.NewTranslationRoutes(apiV2Group, t, l)
+	v2.NewRoutes(apiV2Group, t, u, tk, jwtManager, l)
 }
 ```
 
@@ -328,7 +378,7 @@ func (uc *UseCase) Do() {
 }
 ```
 
-It will also allow us to do auto-generation of mocks (for example with [mockery](https://github.com/vektra/mockery)) and
+It will also allow us to do auto-generation of mocks (for example with [go.uber.org/mock](https://go.uber.org/mock)) and
 easily write unit tests.
 
 > We are not tied to specific implementations in order to always be able to change one component to another.
@@ -414,9 +464,9 @@ Or more complex business logic:
 - **Use Cases** is business logic located in `internal/usecase`.
 
 The layer with which business logic directly interacts is usually called the _infrastructure_ layer.
-These can be repositories `internal/usecase/repo`, external webapi `internal/usecase/webapi`, any pkg, and other
+These can be repositories `internal/repo/persistent`, external webapi `internal/repo/webapi`, any pkg, and other
 microservices.
-In the template, the _infrastructure_ packages are located inside `internal/usecase`.
+In the template, the _infrastructure_ packages are located inside `internal/repo`.
 
 You can choose how to call the entry points as you wish. The options are:
 
