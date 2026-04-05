@@ -73,10 +73,6 @@ func (l *Logger) Warn(message string, args ...any) {
 
 // Error -.
 func (l *Logger) Error(message any, args ...any) {
-	if l.logger.GetLevel() == zerolog.DebugLevel {
-		l.Debug(message, args...)
-	}
-
 	l.msg(zerolog.ErrorLevel, message, args...)
 }
 

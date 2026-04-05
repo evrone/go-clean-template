@@ -40,6 +40,14 @@ golang服务的整洁架构模板
 - gRPC（基于 protobuf 的 [gRPC](https://grpc.io/) 框架）
 - REST API（基于 [Fiber](https://github.com/gofiber/fiber) 框架）
 
+模板包含三个领域，演示多服务架构：
+
+- **用户认证** — 注册、登录、基于 JWT 的授权
+- **任务管理** — CRUD 操作，支持状态转换（todo、in_progress、done）
+- **翻译** — 文本翻译与历史记录
+
+所有领域在四种传输协议（REST、gRPC、AMQP RPC、NATS RPC）上均可用。
+
 ## 内容
 
 - [快速开始](#快速开始)
@@ -86,7 +94,9 @@ Check services:
   - http://app.lvh.me/swagger | http://127.0.0.1:8080/swagger
 - gRPC:
   - URL: `tcp://grpc.lvh.me:8081` | `tcp://127.0.0.1:8081`
-  - Proto: [v1/translation.history.proto](docs/proto/v1/translation.history.proto)
+  - [v1/auth.proto](docs/proto/v1/auth.proto)
+  - [v1/task.proto](docs/proto/v1/task.proto)
+  - [v1/translation.history.proto](docs/proto/v1/translation.history.proto)
 - PostgreSQL:
   - `postgres://user:myAwEsOm3pa55@w0rd@127.0.0.1:5432/db`
 - RabbitMQ:

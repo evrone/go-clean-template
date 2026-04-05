@@ -10,9 +10,21 @@ import (
 
 // NewTranslationRoutes -.
 func NewTranslationRoutes(app *pbgrpc.Server, t usecase.Translation, l logger.Interface) {
-	r := &V1{t: t, l: l, v: validator.New(validator.WithRequiredStructEnabled())}
+	r := &TranslationController{t: t, l: l, v: validator.New(validator.WithRequiredStructEnabled())}
 
-	{
-		v1.RegisterTranslationServer(app, r)
-	}
+	v1.RegisterTranslationServer(app, r)
+}
+
+// NewAuthRoutes -.
+func NewAuthRoutes(app *pbgrpc.Server, u usecase.User, l logger.Interface) {
+	r := &AuthController{u: u, l: l, v: validator.New(validator.WithRequiredStructEnabled())}
+
+	v1.RegisterAuthServiceServer(app, r)
+}
+
+// NewTaskRoutes -.
+func NewTaskRoutes(app *pbgrpc.Server, tk usecase.Task, l logger.Interface) {
+	r := &TaskController{tk: tk, l: l, v: validator.New(validator.WithRequiredStructEnabled())}
+
+	v1.RegisterTaskServiceServer(app, r)
 }

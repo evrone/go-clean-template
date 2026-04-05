@@ -39,6 +39,9 @@ x-backend-app-environment: &x-backend-app-environment
   METRICS_ENABLED: "true"
   # Swagger
   SWAGGER_ENABLED: "true"
+  # JWT
+  JWT_TOKEN_EXPIRY: "24h"
+  JWT_SECRET: "your-secret-key-change-in-production"
 
 
 services:

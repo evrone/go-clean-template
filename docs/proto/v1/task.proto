@@ -1,0 +1,61 @@
+syntax = "proto3";
+
+package grpc.v1;
+
+option go_package = "docs/proto/v1";
+
+service TaskService {
+  rpc CreateTask (CreateTaskRequest) returns (TaskResponse);
+  rpc GetTask (GetTaskRequest) returns (TaskResponse);
+  rpc ListTasks (ListTasksRequest) returns (ListTasksResponse);
+  rpc UpdateTask (UpdateTaskRequest) returns (TaskResponse);
+  rpc TransitionTask (TransitionTaskRequest) returns (TaskResponse);
+  rpc DeleteTask (DeleteTaskRequest) returns (DeleteTaskResponse);
+}
+
+message CreateTaskRequest {
+  string title = 1;
+  string description = 2;
+}
+
+message GetTaskRequest {
+  string id = 1;
+}
+
+message ListTasksRequest {
+  string status = 1;
+  int32 limit = 2;
+  int32 offset = 3;
+}
+
+message UpdateTaskRequest {
+  string id = 1;
+  string title = 2;
+  string description = 3;
+}
+
+message TransitionTaskRequest {
+  string id = 1;
+  string status = 2;
+}
+
+message DeleteTaskRequest {
+  string id = 1;
+}
+
+message TaskResponse {
+  string id = 1;
+  string user_id = 2;
+  string title = 3;
+  string description = 4;
+  string status = 5;
+  string created_at = 6;
+  string updated_at = 7;
+}
+
+message ListTasksResponse {
+  repeated TaskResponse tasks = 1;
+  int32 total = 2;
+}
+
+message DeleteTaskResponse {}

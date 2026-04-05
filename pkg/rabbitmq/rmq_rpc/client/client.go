@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"log"
 	"sync"
 	"time"
 
@@ -266,7 +267,9 @@ func (c *Client) deleteCall(corrID string) {
 }
 
 func (c *Client) ack(d *amqp.Delivery, multiple bool) {
-	d.Ack(multiple) //nolint:errcheck // we can't do anything with this error
+	if err := d.Ack(multiple); err != nil {
+		log.Printf("rmq_rpc client - ack: %v", err)
+	}
 }
 
 func (c *Client) publish(corrID, handler string, request any) error {

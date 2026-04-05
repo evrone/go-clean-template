@@ -20,16 +20,15 @@ const _ = grpc.SupportPackageIsVersion9
 
 const (
 	Translation_GetHistory_FullMethodName = "/grpc.v1.Translation/GetHistory"
+	Translation_Translate_FullMethodName  = "/grpc.v1.Translation/Translate"
 )
 
 // TranslationClient is the client API for Translation service.
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
-//
-// The Translation service definition.
 type TranslationClient interface {
-	// RPC method to get translation history.
 	GetHistory(ctx context.Context, in *GetHistoryRequest, opts ...grpc.CallOption) (*GetHistoryResponse, error)
+	Translate(ctx context.Context, in *TranslateRequest, opts ...grpc.CallOption) (*TranslateResponse, error)
 }
 
 type translationClient struct {
@@ -50,14 +49,22 @@ func (c *translationClient) GetHistory(ctx context.Context, in *GetHistoryReques
 	return out, nil
 }
 
+func (c *translationClient) Translate(ctx context.Context, in *TranslateRequest, opts ...grpc.CallOption) (*TranslateResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(TranslateResponse)
+	err := c.cc.Invoke(ctx, Translation_Translate_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // TranslationServer is the server API for Translation service.
 // All implementations must embed UnimplementedTranslationServer
 // for forward compatibility.
-//
-// The Translation service definition.
 type TranslationServer interface {
-	// RPC method to get translation history.
 	GetHistory(context.Context, *GetHistoryRequest) (*GetHistoryResponse, error)
+	Translate(context.Context, *TranslateRequest) (*TranslateResponse, error)
 	mustEmbedUnimplementedTranslationServer()
 }
 
@@ -70,6 +77,9 @@ type UnimplementedTranslationServer struct{}
 
 func (UnimplementedTranslationServer) GetHistory(context.Context, *GetHistoryRequest) (*GetHistoryResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method GetHistory not implemented")
+}
+func (UnimplementedTranslationServer) Translate(context.Context, *TranslateRequest) (*TranslateResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method Translate not implemented")
 }
 func (UnimplementedTranslationServer) mustEmbedUnimplementedTranslationServer() {}
 func (UnimplementedTranslationServer) testEmbeddedByValue()                     {}
@@ -110,6 +120,24 @@ func _Translation_GetHistory_Handler(srv interface{}, ctx context.Context, dec f
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Translation_Translate_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(TranslateRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(TranslationServer).Translate(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Translation_Translate_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(TranslationServer).Translate(ctx, req.(*TranslateRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // Translation_ServiceDesc is the grpc.ServiceDesc for Translation service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -120,6 +148,10 @@ var Translation_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "GetHistory",
 			Handler:    _Translation_GetHistory_Handler,
+		},
+		{
+			MethodName: "Translate",
+			Handler:    _Translation_Translate_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

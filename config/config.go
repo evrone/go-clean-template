@@ -2,6 +2,7 @@ package config
 
 import (
 	"fmt"
+	"time"
 
 	"github.com/caarlos0/env/v11"
 )
@@ -16,6 +17,7 @@ type (
 		GRPC    GRPC
 		RMQ     RMQ
 		NATS    NATS
+		JWT     JWT
 		Metrics Metrics
 		Swagger Swagger
 	}
@@ -59,6 +61,12 @@ type (
 	NATS struct {
 		ServerExchange string `env:"NATS_RPC_SERVER,required"`
 		URL            string `env:"NATS_URL,required"`
+	}
+
+	// JWT -.
+	JWT struct {
+		Secret      string        `env:"JWT_SECRET,required"`
+		TokenExpiry time.Duration `env:"JWT_TOKEN_EXPIRY" envDefault:"24h"`
 	}
 
 	// Metrics -.

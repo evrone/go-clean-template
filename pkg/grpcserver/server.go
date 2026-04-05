@@ -1,4 +1,3 @@
-// Package grpcserver implements HTTP server.
 package grpcserver
 
 import (
@@ -20,9 +19,10 @@ type Server struct {
 	ctx context.Context
 	eg  *errgroup.Group
 
-	App     *pbgrpc.Server
-	notify  chan error
-	address string
+	App        *pbgrpc.Server
+	notify     chan error
+	address    string
+	serverOpts []pbgrpc.ServerOption
 
 	logger logger.Interface
 }
@@ -30,21 +30,21 @@ type Server struct {
 // New -.
 func New(l logger.Interface, opts ...Option) *Server {
 	group, ctx := errgroup.WithContext(context.Background())
-	group.SetLimit(1) // Run only one goroutine
+	group.SetLimit(1)
 
 	s := &Server{
 		ctx:     ctx,
 		eg:      group,
-		App:     pbgrpc.NewServer(),
 		notify:  make(chan error, 1),
 		address: _defaultAddr,
 		logger:  l,
 	}
 
-	// Custom options
 	for _, opt := range opts {
 		opt(s)
 	}
+
+	s.App = pbgrpc.NewServer(s.serverOpts...)
 
 	return s
 }
@@ -87,13 +87,11 @@ func (s *Server) Notify() <-chan error {
 func (s *Server) Shutdown() error {
 	var shutdownErrors []error
 
-	s.App.GracefulStop() // Attention! Close connection first
+	s.App.GracefulStop()
 
-	// Wait for all goroutines to finish and get any error
 	err := s.eg.Wait()
 	if err != nil && !errors.Is(err, context.Canceled) {
 		s.logger.Error(err, "grpc server - Server - Shutdown - s.eg.Wait")
-
 		shutdownErrors = append(shutdownErrors, err)
 	}
 

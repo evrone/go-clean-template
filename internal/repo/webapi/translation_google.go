@@ -1,6 +1,7 @@
 package webapi
 
 import (
+	"context"
 	"fmt"
 
 	translator "github.com/Conight/go-googletrans"
@@ -25,7 +26,11 @@ func New() *TranslationWebAPI {
 }
 
 // Translate -.
-func (t *TranslationWebAPI) Translate(translation entity.Translation) (entity.Translation, error) {
+func (t *TranslationWebAPI) Translate(ctx context.Context, translation entity.Translation) (entity.Translation, error) {
+	if err := ctx.Err(); err != nil {
+		return entity.Translation{}, fmt.Errorf("TranslationWebAPI - Translate - ctx: %w", err)
+	}
+
 	trans := translator.New(t.conf)
 
 	result, err := trans.Translate(translation.Original, translation.Source, translation.Destination)

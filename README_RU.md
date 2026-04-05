@@ -40,6 +40,14 @@
 - gRPC ([gRPC](https://grpc.io/) фреймворк на основе protobuf)
 - REST API ([Fiber](https://github.com/gofiber/fiber) фреймворк)
 
+Шаблон включает три домена для демонстрации многосервисной архитектуры:
+
+- **Аутентификация пользователей** — регистрация, вход, авторизация на основе JWT
+- **Управление задачами** — CRUD-операции с переходами статусов (todo, in_progress, done)
+- **Перевод** — перевод текста с сохранением истории
+
+Все домены доступны через все четыре транспорта (REST, gRPC, AMQP RPC, NATS RPC).
+
 ## Содержание
 
 - [Быстрый старт](#быстрый-старт)
@@ -86,6 +94,8 @@ make compose-up-all
   - http://app.lvh.me/swagger | http://127.0.0.1:8080/swagger
 - gRPC:
   - URL: `tcp://grpc.lvh.me:8081` | `tcp://127.0.0.1:8081`
+  - [v1/auth.proto](docs/proto/v1/auth.proto)
+  - [v1/task.proto](docs/proto/v1/task.proto)
   - [v1/translation.history.proto](docs/proto/v1/translation.history.proto)
 - PostgreSQL:
   - `postgres://user:myAwEsOm3pa55@w0rd@127.0.0.1:5432/db`

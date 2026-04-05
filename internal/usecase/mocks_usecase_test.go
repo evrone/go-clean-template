@@ -42,31 +42,214 @@ func (m *MockTranslation) EXPECT() *MockTranslationMockRecorder {
 }
 
 // History mocks base method.
-func (m *MockTranslation) History(arg0 context.Context) (entity.TranslationHistory, error) {
+func (m *MockTranslation) History(ctx context.Context, userID string) (entity.TranslationHistory, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "History", arg0)
+	ret := m.ctrl.Call(m, "History", ctx, userID)
 	ret0, _ := ret[0].(entity.TranslationHistory)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // History indicates an expected call of History.
-func (mr *MockTranslationMockRecorder) History(arg0 any) *gomock.Call {
+func (mr *MockTranslationMockRecorder) History(ctx, userID any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "History", reflect.TypeOf((*MockTranslation)(nil).History), arg0)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "History", reflect.TypeOf((*MockTranslation)(nil).History), ctx, userID)
 }
 
 // Translate mocks base method.
-func (m *MockTranslation) Translate(arg0 context.Context, arg1 entity.Translation) (entity.Translation, error) {
+func (m *MockTranslation) Translate(ctx context.Context, userID string, t entity.Translation) (entity.Translation, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Translate", arg0, arg1)
+	ret := m.ctrl.Call(m, "Translate", ctx, userID, t)
 	ret0, _ := ret[0].(entity.Translation)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // Translate indicates an expected call of Translate.
-func (mr *MockTranslationMockRecorder) Translate(arg0, arg1 any) *gomock.Call {
+func (mr *MockTranslationMockRecorder) Translate(ctx, userID, t any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Translate", reflect.TypeOf((*MockTranslation)(nil).Translate), arg0, arg1)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Translate", reflect.TypeOf((*MockTranslation)(nil).Translate), ctx, userID, t)
+}
+
+// MockUser is a mock of User interface.
+type MockUser struct {
+	ctrl     *gomock.Controller
+	recorder *MockUserMockRecorder
+	isgomock struct{}
+}
+
+// MockUserMockRecorder is the mock recorder for MockUser.
+type MockUserMockRecorder struct {
+	mock *MockUser
+}
+
+// NewMockUser creates a new mock instance.
+func NewMockUser(ctrl *gomock.Controller) *MockUser {
+	mock := &MockUser{ctrl: ctrl}
+	mock.recorder = &MockUserMockRecorder{mock}
+	return mock
+}
+
+// EXPECT returns an object that allows the caller to indicate expected use.
+func (m *MockUser) EXPECT() *MockUserMockRecorder {
+	return m.recorder
+}
+
+// GetUser mocks base method.
+func (m *MockUser) GetUser(ctx context.Context, userID string) (entity.User, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetUser", ctx, userID)
+	ret0, _ := ret[0].(entity.User)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetUser indicates an expected call of GetUser.
+func (mr *MockUserMockRecorder) GetUser(ctx, userID any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetUser", reflect.TypeOf((*MockUser)(nil).GetUser), ctx, userID)
+}
+
+// Login mocks base method.
+func (m *MockUser) Login(ctx context.Context, email, password string) (string, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Login", ctx, email, password)
+	ret0, _ := ret[0].(string)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// Login indicates an expected call of Login.
+func (mr *MockUserMockRecorder) Login(ctx, email, password any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Login", reflect.TypeOf((*MockUser)(nil).Login), ctx, email, password)
+}
+
+// Register mocks base method.
+func (m *MockUser) Register(ctx context.Context, username, email, password string) (entity.User, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Register", ctx, username, email, password)
+	ret0, _ := ret[0].(entity.User)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// Register indicates an expected call of Register.
+func (mr *MockUserMockRecorder) Register(ctx, username, email, password any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Register", reflect.TypeOf((*MockUser)(nil).Register), ctx, username, email, password)
+}
+
+// MockTask is a mock of Task interface.
+type MockTask struct {
+	ctrl     *gomock.Controller
+	recorder *MockTaskMockRecorder
+	isgomock struct{}
+}
+
+// MockTaskMockRecorder is the mock recorder for MockTask.
+type MockTaskMockRecorder struct {
+	mock *MockTask
+}
+
+// NewMockTask creates a new mock instance.
+func NewMockTask(ctrl *gomock.Controller) *MockTask {
+	mock := &MockTask{ctrl: ctrl}
+	mock.recorder = &MockTaskMockRecorder{mock}
+	return mock
+}
+
+// EXPECT returns an object that allows the caller to indicate expected use.
+func (m *MockTask) EXPECT() *MockTaskMockRecorder {
+	return m.recorder
+}
+
+// Create mocks base method.
+func (m *MockTask) Create(ctx context.Context, userID, title, description string) (entity.Task, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Create", ctx, userID, title, description)
+	ret0, _ := ret[0].(entity.Task)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// Create indicates an expected call of Create.
+func (mr *MockTaskMockRecorder) Create(ctx, userID, title, description any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Create", reflect.TypeOf((*MockTask)(nil).Create), ctx, userID, title, description)
+}
+
+// Delete mocks base method.
+func (m *MockTask) Delete(ctx context.Context, userID, taskID string) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Delete", ctx, userID, taskID)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// Delete indicates an expected call of Delete.
+func (mr *MockTaskMockRecorder) Delete(ctx, userID, taskID any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Delete", reflect.TypeOf((*MockTask)(nil).Delete), ctx, userID, taskID)
+}
+
+// Get mocks base method.
+func (m *MockTask) Get(ctx context.Context, userID, taskID string) (entity.Task, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Get", ctx, userID, taskID)
+	ret0, _ := ret[0].(entity.Task)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// Get indicates an expected call of Get.
+func (mr *MockTaskMockRecorder) Get(ctx, userID, taskID any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Get", reflect.TypeOf((*MockTask)(nil).Get), ctx, userID, taskID)
+}
+
+// List mocks base method.
+func (m *MockTask) List(ctx context.Context, userID string, status *entity.TaskStatus, limit, offset int) ([]entity.Task, int, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "List", ctx, userID, status, limit, offset)
+	ret0, _ := ret[0].([]entity.Task)
+	ret1, _ := ret[1].(int)
+	ret2, _ := ret[2].(error)
+	return ret0, ret1, ret2
+}
+
+// List indicates an expected call of List.
+func (mr *MockTaskMockRecorder) List(ctx, userID, status, limit, offset any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "List", reflect.TypeOf((*MockTask)(nil).List), ctx, userID, status, limit, offset)
+}
+
+// Transition mocks base method.
+func (m *MockTask) Transition(ctx context.Context, userID, taskID string, newStatus entity.TaskStatus) (entity.Task, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Transition", ctx, userID, taskID, newStatus)
+	ret0, _ := ret[0].(entity.Task)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// Transition indicates an expected call of Transition.
+func (mr *MockTaskMockRecorder) Transition(ctx, userID, taskID, newStatus any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Transition", reflect.TypeOf((*MockTask)(nil).Transition), ctx, userID, taskID, newStatus)
+}
+
+// Update mocks base method.
+func (m *MockTask) Update(ctx context.Context, userID, taskID, title, description string) (entity.Task, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Update", ctx, userID, taskID, title, description)
+	ret0, _ := ret[0].(entity.Task)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// Update indicates an expected call of Update.
+func (mr *MockTaskMockRecorder) Update(ctx, userID, taskID, title, description any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Update", reflect.TypeOf((*MockTask)(nil).Update), ctx, userID, taskID, title, description)
 }
