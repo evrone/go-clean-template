@@ -33,7 +33,7 @@ golang服务的整洁架构模板
 [Go 整洁模板](https://evrone.com/go-clean-template?utm_source=github&utm_campaign=go-clean-template) 由
 [Evrone](https://evrone.com/?utm_source=github&utm_campaign=go-clean-template) 创建和提供支持.
 
-此模板实现了三种类型的服务器：
+此模板实现了四种类型的服务器：
 
 - AMQP RPC（基于 RabbitMQ 作为传输）
 - NATS RPC（基于 NATS 作为传输）
@@ -50,10 +50,55 @@ golang服务的整洁架构模板
 
 ## 内容
 
+- [领域](#领域)
 - [快速开始](#快速开始)
 - [工程架构](#工程架构)
 - [依赖注入](#依赖注入)
 - [整洁架构](#整洁架构)
+
+## 领域
+
+模板包含三个完整实现的领域，每个领域均可通过所有四种传输协议（REST、gRPC、AMQP RPC、NATS RPC）访问。
+
+### 用户认证
+
+注册、登录和基于 JWT 的授权。
+
+| 操作   | REST                     | gRPC                     |
+|------|--------------------------|--------------------------|
+| 注册   | `POST /v1/auth/register` | `AuthService/Register`   |
+| 登录   | `POST /v1/auth/login`    | `AuthService/Login`      |
+| 获取资料 | `GET /v1/user/profile`   | `AuthService/GetProfile` |
+
+- 密码使用 bcrypt 加密
+- JWT 令牌支持可配置的过期时间
+- 所有传输协议均有认证中间件
+
+### 任务管理
+
+CRUD 操作，支持状态状态机。
+
+| 操作   | REST                         | gRPC                         |
+|------|------------------------------|------------------------------|
+| 创建   | `POST /v1/tasks`             | `TaskService/CreateTask`     |
+| 列表   | `GET /v1/tasks`              | `TaskService/ListTasks`      |
+| 获取   | `GET /v1/tasks/:id`          | `TaskService/GetTask`        |
+| 更新   | `PUT /v1/tasks/:id`          | `TaskService/UpdateTask`     |
+| 状态转换 | `PATCH /v1/tasks/:id/status` | `TaskService/TransitionTask` |
+| 删除   | `DELETE /v1/tasks/:id`       | `TaskService/DeleteTask`     |
+
+- 状态转换：`todo` → `in_progress` → `done`（以及 `in_progress` → `todo`）
+- 支持 `limit`/`offset` 分页和可选状态过滤
+- 任务绑定到已认证的用户
+
+### 翻译
+
+通过外部 API 进行文本翻译，支持历史记录。
+
+| 操作 | REST                                | gRPC                                    |
+|----|-------------------------------------|-----------------------------------------|
+| 翻译 | `POST /v1/translation/do-translate` | `TranslationHistoryService/DoTranslate` |
+| 历史 | `GET /v1/translation/history`       | `TranslationHistoryService/ShowHistory` |
 
 ## Quick start
 
@@ -162,9 +207,10 @@ go run -tags migrate ./cmd/app
 
 ### `internal/controller`
 
-服务器处理层（MVC 控制器）。模板展示了 3 种服务器：
+服务器处理层（MVC 控制器）。模板展示了 4 种服务器：
 
 - AMQP RPC（基于 RabbitMQ 作为传输）
+- NATS RPC（基于 NATS 作为传输）
 - gRPC（基于 protobuf 的 [gRPC](https://grpc.io/) 框架）
 - REST API（基于 [Fiber](https://github.com/gofiber/fiber) 框架）
 
@@ -184,7 +230,7 @@ go run -tags migrate ./cmd/app
 routes := make(map[string]server.CallHandler)
 
 {
-    v1.NewTranslationRoutes(routes, t, l)
+    v1.NewRoutes(routes, t, u, tk, j, l)
 }
 
 {
@@ -201,10 +247,14 @@ routes := make(map[string]server.CallHandler)
 
 ```go
 {
+    v1.NewAuthRoutes(app, u, l)
+    v1.NewTaskRoutes(app, tk, l)
     v1.NewTranslationRoutes(app, t, l)
 }
 
 {
+    v2.NewAuthRoutes(app, u, l)
+    v2.NewTaskRoutes(app, tk, l)
     v2.NewTranslationRoutes(app, t, l)
 }
 
@@ -221,7 +271,7 @@ reflection.Register(app)
 routes := make(map[string]server.CallHandler)
 
 {
-    v1.NewTranslationRoutes(routes, t, l)
+    v1.NewRoutes(routes, t, u, tk, j, l)
 }
 
 {
@@ -238,11 +288,11 @@ routes := make(map[string]server.CallHandler)
 ```go
 apiV1Group := app.Group("/v1")
 {
-	v1.NewTranslationRoutes(apiV1Group, t, l)
+	v1.NewRoutes(apiV1Group, t, u, tk, jwtManager, l)
 }
 apiV2Group := app.Group("/v2")
 {
-	v2.NewTranslationRoutes(apiV2Group, t, l)
+	v2.NewRoutes(apiV2Group, t, u, tk, jwtManager, l)
 }
 ```
 
@@ -289,7 +339,7 @@ RabbitMQ RPC 模式：
 这使得业务逻辑独立（且可移植）
 我们可以覆盖接口的实现，而无需更改 `usecase` 包.
 
-它还将允许我们自动生成相关mock（例如使用 [mockery](https://github.com/vektra/mockery)），以便进行单元测试.
+它还将允许我们自动生成相关mock（例如使用 [go.uber.org/mock](https://go.uber.org/mock)），以便进行单元测试.
 > 我们不依赖于特定的实现，以便始终能够将一个组件更改为另一个组件
 > 如果新组件实现了接口，则业务逻辑无需更改。
 
@@ -395,8 +445,8 @@ HTTP 和数据库都在外层，这意味着他们彼此无法感知
 
 - **Use Cases** 业务逻辑位于 `internal/usecase` 中
   与业务逻辑直接交互的层通常称为_infrastructure_ 层
-  这些可以是存储库 `internal/usecase/repo`、外部 webapi `internal/usecase/webapi`、任何包和其他微服务。
-  在模板中，_infrastructure_ 包位于 `internal/usecase` 中
+  这些可以是存储库 `internal/repo/persistent`、外部 webapi `internal/repo/webapi`、任何包和其他微服务。
+  在模板中，_infrastructure_ 包位于 `internal/repo` 中
 
 您可以根据需要决定你要调用的入口点，包括：
 
