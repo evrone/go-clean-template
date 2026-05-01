@@ -123,11 +123,6 @@ const docTemplate = `{
         },
         "/tasks": {
             "get": {
-                "security": [
-                    {
-                        "BearerAuth": []
-                    }
-                ],
                 "description": "List tasks for the current user with optional filtering",
                 "produces": [
                     "application/json"
@@ -183,14 +178,14 @@ const docTemplate = `{
                             "$ref": "#/definitions/v1.Error"
                         }
                     }
-                }
-            },
-            "post": {
+                },
                 "security": [
                     {
                         "BearerAuth": []
                     }
-                ],
+                ]
+            },
+            "post": {
                 "description": "Create a new task for the current user",
                 "consumes": [
                     "application/json"
@@ -239,16 +234,16 @@ const docTemplate = `{
                             "$ref": "#/definitions/v1.Error"
                         }
                     }
-                }
-            }
-        },
-        "/tasks/{id}": {
-            "get": {
+                },
                 "security": [
                     {
                         "BearerAuth": []
                     }
-                ],
+                ]
+            }
+        },
+        "/tasks/{id}": {
+            "get": {
                 "description": "Get a task by ID",
                 "produces": [
                     "application/json"
@@ -298,14 +293,14 @@ const docTemplate = `{
                             "$ref": "#/definitions/v1.Error"
                         }
                     }
-                }
-            },
-            "put": {
+                },
                 "security": [
                     {
                         "BearerAuth": []
                     }
-                ],
+                ]
+            },
+            "put": {
                 "description": "Update task title and description",
                 "consumes": [
                     "application/json"
@@ -373,14 +368,14 @@ const docTemplate = `{
                             "$ref": "#/definitions/v1.Error"
                         }
                     }
-                }
-            },
-            "delete": {
+                },
                 "security": [
                     {
                         "BearerAuth": []
                     }
-                ],
+                ]
+            },
+            "delete": {
                 "description": "Delete a task by ID",
                 "tags": [
                     "tasks"
@@ -418,16 +413,16 @@ const docTemplate = `{
                             "$ref": "#/definitions/v1.Error"
                         }
                     }
-                }
-            }
-        },
-        "/tasks/{id}/status": {
-            "patch": {
+                },
                 "security": [
                     {
                         "BearerAuth": []
                     }
-                ],
+                ]
+            }
+        },
+        "/tasks/{id}/status": {
+            "patch": {
                 "description": "Change task status (todo -\u003e in_progress -\u003e done, or in_progress -\u003e todo)",
                 "consumes": [
                     "application/json"
@@ -495,16 +490,16 @@ const docTemplate = `{
                             "$ref": "#/definitions/v1.Error"
                         }
                     }
-                }
-            }
-        },
-        "/translation/do-translate": {
-            "post": {
+                },
                 "security": [
                     {
                         "BearerAuth": []
                     }
-                ],
+                ]
+            }
+        },
+        "/translation/do-translate": {
+            "post": {
                 "description": "Translate a text",
                 "consumes": [
                     "application/json"
@@ -553,16 +548,16 @@ const docTemplate = `{
                             "$ref": "#/definitions/v1.Error"
                         }
                     }
-                }
-            }
-        },
-        "/translation/history": {
-            "get": {
+                },
                 "security": [
                     {
                         "BearerAuth": []
                     }
-                ],
+                ]
+            }
+        },
+        "/translation/history": {
+            "get": {
                 "description": "Show all translation history for current user",
                 "produces": [
                     "application/json"
@@ -591,16 +586,16 @@ const docTemplate = `{
                             "$ref": "#/definitions/v1.Error"
                         }
                     }
-                }
-            }
-        },
-        "/user/profile": {
-            "get": {
+                },
                 "security": [
                     {
                         "BearerAuth": []
                     }
-                ],
+                ]
+            }
+        },
+        "/user/profile": {
+            "get": {
                 "description": "Get current user profile",
                 "produces": [
                     "application/json"
@@ -635,7 +630,12 @@ const docTemplate = `{
                             "$ref": "#/definitions/v1.Error"
                         }
                     }
-                }
+                },
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ]
             }
         }
     },

@@ -51,7 +51,7 @@ services:
     environment:
       <<: *x-db-environment
     volumes:
-      - db_data:/var/lib/postgresql/data
+      - db_data:/var/lib/postgresql/18/data
     ports:
       - "5432:5432"
     networks:
@@ -61,7 +61,7 @@ services:
 
   rabbitmq:
     container_name: rabbitmq
-    image: rabbitmq:4.2.5-management
+    image: rabbitmq:4.3.0-management
     environment:
       <<: *x-rabbitmq-variables
     ports:
@@ -76,7 +76,7 @@ services:
 
   nats:
     container_name: nats
-    image: nats:2.12-alpine
+    image: nats:2.14-alpine
     command: [ "-m", "8222", "-sd", "/nats-data", "-user", "guest", "-pass", "guest" ]
     ports:
       - "4222:4222"
