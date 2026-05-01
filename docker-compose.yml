@@ -76,7 +76,7 @@ services:
 
   nats:
     container_name: nats
-    image: nats:2.12-alpine
+    image: nats:2.14-alpine
     command: [ "-m", "8222", "-sd", "/nats-data", "-user", "guest", "-pass", "guest" ]
     ports:
       - "4222:4222"
