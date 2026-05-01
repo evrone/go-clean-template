@@ -10,72 +10,72 @@ import (
 type (
 	// Config -.
 	Config struct {
-		App     App
-		HTTP    HTTP
-		Log     Log
-		PG      PG
-		GRPC    GRPC
-		RMQ     RMQ
-		NATS    NATS
-		JWT     JWT
-		Metrics Metrics
-		Swagger Swagger
+		App     app
+		HTTP    http
+		Log     log
+		PG      pg
+		GRPC    grpc
+		RMQ     rmq
+		NATS    nats
+		JWT     jwt
+		Metrics metrics
+		Swagger swagger
 	}
 
 	// App -.
-	App struct {
+	app struct {
 		Name    string `env:"APP_NAME,required"`
 		Version string `env:"APP_VERSION,required"`
 	}
 
 	// HTTP -.
-	HTTP struct {
+	http struct {
 		Port           string `env:"HTTP_PORT,required"`
 		UsePreforkMode bool   `env:"HTTP_USE_PREFORK_MODE" envDefault:"false"`
 	}
 
 	// Log -.
-	Log struct {
+	log struct {
 		Level string `env:"LOG_LEVEL,required"`
 	}
 
 	// PG -.
-	PG struct {
+	pg struct {
 		PoolMax int    `env:"PG_POOL_MAX,required"`
 		URL     string `env:"PG_URL,required"`
 	}
 
 	// GRPC -.
-	GRPC struct {
+	grpc struct {
 		Port string `env:"GRPC_PORT,required"`
 	}
 
 	// RMQ -.
-	RMQ struct {
+	rmq struct {
 		ServerExchange string `env:"RMQ_RPC_SERVER,required"`
 		ClientExchange string `env:"RMQ_RPC_CLIENT,required"`
 		URL            string `env:"RMQ_URL,required"`
 	}
 
 	// NATS -.
-	NATS struct {
+	nats struct {
 		ServerExchange string `env:"NATS_RPC_SERVER,required"`
 		URL            string `env:"NATS_URL,required"`
 	}
 
 	// JWT -.
-	JWT struct {
+	jwt struct {
 		Secret      string        `env:"JWT_SECRET,required"`
 		TokenExpiry time.Duration `env:"JWT_TOKEN_EXPIRY" envDefault:"24h"`
 	}
 
 	// Metrics -.
-	Metrics struct {
+	metrics struct {
 		Enabled bool `env:"METRICS_ENABLED" envDefault:"true"`
 	}
 
 	// Swagger -.
-	Swagger struct {
+	swagger struct {
 		Enabled bool `env:"SWAGGER_ENABLED" envDefault:"false"`
 	}
 )
