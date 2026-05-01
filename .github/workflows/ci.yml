@@ -24,7 +24,7 @@ jobs:
       - uses: actions/checkout@v6
       - uses: reviewdog/action-yamllint@v1
         with:
-          fail_on_error: true
+          fail_level: error
           reporter: github-pr-review
           yamllint_flags: '-d "{extends: default, rules: {truthy: disable}}" .'
 
@@ -35,7 +35,7 @@ jobs:
       - uses: actions/checkout@v6
       - uses: reviewdog/action-hadolint@v1
         with:
-          fail_on_error: true
+          fail_level: error
           reporter: github-pr-review
 
   dotenv-linter:
