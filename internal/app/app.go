@@ -71,7 +71,8 @@ func initServers(cfg *config.Config, uc useCases, jwtManager *jwt.Manager, l log
 	}
 
 	// gRPC Server
-	grpcServer := grpcserver.New(l,
+	grpcServer := grpcserver.New(
+		l,
 		grpcserver.Port(cfg.GRPC.Port),
 		grpcserver.ServerOptions(pbgrpc.UnaryInterceptor(grpcmw.AuthInterceptor(jwtManager))),
 	)
