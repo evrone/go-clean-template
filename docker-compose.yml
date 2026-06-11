@@ -61,7 +61,7 @@ services:
 
   rabbitmq:
     container_name: rabbitmq
-    image: rabbitmq:4.3.0-management
+    image: rabbitmq:4.3.1-management
     environment:
       <<: *x-rabbitmq-variables
     ports:
@@ -117,7 +117,7 @@ services:
 
   nginx:
     container_name: nginx
-    image: nginx:1.31.0-alpine
+    image: nginx:1.31.1-alpine
     volumes:
       - ./nginx/nginx.conf:/etc/nginx/nginx.conf
     ports:
