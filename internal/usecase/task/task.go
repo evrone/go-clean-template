@@ -7,6 +7,7 @@ import (
 
 	"github.com/evrone/go-clean-template/internal/entity"
 	"github.com/evrone/go-clean-template/internal/repo"
+	"github.com/evrone/go-clean-template/internal/usecase"
 	"github.com/google/uuid"
 )
 
@@ -15,9 +16,9 @@ type UseCase struct {
 	repo repo.TaskRepo
 }
 
-// New -.
-func New(r repo.TaskRepo) *UseCase {
-	return &UseCase{repo: r}
+// New returns a Task usecase instrumented with OpenTelemetry tracing spans.
+func New(r repo.TaskRepo) usecase.Task {
+	return newTraced(&UseCase{repo: r})
 }
 
 // Create -.

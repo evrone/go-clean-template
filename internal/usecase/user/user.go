@@ -7,6 +7,7 @@ import (
 
 	"github.com/evrone/go-clean-template/internal/entity"
 	"github.com/evrone/go-clean-template/internal/repo"
+	"github.com/evrone/go-clean-template/internal/usecase"
 	"github.com/evrone/go-clean-template/pkg/jwt"
 	"github.com/google/uuid"
 	"golang.org/x/crypto/bcrypt"
@@ -18,12 +19,12 @@ type UseCase struct {
 	jwt  *jwt.Manager
 }
 
-// New -.
-func New(r repo.UserRepo, j *jwt.Manager) *UseCase {
-	return &UseCase{
+// New returns a User usecase instrumented with OpenTelemetry tracing spans.
+func New(r repo.UserRepo, j *jwt.Manager) usecase.User {
+	return newTraced(&UseCase{
 		repo: r,
 		jwt:  j,
-	}
+	})
 }
 
 // Register -.

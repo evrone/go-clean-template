@@ -6,6 +6,7 @@ import (
 
 	"github.com/evrone/go-clean-template/internal/entity"
 	"github.com/evrone/go-clean-template/internal/repo"
+	"github.com/evrone/go-clean-template/internal/usecase"
 )
 
 // UseCase -.
@@ -14,12 +15,12 @@ type UseCase struct {
 	webAPI repo.TranslationWebAPI
 }
 
-// New -.
-func New(r repo.TranslationRepo, w repo.TranslationWebAPI) *UseCase {
-	return &UseCase{
+// New returns a Translation usecase instrumented with OpenTelemetry tracing spans.
+func New(r repo.TranslationRepo, w repo.TranslationWebAPI) usecase.Translation {
+	return newTraced(&UseCase{
 		repo:   r,
 		webAPI: w,
-	}
+	})
 }
 
 // History - getting translate history from store.

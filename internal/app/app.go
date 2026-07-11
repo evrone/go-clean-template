@@ -16,6 +16,7 @@ import (
 	"github.com/evrone/go-clean-template/internal/controller/restapi"
 	"github.com/evrone/go-clean-template/internal/repo/persistent"
 	"github.com/evrone/go-clean-template/internal/repo/webapi"
+	"github.com/evrone/go-clean-template/internal/usecase"
 	"github.com/evrone/go-clean-template/internal/usecase/task"
 	"github.com/evrone/go-clean-template/internal/usecase/translation"
 	"github.com/evrone/go-clean-template/internal/usecase/user"
@@ -32,9 +33,9 @@ import (
 )
 
 type useCases struct {
-	translation *translation.UseCase
-	user        *user.UseCase
-	task        *task.UseCase
+	translation usecase.Translation
+	user        usecase.User
+	task        usecase.Task
 }
 
 type servers struct {
