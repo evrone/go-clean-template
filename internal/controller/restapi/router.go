@@ -29,7 +29,6 @@ import (
 //	@name Authorization
 func NewRouter(app *fiber.App, cfg *config.Config, t usecase.Translation, u usecase.User, tk usecase.Task, jwtManager *jwt.Manager, l logger.Interface) {
 	// Options
-	app.Use(otelfiber.Middleware())
 	app.Use(middleware.Logger(l))
 	app.Use(middleware.Recovery(l))
 
@@ -51,6 +50,10 @@ func NewRouter(app *fiber.App, cfg *config.Config, t usecase.Translation, u usec
 	// Routers
 	apiV1Group := app.Group("/v1")
 	{
+		if cfg.Tracing.Enabled {
+			apiV1Group.Use(otelfiber.Middleware())
+		}
+
 		v1.NewRoutes(apiV1Group, t, u, tk, jwtManager, l)
 	}
 }
