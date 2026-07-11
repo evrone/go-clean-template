@@ -9,7 +9,6 @@ Clean Architecture template for Golang services
 
 [![Release](https://img.shields.io/github/v/release/evrone/go-clean-template.svg)](https://github.com/evrone/go-clean-template/releases/)
 [![License](https://img.shields.io/badge/License-MIT-success)](https://github.com/evrone/go-clean-template/blob/master/LICENSE)
-[![Go Report Card](https://goreportcard.com/badge/github.com/evrone/go-clean-template)](https://goreportcard.com/report/github.com/evrone/go-clean-template)
 [![codecov](https://codecov.io/gh/evrone/go-clean-template/branch/master/graph/badge.svg?token=XE3E0X3EVQ)](https://codecov.io/gh/evrone/go-clean-template)
 
 [![Web Framework](https://img.shields.io/badge/Fiber-Web%20Framework-blue)](https://github.com/gofiber/fiber)
@@ -20,6 +19,7 @@ Clean Architecture template for Golang services
 [![Database Migrations](https://img.shields.io/badge/Migrations-Seamless%20Schema%20Updates-blue)](https://github.com/golang-migrate/migrate)
 [![Logging](https://img.shields.io/badge/ZeroLog-Structured%20Logging-blue)](https://github.com/rs/zerolog)
 [![Metrics](https://img.shields.io/badge/Prometheus-Metrics%20Integration-blue)](https://github.com/ansrivas/fiberprometheus)
+[![Tracing](https://img.shields.io/badge/OpenTelemetry-Distributed%20Tracing-blue)](https://opentelemetry.io/)
 [![Testing](https://img.shields.io/badge/Testify-Testing%20Framework-blue)](https://github.com/stretchr/testify)
 [![Mocking](https://img.shields.io/badge/Mock-Mocking%20Library-blue)](https://go.uber.org/mock)
 
@@ -57,6 +57,7 @@ All domains are available across all four transports (REST, gRPC, AMQP RPC, NATS
 
 - [Domains](#domains)
 - [Quick start](#quick-start)
+- [Observability](#observability)
 - [Project structure](#project-structure)
 - [Dependency Injection](#dependency-injection)
 - [Clean Architecture](#clean-architecture)
@@ -155,6 +156,36 @@ Check services:
 - NATS monitoring:
   - http://nats.lvh.me | http://127.0.0.1:8222/
   - Credentials: `guest` / `guest`
+- Jaeger (traces UI):
+  - http://jaeger.lvh.me | http://127.0.0.1:16686
+
+## Observability
+
+Distributed tracing is provided by [OpenTelemetry](https://opentelemetry.io/). Spans are exported over OTLP/gRPC to a
+collector — [Jaeger](https://www.jaegertracing.io/) in the docker stack.
+
+- **Context propagation** — W3C `traceparent` + `baggage`, so a single trace spans all four transports. REST uses
+  the [otelfiber](https://github.com/gofiber/contrib/tree/main/otelfiber) middleware, gRPC uses the
+  [otelgrpc](https://github.com/open-telemetry/opentelemetry-go-contrib) stats handler, and AMQP RPC / NATS RPC carry the
+  trace context in message headers via custom carriers (`pkg/rabbitmq/rmq_rpc/otel_carrier.go`,
+  `pkg/nats/nats_rpc/otel_carrier.go`).
+- **Instrumented layers** — use cases and repositories are wrapped in tracing decorators (`*/tracing.go`), so a trace
+  shows the full path: controller → usecase → repo / webapi.
+- **No-op when disabled** — with `TRACING_ENABLED=false` a no-op tracer provider is installed, so instrumentation runs
+  unconditionally with zero overhead.
+- **Sampling** — `TRACING_SAMPLE_RATE` is a parent-based ratio. Use `1.0` locally; lower it (`0.1` / `0.01`) in
+  production.
+- Internal routes (`/healthz`, `/metrics`, `/swagger`) are excluded from tracing — only the versioned API groups are
+  instrumented.
+
+Configuration (see [.env.example](.env.example)):
+
+| Variable                | Default            | Description                       |
+|-------------------------|--------------------|-----------------------------------|
+| `TRACING_ENABLED`       | `false`            | Enable OpenTelemetry tracing      |
+| `TRACING_OTLP_ENDPOINT` | `localhost:4317`   | OTLP/gRPC collector endpoint      |
+| `TRACING_OTLP_INSECURE` | `true`             | Disable TLS for the OTLP exporter |
+| `TRACING_SAMPLE_RATE`   | `0.1`              | Parent-based sampling ratio       |
 
 ## Project structure
 
@@ -343,6 +374,12 @@ RabbitMQ RPC pattern:
 - There is no routing inside RabbitMQ
 - Exchange fanout is used, to which 1 exclusive queue is bound, this is the most productive config
 - Reconnect on the loss of connection
+
+### `pkg/tracing`
+
+OpenTelemetry setup: configures a global `TracerProvider` with an OTLP/gRPC exporter and W3C trace-context + baggage
+propagators. When tracing is disabled, a no-op provider is installed so instrumentation code runs unconditionally.
+See [Observability](#observability).
 
 ## Dependency Injection
 

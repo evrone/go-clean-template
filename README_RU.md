@@ -6,7 +6,6 @@
 
 [![Release](https://img.shields.io/github/v/release/evrone/go-clean-template.svg)](https://github.com/evrone/go-clean-template/releases/)
 [![License](https://img.shields.io/badge/License-MIT-success)](https://github.com/evrone/go-clean-template/blob/master/LICENSE)
-[![Go Report Card](https://goreportcard.com/badge/github.com/evrone/go-clean-template)](https://goreportcard.com/report/github.com/evrone/go-clean-template)
 [![codecov](https://codecov.io/gh/evrone/go-clean-template/branch/master/graph/badge.svg?token=XE3E0X3EVQ)](https://codecov.io/gh/evrone/go-clean-template)
 
 [![Web Framework](https://img.shields.io/badge/Fiber-Web%20Framework-blue)](https://github.com/gofiber/fiber)
@@ -17,6 +16,7 @@
 [![Database Migrations](https://img.shields.io/badge/Migrations-Seamless%20Schema%20Updates-blue)](https://github.com/golang-migrate/migrate)
 [![Logging](https://img.shields.io/badge/ZeroLog-Structured%20Logging-blue)](https://github.com/rs/zerolog)
 [![Metrics](https://img.shields.io/badge/Prometheus-Metrics%20Integration-blue)](https://github.com/ansrivas/fiberprometheus)
+[![Tracing](https://img.shields.io/badge/OpenTelemetry-Distributed%20Tracing-blue)](https://opentelemetry.io/)
 [![Testing](https://img.shields.io/badge/Testify-Testing%20Framework-blue)](https://github.com/stretchr/testify)
 [![Mocking](https://img.shields.io/badge/Mock-Mocking%20Library-blue)](https://go.uber.org/mock)
 
@@ -52,6 +52,7 @@
 
 - [Домены](#домены)
 - [Быстрый старт](#быстрый-старт)
+- [Наблюдаемость](#наблюдаемость)
 - [Структура проекта](#структура-проекта)
 - [Внедрение зависимостей](#внедрение-зависимостей)
 - [Чистая Архитектура](#чистая-архитектура)
@@ -150,6 +151,36 @@ make compose-up-all
 - NATS monitoring:
   - http://nats.lvh.me | http://127.0.0.1:8222/
   - Credentials: `guest` / `guest`
+- Jaeger (UI трейсов):
+  - http://jaeger.lvh.me | http://127.0.0.1:16686
+
+## Наблюдаемость
+
+Распределённая трассировка реализована через [OpenTelemetry](https://opentelemetry.io/). Спаны экспортируются по
+OTLP/gRPC в коллектор — [Jaeger](https://www.jaegertracing.io/) в docker-стеке.
+
+- **Проброс контекста** — W3C `traceparent` + `baggage`, поэтому один трейс охватывает все четыре транспорта. REST
+  использует middleware [otelfiber](https://github.com/gofiber/contrib/tree/main/otelfiber), gRPC — stats handler
+  [otelgrpc](https://github.com/open-telemetry/opentelemetry-go-contrib), а AMQP RPC / NATS RPC переносят trace-контекст
+  в заголовках сообщений через собственные carrier'ы (`pkg/rabbitmq/rmq_rpc/otel_carrier.go`,
+  `pkg/nats/nats_rpc/otel_carrier.go`).
+- **Инструментированные слои** — use case'ы и репозитории обёрнуты в трассировочные декораторы (`*/tracing.go`), поэтому
+  трейс показывает весь путь: controller → usecase → repo / webapi.
+- **No-op при отключении** — при `TRACING_ENABLED=false` устанавливается no-op tracer provider, поэтому инструментация
+  выполняется безусловно и без накладных расходов.
+- **Сэмплирование** — `TRACING_SAMPLE_RATE` — parent-based коэффициент. Локально используйте `1.0`; в продакшене
+  снижайте (`0.1` / `0.01`).
+- Внутренние маршруты (`/healthz`, `/metrics`, `/swagger`) исключены из трассировки — инструментируются только
+  версионированные группы API.
+
+Конфигурация (см. [.env.example](.env.example)):
+
+| Переменная              | По умолчанию       | Описание                            |
+|-------------------------|--------------------|-------------------------------------|
+| `TRACING_ENABLED`       | `false`            | Включить трассировку OpenTelemetry  |
+| `TRACING_OTLP_ENDPOINT` | `localhost:4317`   | Адрес OTLP/gRPC коллектора           |
+| `TRACING_OTLP_INSECURE` | `true`             | Отключить TLS для OTLP-экспортёра    |
+| `TRACING_SAMPLE_RATE`   | `0.1`              | Parent-based коэффициент сэмплирования |
 
 ## Структура проекта
 
@@ -338,6 +369,12 @@ RabbitMQ RPC паттерн:
 - Внутри RabbitMQ не используется маршрутизация
 - Используется fanout-обмен, к которому привязана одна эксклюзивная очередь - это наиболее производительная конфигурация
 - Переподключение при потере соединения
+
+### `pkg/tracing`
+
+Настройка OpenTelemetry: конфигурирует глобальный `TracerProvider` с экспортёром OTLP/gRPC и пропагаторами W3C
+trace-context + baggage. При отключённой трассировке устанавливается no-op provider, поэтому код инструментации
+выполняется безусловно. См. [Наблюдаемость](#наблюдаемость).
 
 ## Внедрение зависимостей
 
