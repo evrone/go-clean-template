@@ -1,6 +1,3 @@
-version: "3.9"
-
-
 services:
   integration-test:
     container_name: integration-test
