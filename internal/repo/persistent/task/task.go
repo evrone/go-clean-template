@@ -1,4 +1,5 @@
-package persistent
+// Package task implements the Postgres-backed Task repository.
+package task
 
 import (
 	"context"
@@ -12,18 +13,18 @@ import (
 	"github.com/jackc/pgx/v5"
 )
 
-// TaskRepo -.
-type TaskRepo struct {
+// Repo -.
+type Repo struct {
 	*postgres.Postgres
 }
 
-// NewTaskRepo -.
-func NewTaskRepo(pg *postgres.Postgres) *TaskRepo {
-	return &TaskRepo{pg}
+// New returns a Task repository instrumented with OpenTelemetry tracing spans.
+func New(pg *postgres.Postgres) repo.TaskRepo {
+	return newTraced(&Repo{pg})
 }
 
 // Store -.
-func (r *TaskRepo) Store(ctx context.Context, task *entity.Task) error {
+func (r *Repo) Store(ctx context.Context, task *entity.Task) error {
 	sql, args, err := r.Builder.
 		Insert("tasks").
 		Columns("id, user_id, title, description, status, created_at, updated_at").
@@ -42,7 +43,7 @@ func (r *TaskRepo) Store(ctx context.Context, task *entity.Task) error {
 }
 
 // GetByID -.
-func (r *TaskRepo) GetByID(ctx context.Context, userID, taskID string) (entity.Task, error) {
+func (r *Repo) GetByID(ctx context.Context, userID, taskID string) (entity.Task, error) {
 	sql, args, err := r.Builder.
 		Select("id, user_id, title, description, status, created_at, updated_at").
 		From("tasks").
@@ -72,7 +73,7 @@ func (r *TaskRepo) GetByID(ctx context.Context, userID, taskID string) (entity.T
 }
 
 // List -.
-func (r *TaskRepo) List(ctx context.Context, userID string, filter repo.TaskFilter) ([]entity.Task, int, error) {
+func (r *Repo) List(ctx context.Context, userID string, filter repo.TaskFilter) ([]entity.Task, int, error) {
 	countBuilder := r.Builder.
 		Select("COUNT(*)").
 		From("tasks").
@@ -134,7 +135,7 @@ func (r *TaskRepo) List(ctx context.Context, userID string, filter repo.TaskFilt
 }
 
 // Update -.
-func (r *TaskRepo) Update(ctx context.Context, task *entity.Task) error {
+func (r *Repo) Update(ctx context.Context, task *entity.Task) error {
 	sql, args, err := r.Builder.
 		Update("tasks").
 		Set("title", task.Title).
@@ -160,7 +161,7 @@ func (r *TaskRepo) Update(ctx context.Context, task *entity.Task) error {
 }
 
 // Delete -.
-func (r *TaskRepo) Delete(ctx context.Context, userID, taskID string) error {
+func (r *Repo) Delete(ctx context.Context, userID, taskID string) error {
 	sql, args, err := r.Builder.
 		Delete("tasks").
 		Where(sq.Eq{"id": taskID, "user_id": userID}).

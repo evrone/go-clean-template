@@ -14,7 +14,9 @@ import (
 	grpcmw "github.com/evrone/go-clean-template/internal/controller/grpc/middleware"
 	natsrpc "github.com/evrone/go-clean-template/internal/controller/nats_rpc"
 	"github.com/evrone/go-clean-template/internal/controller/restapi"
-	"github.com/evrone/go-clean-template/internal/repo/persistent"
+	persistTaskRepo "github.com/evrone/go-clean-template/internal/repo/persistent/task"
+	persistTranslationRepo "github.com/evrone/go-clean-template/internal/repo/persistent/translation"
+	persistUserRepo "github.com/evrone/go-clean-template/internal/repo/persistent/user"
 	"github.com/evrone/go-clean-template/internal/repo/webapi"
 	"github.com/evrone/go-clean-template/internal/usecase"
 	"github.com/evrone/go-clean-template/internal/usecase/task"
@@ -46,9 +48,9 @@ type servers struct {
 }
 
 func initUseCases(pg *postgres.Postgres, jwtManager *jwt.Manager) useCases {
-	userRepo := persistent.NewUserRepo(pg)
-	taskRepo := persistent.NewTaskRepo(pg)
-	translationRepo := persistent.NewTranslationRepo(pg)
+	translationRepo := persistTranslationRepo.New(pg)
+	taskRepo := persistTaskRepo.New(pg)
+	userRepo := persistUserRepo.New(pg)
 
 	return useCases{
 		user:        user.New(userRepo, jwtManager),

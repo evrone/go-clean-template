@@ -5,23 +5,24 @@ import (
 	"fmt"
 
 	"github.com/evrone/go-clean-template/internal/entity"
+	"github.com/evrone/go-clean-template/internal/repo"
 	"github.com/evrone/go-clean-template/pkg/postgres"
 )
 
 const _defaultEntityCap = 64
 
-// TranslationRepo -.
-type TranslationRepo struct {
+// Repo -.
+type Repo struct {
 	*postgres.Postgres
 }
 
-// NewTranslationRepo -.
-func NewTranslationRepo(pg *postgres.Postgres) *TranslationRepo {
-	return &TranslationRepo{pg}
+// New returns a Translation repository instrumented with OpenTelemetry tracing spans.
+func New(pg *postgres.Postgres) repo.TranslationRepo {
+	return newTraced(&Repo{pg})
 }
 
 // GetHistory -.
-func (r *TranslationRepo) GetHistory(ctx context.Context, userID string) ([]entity.Translation, error) {
+func (r *Repo) GetHistory(ctx context.Context, userID string) ([]entity.Translation, error) {
 	sql, args, err := r.Builder.
 		Select("source, destination, original, translation").
 		From("history").
@@ -54,7 +55,7 @@ func (r *TranslationRepo) GetHistory(ctx context.Context, userID string) ([]enti
 }
 
 // Store -.
-func (r *TranslationRepo) Store(ctx context.Context, userID string, t entity.Translation) error {
+func (r *Repo) Store(ctx context.Context, userID string, t entity.Translation) error {
 	sql, args, err := r.Builder.
 		Insert("history").
 		Columns("user_id, source, destination, original, translation").
