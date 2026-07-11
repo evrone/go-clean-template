@@ -13,7 +13,7 @@ import (
 )
 
 func (r *V1) createTask() server.CallHandler {
-	return func(msg *nats.Msg) (any, error) {
+	return func(ctx context.Context, msg *nats.Msg) (any, error) {
 		userID, data, err := extractUserID(msg, r.j)
 		if err != nil {
 			return nil, fmt.Errorf("nats_rpc - V1 - createTask - auth: %w", err)
@@ -30,7 +30,7 @@ func (r *V1) createTask() server.CallHandler {
 			return nil, fmt.Errorf("nats_rpc - V1 - createTask - validation: %w", err)
 		}
 
-		task, err := r.tk.Create(context.Background(), userID, req.Title, req.Description)
+		task, err := r.tk.Create(ctx, userID, req.Title, req.Description)
 		if err != nil {
 			r.l.Error(err, "nats_rpc - V1 - createTask")
 
@@ -42,7 +42,7 @@ func (r *V1) createTask() server.CallHandler {
 }
 
 func (r *V1) getTask() server.CallHandler {
-	return func(msg *nats.Msg) (any, error) {
+	return func(ctx context.Context, msg *nats.Msg) (any, error) {
 		userID, data, err := extractUserID(msg, r.j)
 		if err != nil {
 			return nil, fmt.Errorf("nats_rpc - V1 - getTask - auth: %w", err)
@@ -59,7 +59,7 @@ func (r *V1) getTask() server.CallHandler {
 			return nil, fmt.Errorf("nats_rpc - V1 - getTask - validation: %w", err)
 		}
 
-		task, err := r.tk.Get(context.Background(), userID, req.ID)
+		task, err := r.tk.Get(ctx, userID, req.ID)
 		if err != nil {
 			r.l.Error(err, "nats_rpc - V1 - getTask")
 
@@ -71,7 +71,7 @@ func (r *V1) getTask() server.CallHandler {
 }
 
 func (r *V1) listTasks() server.CallHandler {
-	return func(msg *nats.Msg) (any, error) {
+	return func(ctx context.Context, msg *nats.Msg) (any, error) {
 		userID, data, err := extractUserID(msg, r.j)
 		if err != nil {
 			return nil, fmt.Errorf("nats_rpc - V1 - listTasks - auth: %w", err)
@@ -95,7 +95,7 @@ func (r *V1) listTasks() server.CallHandler {
 			status = &s
 		}
 
-		tasks, total, err := r.tk.List(context.Background(), userID, status, req.Limit, req.Offset)
+		tasks, total, err := r.tk.List(ctx, userID, status, req.Limit, req.Offset)
 		if err != nil {
 			r.l.Error(err, "nats_rpc - V1 - listTasks")
 
@@ -107,7 +107,7 @@ func (r *V1) listTasks() server.CallHandler {
 }
 
 func (r *V1) updateTask() server.CallHandler {
-	return func(msg *nats.Msg) (any, error) {
+	return func(ctx context.Context, msg *nats.Msg) (any, error) {
 		userID, data, err := extractUserID(msg, r.j)
 		if err != nil {
 			return nil, fmt.Errorf("nats_rpc - V1 - updateTask - auth: %w", err)
@@ -124,7 +124,7 @@ func (r *V1) updateTask() server.CallHandler {
 			return nil, fmt.Errorf("nats_rpc - V1 - updateTask - validation: %w", err)
 		}
 
-		task, err := r.tk.Update(context.Background(), userID, req.ID, req.Title, req.Description)
+		task, err := r.tk.Update(ctx, userID, req.ID, req.Title, req.Description)
 		if err != nil {
 			r.l.Error(err, "nats_rpc - V1 - updateTask")
 
@@ -136,7 +136,7 @@ func (r *V1) updateTask() server.CallHandler {
 }
 
 func (r *V1) transitionTask() server.CallHandler {
-	return func(msg *nats.Msg) (any, error) {
+	return func(ctx context.Context, msg *nats.Msg) (any, error) {
 		userID, data, err := extractUserID(msg, r.j)
 		if err != nil {
 			return nil, fmt.Errorf("nats_rpc - V1 - transitionTask - auth: %w", err)
@@ -153,7 +153,7 @@ func (r *V1) transitionTask() server.CallHandler {
 			return nil, fmt.Errorf("nats_rpc - V1 - transitionTask - validation: %w", err)
 		}
 
-		task, err := r.tk.Transition(context.Background(), userID, req.ID, entity.TaskStatus(req.Status))
+		task, err := r.tk.Transition(ctx, userID, req.ID, entity.TaskStatus(req.Status))
 		if err != nil {
 			r.l.Error(err, "nats_rpc - V1 - transitionTask")
 
@@ -165,7 +165,7 @@ func (r *V1) transitionTask() server.CallHandler {
 }
 
 func (r *V1) deleteTask() server.CallHandler {
-	return func(msg *nats.Msg) (any, error) {
+	return func(ctx context.Context, msg *nats.Msg) (any, error) {
 		userID, data, err := extractUserID(msg, r.j)
 		if err != nil {
 			return nil, fmt.Errorf("nats_rpc - V1 - deleteTask - auth: %w", err)
@@ -182,7 +182,7 @@ func (r *V1) deleteTask() server.CallHandler {
 			return nil, fmt.Errorf("nats_rpc - V1 - deleteTask - validation: %w", err)
 		}
 
-		err = r.tk.Delete(context.Background(), userID, req.ID)
+		err = r.tk.Delete(ctx, userID, req.ID)
 		if err != nil {
 			r.l.Error(err, "nats_rpc - V1 - deleteTask")
 

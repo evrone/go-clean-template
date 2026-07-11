@@ -20,6 +20,7 @@ type (
 		JWT     jwt
 		Metrics metrics
 		Swagger swagger
+		Tracing tracing
 	}
 
 	// App -.
@@ -77,6 +78,14 @@ type (
 	// Swagger -.
 	swagger struct {
 		Enabled bool `env:"SWAGGER_ENABLED" envDefault:"false"`
+	}
+
+	// Tracing -.
+	tracing struct {
+		Enabled      bool    `env:"TRACING_ENABLED" envDefault:"false"`
+		OTLPEndpoint string  `env:"TRACING_OTLP_ENDPOINT" envDefault:"localhost:4317"`
+		OTLPInsecure bool    `env:"TRACING_OTLP_INSECURE" envDefault:"true"`
+		SampleRate   float64 `env:"TRACING_SAMPLE_RATE" envDefault:"0.1"`
 	}
 )
 

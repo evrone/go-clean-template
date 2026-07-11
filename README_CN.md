@@ -6,7 +6,6 @@ golang服务的整洁架构模板
 
 [![Release](https://img.shields.io/github/v/release/evrone/go-clean-template.svg)](https://github.com/evrone/go-clean-template/releases/)
 [![License](https://img.shields.io/badge/License-MIT-success)](https://github.com/evrone/go-clean-template/blob/master/LICENSE)
-[![Go Report Card](https://goreportcard.com/badge/github.com/evrone/go-clean-template)](https://goreportcard.com/report/github.com/evrone/go-clean-template)
 [![codecov](https://codecov.io/gh/evrone/go-clean-template/branch/master/graph/badge.svg?token=XE3E0X3EVQ)](https://codecov.io/gh/evrone/go-clean-template)
 
 [![Web Framework](https://img.shields.io/badge/Fiber-Web%20Framework-blue)](https://github.com/gofiber/fiber)
@@ -17,6 +16,7 @@ golang服务的整洁架构模板
 [![Database Migrations](https://img.shields.io/badge/Migrations-Seamless%20Schema%20Updates-blue)](https://github.com/golang-migrate/migrate)
 [![Logging](https://img.shields.io/badge/ZeroLog-Structured%20Logging-blue)](https://github.com/rs/zerolog)
 [![Metrics](https://img.shields.io/badge/Prometheus-Metrics%20Integration-blue)](https://github.com/ansrivas/fiberprometheus)
+[![Tracing](https://img.shields.io/badge/OpenTelemetry-Distributed%20Tracing-blue)](https://opentelemetry.io/)
 [![Testing](https://img.shields.io/badge/Testify-Testing%20Framework-blue)](https://github.com/stretchr/testify)
 [![Mocking](https://img.shields.io/badge/Mock-Mocking%20Library-blue)](https://go.uber.org/mock)
 
@@ -52,6 +52,7 @@ golang服务的整洁架构模板
 
 - [领域](#领域)
 - [快速开始](#快速开始)
+- [可观测性](#可观测性)
 - [工程架构](#工程架构)
 - [依赖注入](#依赖注入)
 - [整洁架构](#整洁架构)
@@ -150,6 +151,33 @@ Check services:
 - NATS monitoring:
   - http://nats.lvh.me | http://127.0.0.1:8222/
   - Credentials: `guest` / `guest`
+- Jaeger (链路追踪 UI):
+  - http://jaeger.lvh.me | http://127.0.0.1:16686
+
+## 可观测性
+
+分布式链路追踪由 [OpenTelemetry](https://opentelemetry.io/) 提供。Span 通过 OTLP/gRPC 导出到收集器 —— docker 栈中为
+[Jaeger](https://www.jaegertracing.io/)。
+
+- **上下文传播** —— W3C `traceparent` + `baggage`，因此单条链路可贯穿全部四种传输协议。REST 使用
+  [otelfiber](https://github.com/gofiber/contrib/tree/main/otelfiber) 中间件，gRPC 使用
+  [otelgrpc](https://github.com/open-telemetry/opentelemetry-go-contrib) stats handler，AMQP RPC / NATS RPC 则通过自定义
+  carrier 将 trace 上下文携带在消息头中（`pkg/rabbitmq/rmq_rpc/otel_carrier.go`、
+  `pkg/nats/nats_rpc/otel_carrier.go`）。
+- **已插桩的层** —— use case 与 repository 都被包裹在链路追踪装饰器中（`*/tracing.go`），因此一条链路能展示完整路径：
+  controller → usecase → repo / webapi。
+- **禁用时为 No-op** —— 当 `TRACING_ENABLED=false` 时会安装 no-op tracer provider，因此插桩代码可无条件执行且无额外开销。
+- **采样** —— `TRACING_SAMPLE_RATE` 为 parent-based 比例。本地使用 `1.0`；生产环境请调低（`0.1` / `0.01`）。
+- 内部路由（`/healthz`、`/metrics`、`/swagger`）不参与链路追踪 —— 仅对带版本的 API 分组插桩。
+
+配置（见 [.env.example](.env.example)）：
+
+| 变量                     | 默认值             | 说明                        |
+|-------------------------|--------------------|-----------------------------|
+| `TRACING_ENABLED`       | `false`            | 启用 OpenTelemetry 链路追踪 |
+| `TRACING_OTLP_ENDPOINT` | `localhost:4317`   | OTLP/gRPC 收集器地址        |
+| `TRACING_OTLP_INSECURE` | `true`             | 关闭 OTLP 导出器的 TLS      |
+| `TRACING_SAMPLE_RATE`   | `0.1`              | parent-based 采样比例       |
 
 ## 工程架构
 
@@ -331,6 +359,11 @@ RabbitMQ RPC 模式：
 - RabbitMQ 中没有路由
 - 使用Exchange fanout出并绑定 1 个独占队列，这么配置是最高效的
 - 在连接丢失时重新连接
+
+### `pkg/tracing`
+
+OpenTelemetry 配置：装配一个全局 `TracerProvider`，使用 OTLP/gRPC 导出器以及 W3C trace-context + baggage 传播器。
+当链路追踪被禁用时会安装 no-op provider，因此插桩代码可无条件执行。参见 [可观测性](#可观测性)。
 
 ## 依赖注入
 

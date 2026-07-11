@@ -36,9 +36,14 @@ x-backend-app-environment: &x-backend-app-environment
   METRICS_ENABLED: "true"
   # Swagger
   SWAGGER_ENABLED: "true"
+  # Tracing
+  TRACING_ENABLED: "true"
+  TRACING_OTLP_ENDPOINT: "jaeger:4317"
+  TRACING_OTLP_INSECURE: "true"
+  TRACING_SAMPLE_RATE: "1.0"  # DON'T set to 1.0 in production, use a lower value like 0.1 or 0.01
   # JWT
-  JWT_TOKEN_EXPIRY: "24h"
   JWT_SECRET: "your-secret-key-change-in-production"
+  JWT_TOKEN_EXPIRY: "24h"
 
 
 services:
@@ -85,6 +90,19 @@ services:
         aliases:
           - nats.lvh.me
 
+  jaeger:
+    container_name: jaeger
+    image: jaegertracing/all-in-one:1.76.0
+    ports:
+      - "16686:16686"   # Jaeger UI
+      - "4317:4317"     # OTLP gRPC
+      - "4318:4318"     # OTLP HTTP
+      - "6831:6831/udp" # Jaeger agent UDP
+    networks:
+      app_network:
+        aliases:
+          - jaeger.lvh.me
+
   app:
     container_name: app
     platform: linux/amd64
@@ -99,6 +117,7 @@ services:
     depends_on:
       - db
       - rabbitmq
+      - jaeger
     deploy:
       resources:
         limits:

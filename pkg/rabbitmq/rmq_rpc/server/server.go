@@ -11,6 +11,10 @@ import (
 	rmqrpc "github.com/evrone/go-clean-template/pkg/rabbitmq/rmq_rpc"
 	"github.com/goccy/go-json"
 	amqp "github.com/rabbitmq/amqp091-go"
+	"go.opentelemetry.io/otel"
+	"go.opentelemetry.io/otel/attribute"
+	"go.opentelemetry.io/otel/codes"
+	"go.opentelemetry.io/otel/trace"
 	"golang.org/x/sync/errgroup"
 )
 
@@ -20,8 +24,10 @@ const (
 	_defaultTimeout  = 2 * time.Second
 )
 
+const _tracerName = "rmq-rpc.server"
+
 // CallHandler -.
-type CallHandler func(*amqp.Delivery) (any, error)
+type CallHandler func(context.Context, *amqp.Delivery) (any, error)
 
 // Server -.
 type Server struct {
@@ -153,15 +159,27 @@ func (s *Server) reconnect() error {
 func (s *Server) serveCall(d *amqp.Delivery) {
 	defer s.ack(d, false)
 
+	ctx := otel.GetTextMapPropagator().Extract(s.ctx, rmqrpc.TableCarrier(d.Headers))
+
+	ctx, span := otel.Tracer(_tracerName).Start(
+		ctx, "rmq_rpc.process "+d.Type,
+		trace.WithSpanKind(trace.SpanKindConsumer),
+		trace.WithAttributes(attribute.String("rpc.method", d.Type)),
+	)
+	defer span.End()
+
 	callHandler, ok := s.router[d.Type]
 	if !ok {
+		span.SetStatus(codes.Error, rmqrpc.ErrBadHandler.Error())
 		s.publish(d, nil, rmqrpc.ErrBadHandler.Error())
 
 		return
 	}
 
-	response, err := callHandler(d)
+	response, err := callHandler(ctx, d)
 	if err != nil {
+		span.RecordError(err)
+		span.SetStatus(codes.Error, err.Error())
 		s.publish(d, nil, rmqrpc.ErrInternalServer.Error())
 
 		s.logger.Error(err, "rmq_rpc server - Server - serveCall - callHandler")

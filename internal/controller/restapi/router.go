@@ -11,6 +11,7 @@ import (
 	"github.com/evrone/go-clean-template/internal/usecase"
 	"github.com/evrone/go-clean-template/pkg/jwt"
 	"github.com/evrone/go-clean-template/pkg/logger"
+	"github.com/gofiber/contrib/otelfiber/v2"
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/swagger"
 )
@@ -49,6 +50,10 @@ func NewRouter(app *fiber.App, cfg *config.Config, t usecase.Translation, u usec
 	// Routers
 	apiV1Group := app.Group("/v1")
 	{
+		if cfg.Tracing.Enabled {
+			apiV1Group.Use(otelfiber.Middleware())
+		}
+
 		v1.NewRoutes(apiV1Group, t, u, tk, jwtManager, l)
 	}
 }

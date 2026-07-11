@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/evrone/go-clean-template/internal/entity"
+	"github.com/evrone/go-clean-template/internal/usecase"
 	"github.com/evrone/go-clean-template/internal/usecase/user"
 	"github.com/evrone/go-clean-template/pkg/jwt"
 	"github.com/stretchr/testify/assert"
@@ -14,7 +15,7 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
-func newUserUseCase(t *testing.T) (*user.UseCase, *MockUserRepo) {
+func newUserUseCase(t *testing.T) (usecase.User, *MockUserRepo) {
 	t.Helper()
 
 	ctrl := gomock.NewController(t)
@@ -33,7 +34,7 @@ func TestRegister(t *testing.T) {
 		t.Parallel()
 
 		uc, repo := newUserUseCase(t)
-		repo.EXPECT().Store(context.Background(), gomock.Any()).Return(nil)
+		repo.EXPECT().Store(gomock.Any(), gomock.Any()).Return(nil)
 
 		u, err := uc.Register(context.Background(), "testuser", "test@example.com", "password123")
 
@@ -47,7 +48,7 @@ func TestRegister(t *testing.T) {
 		t.Parallel()
 
 		uc, repo := newUserUseCase(t)
-		repo.EXPECT().Store(context.Background(), gomock.Any()).Return(entity.ErrUserAlreadyExists)
+		repo.EXPECT().Store(gomock.Any(), gomock.Any()).Return(entity.ErrUserAlreadyExists)
 
 		_, err := uc.Register(context.Background(), "testuser", "test@example.com", "password123")
 
@@ -69,7 +70,7 @@ func TestLogin(t *testing.T) {
 			ID: "user-id-123", Username: "testuser",
 			Email: "test@example.com", PasswordHash: string(hash),
 		}
-		repo.EXPECT().GetByEmail(context.Background(), "test@example.com").Return(storedUser, nil)
+		repo.EXPECT().GetByEmail(gomock.Any(), "test@example.com").Return(storedUser, nil)
 
 		token, err := uc.Login(context.Background(), "test@example.com", "password123")
 
@@ -88,7 +89,7 @@ func TestLogin(t *testing.T) {
 			ID: "user-id-123", Username: "testuser",
 			Email: "test@example.com", PasswordHash: string(hash),
 		}
-		repo.EXPECT().GetByEmail(context.Background(), "test@example.com").Return(storedUser, nil)
+		repo.EXPECT().GetByEmail(gomock.Any(), "test@example.com").Return(storedUser, nil)
 
 		token, err := uc.Login(context.Background(), "test@example.com", "wrongpassword")
 
@@ -100,7 +101,7 @@ func TestLogin(t *testing.T) {
 		t.Parallel()
 
 		uc, repo := newUserUseCase(t)
-		repo.EXPECT().GetByEmail(context.Background(), "notfound@example.com").Return(entity.User{}, entity.ErrUserNotFound)
+		repo.EXPECT().GetByEmail(gomock.Any(), "notfound@example.com").Return(entity.User{}, entity.ErrUserNotFound)
 
 		token, err := uc.Login(context.Background(), "notfound@example.com", "password123")
 
@@ -122,7 +123,7 @@ func TestGetUser(t *testing.T) {
 		t.Parallel()
 
 		uc, repo := newUserUseCase(t)
-		repo.EXPECT().GetByID(context.Background(), "user-id-123").Return(expectedUser, nil)
+		repo.EXPECT().GetByID(gomock.Any(), "user-id-123").Return(expectedUser, nil)
 
 		u, err := uc.GetUser(context.Background(), "user-id-123")
 
@@ -134,7 +135,7 @@ func TestGetUser(t *testing.T) {
 		t.Parallel()
 
 		uc, repo := newUserUseCase(t)
-		repo.EXPECT().GetByID(context.Background(), "missing-id").Return(entity.User{}, entity.ErrUserNotFound)
+		repo.EXPECT().GetByID(gomock.Any(), "missing-id").Return(entity.User{}, entity.ErrUserNotFound)
 
 		_, err := uc.GetUser(context.Background(), "missing-id")
 
@@ -147,7 +148,7 @@ func TestGetUser_GenericError(t *testing.T) {
 
 	uc, repo := newUserUseCase(t)
 
-	repo.EXPECT().GetByID(context.Background(), "user-id-123").Return(entity.User{}, errInternalServErr)
+	repo.EXPECT().GetByID(gomock.Any(), "user-id-123").Return(entity.User{}, errInternalServErr)
 
 	_, err := uc.GetUser(context.Background(), "user-id-123")
 

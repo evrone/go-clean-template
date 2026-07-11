@@ -6,6 +6,7 @@ import (
 	"testing"
 
 	"github.com/evrone/go-clean-template/internal/entity"
+	"github.com/evrone/go-clean-template/internal/usecase"
 	"github.com/evrone/go-clean-template/internal/usecase/translation"
 	"github.com/stretchr/testify/require"
 	"go.uber.org/mock/gomock"
@@ -13,7 +14,7 @@ import (
 
 var errInternalServErr = errors.New("internal server error")
 
-func newTranslationUseCase(t *testing.T) (*translation.UseCase, *MockTranslationRepo, *MockTranslationWebAPI) {
+func newTranslationUseCase(t *testing.T) (usecase.Translation, *MockTranslationRepo, *MockTranslationWebAPI) {
 	t.Helper()
 
 	ctrl := gomock.NewController(t)
@@ -33,7 +34,7 @@ func TestHistory(t *testing.T) {
 		t.Parallel()
 
 		uc, repo, _ := newTranslationUseCase(t)
-		repo.EXPECT().GetHistory(context.Background(), "").Return(nil, nil)
+		repo.EXPECT().GetHistory(gomock.Any(), "").Return(nil, nil)
 
 		res, err := uc.History(context.Background(), "")
 
@@ -45,7 +46,7 @@ func TestHistory(t *testing.T) {
 		t.Parallel()
 
 		uc, repo, _ := newTranslationUseCase(t)
-		repo.EXPECT().GetHistory(context.Background(), "").Return(nil, errInternalServErr)
+		repo.EXPECT().GetHistory(gomock.Any(), "").Return(nil, errInternalServErr)
 
 		res, err := uc.History(context.Background(), "")
 
@@ -61,8 +62,8 @@ func TestTranslate(t *testing.T) {
 		t.Parallel()
 
 		uc, repo, webAPI := newTranslationUseCase(t)
-		webAPI.EXPECT().Translate(context.Background(), entity.Translation{}).Return(entity.Translation{}, nil)
-		repo.EXPECT().Store(context.Background(), "", entity.Translation{}).Return(nil)
+		webAPI.EXPECT().Translate(gomock.Any(), entity.Translation{}).Return(entity.Translation{}, nil)
+		repo.EXPECT().Store(gomock.Any(), "", entity.Translation{}).Return(nil)
 
 		res, err := uc.Translate(context.Background(), "", entity.Translation{})
 
@@ -74,7 +75,7 @@ func TestTranslate(t *testing.T) {
 		t.Parallel()
 
 		uc, _, webAPI := newTranslationUseCase(t)
-		webAPI.EXPECT().Translate(context.Background(), entity.Translation{}).Return(entity.Translation{}, errInternalServErr)
+		webAPI.EXPECT().Translate(gomock.Any(), entity.Translation{}).Return(entity.Translation{}, errInternalServErr)
 
 		res, err := uc.Translate(context.Background(), "", entity.Translation{})
 
@@ -86,8 +87,8 @@ func TestTranslate(t *testing.T) {
 		t.Parallel()
 
 		uc, repo, webAPI := newTranslationUseCase(t)
-		webAPI.EXPECT().Translate(context.Background(), entity.Translation{}).Return(entity.Translation{}, nil)
-		repo.EXPECT().Store(context.Background(), "", entity.Translation{}).Return(errInternalServErr)
+		webAPI.EXPECT().Translate(gomock.Any(), entity.Translation{}).Return(entity.Translation{}, nil)
+		repo.EXPECT().Store(gomock.Any(), "", entity.Translation{}).Return(errInternalServErr)
 
 		res, err := uc.Translate(context.Background(), "", entity.Translation{})
 

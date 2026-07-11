@@ -2,6 +2,7 @@
 package app
 
 import (
+	"context"
 	"fmt"
 	"os"
 	"os/signal"
@@ -13,8 +14,11 @@ import (
 	grpcmw "github.com/evrone/go-clean-template/internal/controller/grpc/middleware"
 	natsrpc "github.com/evrone/go-clean-template/internal/controller/nats_rpc"
 	"github.com/evrone/go-clean-template/internal/controller/restapi"
-	"github.com/evrone/go-clean-template/internal/repo/persistent"
+	persistTaskRepo "github.com/evrone/go-clean-template/internal/repo/persistent/task"
+	persistTranslationRepo "github.com/evrone/go-clean-template/internal/repo/persistent/translation"
+	persistUserRepo "github.com/evrone/go-clean-template/internal/repo/persistent/user"
 	"github.com/evrone/go-clean-template/internal/repo/webapi"
+	"github.com/evrone/go-clean-template/internal/usecase"
 	"github.com/evrone/go-clean-template/internal/usecase/task"
 	"github.com/evrone/go-clean-template/internal/usecase/translation"
 	"github.com/evrone/go-clean-template/internal/usecase/user"
@@ -25,13 +29,15 @@ import (
 	natsRPCServer "github.com/evrone/go-clean-template/pkg/nats/nats_rpc/server"
 	"github.com/evrone/go-clean-template/pkg/postgres"
 	rmqRPCServer "github.com/evrone/go-clean-template/pkg/rabbitmq/rmq_rpc/server"
+	"github.com/evrone/go-clean-template/pkg/tracing"
+	"go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc"
 	pbgrpc "google.golang.org/grpc"
 )
 
 type useCases struct {
-	translation *translation.UseCase
-	user        *user.UseCase
-	task        *task.UseCase
+	translation usecase.Translation
+	user        usecase.User
+	task        usecase.Task
 }
 
 type servers struct {
@@ -42,9 +48,9 @@ type servers struct {
 }
 
 func initUseCases(pg *postgres.Postgres, jwtManager *jwt.Manager) useCases {
-	userRepo := persistent.NewUserRepo(pg)
-	taskRepo := persistent.NewTaskRepo(pg)
-	translationRepo := persistent.NewTranslationRepo(pg)
+	translationRepo := persistTranslationRepo.New(pg)
+	taskRepo := persistTaskRepo.New(pg)
+	userRepo := persistUserRepo.New(pg)
 
 	return useCases{
 		user:        user.New(userRepo, jwtManager),
@@ -74,7 +80,10 @@ func initServers(cfg *config.Config, uc useCases, jwtManager *jwt.Manager, l log
 	grpcServer := grpcserver.New(
 		l,
 		grpcserver.Port(cfg.GRPC.Port),
-		grpcserver.ServerOptions(pbgrpc.UnaryInterceptor(grpcmw.AuthInterceptor(jwtManager))),
+		grpcserver.ServerOptions(
+			pbgrpc.UnaryInterceptor(grpcmw.AuthInterceptor(jwtManager)),
+			pbgrpc.StatsHandler(otelgrpc.NewServerHandler()),
+		),
 	)
 	grpc.NewRouter(grpcServer.App, uc.translation, uc.user, uc.task, l)
 
@@ -140,6 +149,26 @@ func (s *servers) shutdownServers(l logger.Interface) {
 // Run creates objects via constructors.
 func Run(cfg *config.Config) {
 	l := logger.New(cfg.Log.Level)
+
+	ctx := context.Background()
+
+	// Tracing
+	shutdownTracing, err := tracing.New(ctx, tracing.Config{
+		Enabled:     cfg.Tracing.Enabled,
+		ServiceName: cfg.App.Name,
+		Version:     cfg.App.Version,
+		Endpoint:    cfg.Tracing.OTLPEndpoint,
+		Insecure:    cfg.Tracing.OTLPInsecure,
+		SampleRate:  cfg.Tracing.SampleRate,
+	})
+	if err != nil {
+		l.Fatal(fmt.Errorf("app - Run - tracing.New: %w", err))
+	}
+	defer func() {
+		if err := shutdownTracing(ctx); err != nil {
+			l.Error(fmt.Errorf("app - Run - shutdownTracing: %w", err))
+		}
+	}()
 
 	// Repository
 	pg, err := postgres.New(cfg.PG.URL, postgres.MaxPoolSize(cfg.PG.PoolMax))

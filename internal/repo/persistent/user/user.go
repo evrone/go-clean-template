@@ -1,4 +1,5 @@
-package persistent
+// Package user implements the Postgres-backed User repository.
+package user
 
 import (
 	"context"
@@ -7,23 +8,24 @@ import (
 
 	sq "github.com/Masterminds/squirrel"
 	"github.com/evrone/go-clean-template/internal/entity"
+	"github.com/evrone/go-clean-template/internal/repo"
 	"github.com/evrone/go-clean-template/pkg/postgres"
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgconn"
 )
 
-// UserRepo -.
-type UserRepo struct {
+// Repo -.
+type Repo struct {
 	*postgres.Postgres
 }
 
-// NewUserRepo -.
-func NewUserRepo(pg *postgres.Postgres) *UserRepo {
-	return &UserRepo{pg}
+// New returns a User repository instrumented with OpenTelemetry tracing spans.
+func New(pg *postgres.Postgres) repo.UserRepo {
+	return newTraced(&Repo{pg})
 }
 
 // Store -.
-func (r *UserRepo) Store(ctx context.Context, user *entity.User) error {
+func (r *Repo) Store(ctx context.Context, user *entity.User) error {
 	sql, args, err := r.Builder.
 		Insert("users").
 		Columns("id, username, email, password_hash, created_at, updated_at").
@@ -47,16 +49,16 @@ func (r *UserRepo) Store(ctx context.Context, user *entity.User) error {
 }
 
 // GetByID -.
-func (r *UserRepo) GetByID(ctx context.Context, id string) (entity.User, error) {
+func (r *Repo) GetByID(ctx context.Context, id string) (entity.User, error) {
 	return r.getUser(ctx, "id", id)
 }
 
 // GetByEmail -.
-func (r *UserRepo) GetByEmail(ctx context.Context, email string) (entity.User, error) {
+func (r *Repo) GetByEmail(ctx context.Context, email string) (entity.User, error) {
 	return r.getUser(ctx, "email", email)
 }
 
-func (r *UserRepo) getUser(ctx context.Context, column, value string) (entity.User, error) {
+func (r *Repo) getUser(ctx context.Context, column, value string) (entity.User, error) {
 	sql, args, err := r.Builder.
 		Select("id, username, email, password_hash, created_at, updated_at").
 		From("users").
