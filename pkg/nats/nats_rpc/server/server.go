@@ -11,6 +11,10 @@ import (
 	natsrpc "github.com/evrone/go-clean-template/pkg/nats/nats_rpc"
 	"github.com/goccy/go-json"
 	"github.com/nats-io/nats.go"
+	"go.opentelemetry.io/otel"
+	"go.opentelemetry.io/otel/attribute"
+	"go.opentelemetry.io/otel/codes"
+	"go.opentelemetry.io/otel/trace"
 	"golang.org/x/sync/errgroup"
 )
 
@@ -20,8 +24,10 @@ const (
 	_defaultTimeout  = 2 * time.Second
 )
 
+const _tracerName = "nats-rpc.server"
+
 // CallHandler -.
-type CallHandler func(*nats.Msg) (any, error)
+type CallHandler func(context.Context, *nats.Msg) (any, error)
 
 // Server -.
 type Server struct {
@@ -153,15 +159,27 @@ func (s *Server) subscribe() error {
 func (s *Server) handleMessage(msg *nats.Msg) {
 	handler := msg.Header.Get("Handler")
 
+	ctx := otel.GetTextMapPropagator().Extract(s.ctx, natsrpc.HeaderCarrier(msg.Header))
+
+	ctx, span := otel.Tracer(_tracerName).Start(
+		ctx, "nats_rpc.process "+handler,
+		trace.WithSpanKind(trace.SpanKindConsumer),
+		trace.WithAttributes(attribute.String("rpc.method", handler)),
+	)
+	defer span.End()
+
 	callHandler, ok := s.router[handler]
 	if !ok {
+		span.SetStatus(codes.Error, natsrpc.ErrBadHandler.Error())
 		s.publish(msg, nil, natsrpc.ErrBadHandler.Error())
 
 		return
 	}
 
-	response, err := callHandler(msg)
+	response, err := callHandler(ctx, msg)
 	if err != nil {
+		span.RecordError(err)
+		span.SetStatus(codes.Error, err.Error())
 		s.publish(msg, nil, natsrpc.ErrInternalServer.Error())
 
 		s.logger.Error(err, "nats_rpc server - Server - handleMessage - callHandler")

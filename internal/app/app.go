@@ -2,6 +2,7 @@
 package app
 
 import (
+	"context"
 	"fmt"
 	"os"
 	"os/signal"
@@ -25,6 +26,8 @@ import (
 	natsRPCServer "github.com/evrone/go-clean-template/pkg/nats/nats_rpc/server"
 	"github.com/evrone/go-clean-template/pkg/postgres"
 	rmqRPCServer "github.com/evrone/go-clean-template/pkg/rabbitmq/rmq_rpc/server"
+	"github.com/evrone/go-clean-template/pkg/tracing"
+	"go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc"
 	pbgrpc "google.golang.org/grpc"
 )
 
@@ -74,7 +77,10 @@ func initServers(cfg *config.Config, uc useCases, jwtManager *jwt.Manager, l log
 	grpcServer := grpcserver.New(
 		l,
 		grpcserver.Port(cfg.GRPC.Port),
-		grpcserver.ServerOptions(pbgrpc.UnaryInterceptor(grpcmw.AuthInterceptor(jwtManager))),
+		grpcserver.ServerOptions(
+			pbgrpc.UnaryInterceptor(grpcmw.AuthInterceptor(jwtManager)),
+			pbgrpc.StatsHandler(otelgrpc.NewServerHandler()),
+		),
 	)
 	grpc.NewRouter(grpcServer.App, uc.translation, uc.user, uc.task, l)
 
@@ -140,6 +146,26 @@ func (s *servers) shutdownServers(l logger.Interface) {
 // Run creates objects via constructors.
 func Run(cfg *config.Config) {
 	l := logger.New(cfg.Log.Level)
+
+	ctx := context.Background()
+
+	// Tracing
+	shutdownTracing, err := tracing.New(ctx, tracing.Config{
+		Enabled:     cfg.Tracing.Enabled,
+		ServiceName: cfg.App.Name,
+		Version:     cfg.App.Version,
+		Endpoint:    cfg.Tracing.OTLPEndpoint,
+		Insecure:    cfg.Tracing.OTLPInsecure,
+		SampleRate:  cfg.Tracing.SampleRate,
+	})
+	if err != nil {
+		l.Fatal(fmt.Errorf("app - Run - tracing.New: %w", err))
+	}
+	defer func() {
+		if err := shutdownTracing(ctx); err != nil {
+			l.Error(fmt.Errorf("app - Run - shutdownTracing: %w", err))
+		}
+	}()
 
 	// Repository
 	pg, err := postgres.New(cfg.PG.URL, postgres.MaxPoolSize(cfg.PG.PoolMax))

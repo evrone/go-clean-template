@@ -12,13 +12,13 @@ import (
 )
 
 func (r *V1) getHistory() server.CallHandler {
-	return func(d *amqp.Delivery) (any, error) {
+	return func(ctx context.Context, d *amqp.Delivery) (any, error) {
 		userID, _, err := extractUserID(d, r.j)
 		if err != nil {
 			return nil, fmt.Errorf("amqp_rpc - V1 - getHistory - auth: %w", err)
 		}
 
-		translationHistory, err := r.t.History(context.Background(), userID)
+		translationHistory, err := r.t.History(ctx, userID)
 		if err != nil {
 			r.l.Error(err, "amqp_rpc - V1 - getHistory")
 
@@ -30,7 +30,7 @@ func (r *V1) getHistory() server.CallHandler {
 }
 
 func (r *V1) translate() server.CallHandler {
-	return func(d *amqp.Delivery) (any, error) {
+	return func(ctx context.Context, d *amqp.Delivery) (any, error) {
 		userID, data, err := extractUserID(d, r.j)
 		if err != nil {
 			return nil, fmt.Errorf("amqp_rpc - V1 - translate - auth: %w", err)
@@ -47,7 +47,7 @@ func (r *V1) translate() server.CallHandler {
 			return nil, fmt.Errorf("amqp_rpc - V1 - translate - validation: %w", err)
 		}
 
-		translation, err := r.t.Translate(context.Background(), userID, entity.Translation{
+		translation, err := r.t.Translate(ctx, userID, entity.Translation{
 			Source:      req.Source,
 			Destination: req.Destination,
 			Original:    req.Original,

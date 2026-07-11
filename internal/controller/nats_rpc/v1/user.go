@@ -12,7 +12,7 @@ import (
 )
 
 func (r *V1) register() server.CallHandler {
-	return func(msg *nats.Msg) (any, error) {
+	return func(ctx context.Context, msg *nats.Msg) (any, error) {
 		var req request.Register
 
 		err := json.Unmarshal(msg.Data, &req)
@@ -26,7 +26,7 @@ func (r *V1) register() server.CallHandler {
 			return nil, fmt.Errorf("nats_rpc - V1 - register - validation: %w", err)
 		}
 
-		user, err := r.u.Register(context.Background(), req.Username, req.Email, req.Password)
+		user, err := r.u.Register(ctx, req.Username, req.Email, req.Password)
 		if err != nil {
 			r.l.Error(err, "nats_rpc - V1 - register")
 
@@ -38,7 +38,7 @@ func (r *V1) register() server.CallHandler {
 }
 
 func (r *V1) login() server.CallHandler {
-	return func(msg *nats.Msg) (any, error) {
+	return func(ctx context.Context, msg *nats.Msg) (any, error) {
 		var req request.Login
 
 		err := json.Unmarshal(msg.Data, &req)
@@ -52,7 +52,7 @@ func (r *V1) login() server.CallHandler {
 			return nil, fmt.Errorf("nats_rpc - V1 - login - validation: %w", err)
 		}
 
-		token, err := r.u.Login(context.Background(), req.Email, req.Password)
+		token, err := r.u.Login(ctx, req.Email, req.Password)
 		if err != nil {
 			r.l.Error(err, "nats_rpc - V1 - login")
 

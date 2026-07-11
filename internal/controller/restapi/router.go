@@ -11,6 +11,7 @@ import (
 	"github.com/evrone/go-clean-template/internal/usecase"
 	"github.com/evrone/go-clean-template/pkg/jwt"
 	"github.com/evrone/go-clean-template/pkg/logger"
+	"github.com/gofiber/contrib/otelfiber/v2"
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/swagger"
 )
@@ -28,6 +29,7 @@ import (
 //	@name Authorization
 func NewRouter(app *fiber.App, cfg *config.Config, t usecase.Translation, u usecase.User, tk usecase.Task, jwtManager *jwt.Manager, l logger.Interface) {
 	// Options
+	app.Use(otelfiber.Middleware())
 	app.Use(middleware.Logger(l))
 	app.Use(middleware.Recovery(l))
 
