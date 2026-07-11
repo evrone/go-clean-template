@@ -85,6 +85,19 @@ services:
         aliases:
           - nats.lvh.me
 
+  jaeger:
+    container_name: jaeger
+    image: jaegertracing/all-in-one:1.76.0
+    ports:
+      - "16686:16686"   # Jaeger UI
+      - "4317:4317"     # OTLP gRPC
+      - "4318:4318"     # OTLP HTTP
+      - "6831:6831/udp" # Jaeger agent UDP
+    networks:
+      app_network:
+        aliases:
+          - jaeger.lvh.me
+
   app:
     container_name: app
     platform: linux/amd64
