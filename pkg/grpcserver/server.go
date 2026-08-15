@@ -2,42 +2,36 @@ package grpcserver
 
 import (
 	"context"
-	"errors"
+	"fmt"
 	"net"
+	"time"
 
 	"github.com/evrone/go-clean-template/pkg/logger"
-	"golang.org/x/sync/errgroup"
 	pbgrpc "google.golang.org/grpc"
 )
 
 const (
-	_defaultAddr = ":80"
+	_defaultAddr            = ":80"
+	_defaultShutdownTimeout = 3 * time.Second
 )
 
 // Server -.
 type Server struct {
-	ctx context.Context
-	eg  *errgroup.Group
+	App *pbgrpc.Server
 
-	App        *pbgrpc.Server
-	notify     chan error
-	address    string
-	serverOpts []pbgrpc.ServerOption
+	address         string
+	serverOpts      []pbgrpc.ServerOption
+	shutdownTimeout time.Duration
 
 	logger logger.Interface
 }
 
 // New -.
 func New(l logger.Interface, opts ...Option) *Server {
-	group, ctx := errgroup.WithContext(context.Background())
-	group.SetLimit(1)
-
 	s := &Server{
-		ctx:     ctx,
-		eg:      group,
-		notify:  make(chan error, 1),
-		address: _defaultAddr,
-		logger:  l,
+		address:         _defaultAddr,
+		shutdownTimeout: _defaultShutdownTimeout,
+		logger:          l,
 	}
 
 	for _, opt := range opts {
@@ -49,53 +43,42 @@ func New(l logger.Interface, opts ...Option) *Server {
 	return s
 }
 
-// Start -.
-func (s *Server) Start() {
-	s.eg.Go(func() error {
-		var lc net.ListenConfig
+// Start starts the gRPC server and blocks until context is canceled.
+func (s *Server) Start(ctx context.Context) error {
+	lc := net.ListenConfig{}
 
-		ln, err := lc.Listen(s.ctx, "tcp", s.address)
-		if err != nil {
-			s.notify <- err
-
-			close(s.notify)
-
-			return err
-		}
-
-		err = s.App.Serve(ln)
-		if err != nil {
-			s.notify <- err
-
-			close(s.notify)
-
-			return err
-		}
-
-		return nil
-	})
-
-	s.logger.Info("grpc server - Server - Started")
-}
-
-// Notify -.
-func (s *Server) Notify() <-chan error {
-	return s.notify
-}
-
-// Shutdown -.
-func (s *Server) Shutdown() error {
-	var shutdownErrors []error
-
-	s.App.GracefulStop()
-
-	err := s.eg.Wait()
-	if err != nil && !errors.Is(err, context.Canceled) {
-		s.logger.Error(err, "grpc server - Server - Shutdown - s.eg.Wait")
-		shutdownErrors = append(shutdownErrors, err)
+	ln, err := lc.Listen(ctx, "tcp", s.address)
+	if err != nil {
+		return fmt.Errorf("listen: %w", err)
 	}
 
-	s.logger.Info("grpc server - Server - Shutdown")
+	s.logger.Info("grpc server - Server - Started on %s", s.address)
 
-	return errors.Join(shutdownErrors...)
+	// Start graceful shutdown goroutine
+	go func() {
+		<-ctx.Done()
+		s.logger.Info("grpc server - Server - Shutting down...")
+
+		stopCh := make(chan struct{})
+
+		go func() {
+			s.App.GracefulStop()
+			close(stopCh)
+		}()
+
+		select {
+		case <-stopCh:
+			s.logger.Info("grpc server - Server - Shutdown complete")
+		case <-time.After(s.shutdownTimeout):
+			s.logger.Info("grpc server - Server - Shutdown timeout, forcing stop")
+			s.App.Stop()
+		}
+	}()
+
+	// Serve blocks until server stops
+	if err := s.App.Serve(ln); err != nil {
+		return fmt.Errorf("serve: %w", err)
+	}
+
+	return ctx.Err()
 }

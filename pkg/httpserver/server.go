@@ -3,13 +3,12 @@ package httpserver
 
 import (
 	"context"
-	"errors"
+	"fmt"
 	"time"
 
 	"github.com/evrone/go-clean-template/pkg/logger"
 	"github.com/goccy/go-json"
 	"github.com/gofiber/fiber/v2"
-	"golang.org/x/sync/errgroup"
 )
 
 const (
@@ -21,11 +20,7 @@ const (
 
 // Server -.
 type Server struct {
-	ctx context.Context
-	eg  *errgroup.Group
-
-	App    *fiber.App
-	notify chan error
+	App *fiber.App
 
 	address         string
 	prefork         bool
@@ -38,14 +33,7 @@ type Server struct {
 
 // New -.
 func New(l logger.Interface, opts ...Option) *Server {
-	group, ctx := errgroup.WithContext(context.Background())
-	group.SetLimit(1) // Run only one goroutine
-
 	s := &Server{
-		ctx:             ctx,
-		eg:              group,
-		App:             nil,
-		notify:          make(chan error, 1),
 		address:         _defaultAddr,
 		readTimeout:     _defaultReadTimeout,
 		writeTimeout:    _defaultWriteTimeout,
@@ -71,49 +59,39 @@ func New(l logger.Interface, opts ...Option) *Server {
 	return s
 }
 
-// Start -.
-func (s *Server) Start() {
-	s.eg.Go(func() error {
-		err := s.App.Listen(s.address)
-		if err != nil {
-			s.notify <- err
+// Start starts the HTTP server and blocks until context is canceled.
+func (s *Server) Start(ctx context.Context) error {
+	errChan := make(chan error, 1)
 
-			close(s.notify)
+	// Start server in goroutine
+	go func() {
+		s.logger.Info("restapi server - Server - Started on %s", s.address)
 
-			return err
+		if err := s.App.Listen(s.address); err != nil {
+			errChan <- err
+		}
+	}()
+
+	// Wait for either error or context cancellation
+	select {
+	case err := <-errChan:
+		return fmt.Errorf("server error: %w", err)
+
+	case <-ctx.Done():
+		s.logger.Info("restapi server - Server - Shutting down...")
+
+		// Create shutdown context with timeout
+		shutdownCtx, cancel := context.WithTimeout(context.WithoutCancel(ctx), s.shutdownTimeout)
+		defer cancel()
+
+		if err := s.App.ShutdownWithContext(shutdownCtx); err != nil {
+			s.logger.Error(err, "restapi server - Server - Shutdown error")
+
+			return fmt.Errorf("shutdown error: %w", err)
 		}
 
-		return nil
-	})
+		s.logger.Info("restapi server - Server - Shutdown complete")
 
-	s.logger.Info("restapi server - Server - Started")
-}
-
-// Notify -.
-func (s *Server) Notify() <-chan error {
-	return s.notify
-}
-
-// Shutdown -.
-func (s *Server) Shutdown() error {
-	var shutdownErrors []error
-
-	err := s.App.ShutdownWithTimeout(s.shutdownTimeout)
-	if err != nil && !errors.Is(err, context.Canceled) {
-		s.logger.Error(err, "restapi server - Server - Shutdown - s.App.ShutdownWithTimeout")
-
-		shutdownErrors = append(shutdownErrors, err)
+		return ctx.Err()
 	}
-
-	// Wait for all goroutines to finish and get any error
-	err = s.eg.Wait()
-	if err != nil && !errors.Is(err, context.Canceled) {
-		s.logger.Error(err, "restapi server - Server - Shutdown - s.eg.Wait")
-
-		shutdownErrors = append(shutdownErrors, err)
-	}
-
-	s.logger.Info("restapi server - Server - Shutdown")
-
-	return errors.Join(shutdownErrors...)
 }

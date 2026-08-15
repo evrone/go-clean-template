@@ -15,7 +15,6 @@ import (
 	"go.opentelemetry.io/otel/attribute"
 	"go.opentelemetry.io/otel/codes"
 	"go.opentelemetry.io/otel/trace"
-	"golang.org/x/sync/errgroup"
 )
 
 const (
@@ -31,13 +30,8 @@ type CallHandler func(context.Context, *amqp.Delivery) (any, error)
 
 // Server -.
 type Server struct {
-	ctx context.Context
-	eg  *errgroup.Group
-
 	conn   *rmqrpc.Connection
 	router map[string]CallHandler
-	stop   chan struct{}
-	notify chan error
 
 	timeout time.Duration
 
@@ -46,9 +40,6 @@ type Server struct {
 
 // New -.
 func New(url, serverExchange string, router map[string]CallHandler, l logger.Interface, opts ...Option) (*Server, error) {
-	group, ctx := errgroup.WithContext(context.Background())
-	group.SetLimit(1) // Run only one goroutine
-
 	cfg := rmqrpc.Config{
 		URL:      url,
 		WaitTime: _defaultWaitTime,
@@ -56,12 +47,8 @@ func New(url, serverExchange string, router map[string]CallHandler, l logger.Int
 	}
 
 	s := &Server{
-		ctx:     ctx,
-		eg:      group,
 		conn:    rmqrpc.New(serverExchange, cfg),
 		router:  router,
-		stop:    make(chan struct{}),
-		notify:  make(chan error, 1),
 		timeout: _defaultTimeout,
 		logger:  l,
 	}
@@ -79,64 +66,42 @@ func New(url, serverExchange string, router map[string]CallHandler, l logger.Int
 	return s, nil
 }
 
-// Start -.
-func (s *Server) Start() {
-	s.eg.Go(func() error {
-		err := s.handleMessages()
-		if err != nil {
-			s.notify <- err
-
-			close(s.notify)
-
-			return err
-		}
-
-		return nil
-	})
-
+// Start starts the RabbitMQ RPC server and blocks until context is canceled.
+func (s *Server) Start(ctx context.Context) error {
 	s.logger.Info("rmq_rpc server - Server - Started")
-}
 
-// Notify -.
-func (s *Server) Notify() <-chan error {
-	return s.notify
-}
+	// Wait for shutdown signal
+	go func() {
+		<-ctx.Done()
+		s.logger.Info("rmq_rpc server - Server - Shutting down...")
+	}()
 
-// Shutdown -.
-func (s *Server) Shutdown() error {
-	var shutdownErrors []error
-
-	close(s.stop)
-
-	// Wait for all goroutines to finish and get any error
-	err := s.eg.Wait()
-	if err != nil && !errors.Is(err, context.Canceled) {
-		s.logger.Error(err, "rmq_rpc server - Server - Shutdown - s.eg.Wait")
-
-		shutdownErrors = append(shutdownErrors, err)
-	}
+	// Handle messages until context is canceled
+	err := s.handleMessages(ctx)
 
 	// Close connection
+	if closeErr := s.conn.Connection.Close(); closeErr != nil {
+		s.logger.Error(closeErr, "rmq_rpc server - Server - Shutdown - s.Connection.Close")
 
-	err = s.conn.Connection.Close()
-	if err != nil {
-		s.logger.Error(err, "rmq_rpc server - Server - Shutdown - s.Connection.Close")
-
-		shutdownErrors = append(shutdownErrors, err)
+		if err == nil {
+			err = closeErr
+		}
 	}
 
-	s.logger.Info("rmq_rpc server - Server - Shutdown")
+	s.logger.Info("rmq_rpc server - Server - Shutdown complete")
 
-	return errors.Join(shutdownErrors...)
+	if errors.Is(err, context.Canceled) {
+		return ctx.Err()
+	}
+
+	return err
 }
 
-func (s *Server) handleMessages() error {
+func (s *Server) handleMessages(ctx context.Context) error {
 	for {
 		select {
-		case <-s.ctx.Done():
-			return s.ctx.Err()
-		case <-s.stop:
-			return nil
+		case <-ctx.Done():
+			return ctx.Err()
 		case d, opened := <-s.conn.Delivery:
 			if !opened {
 				err := s.reconnect()
@@ -147,7 +112,7 @@ func (s *Server) handleMessages() error {
 				break
 			}
 
-			s.serveCall(&d)
+			s.serveCall(ctx, &d)
 		}
 	}
 }
@@ -156,10 +121,10 @@ func (s *Server) reconnect() error {
 	return s.conn.AttemptConnect()
 }
 
-func (s *Server) serveCall(d *amqp.Delivery) {
+func (s *Server) serveCall(ctx context.Context, d *amqp.Delivery) {
 	defer s.ack(d, false)
 
-	ctx := otel.GetTextMapPropagator().Extract(s.ctx, rmqrpc.TableCarrier(d.Headers))
+	ctx = otel.GetTextMapPropagator().Extract(ctx, rmqrpc.TableCarrier(d.Headers))
 
 	ctx, span := otel.Tracer(_tracerName).Start(
 		ctx, "rmq_rpc.process "+d.Type,

@@ -3,10 +3,12 @@ package app
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"os"
 	"os/signal"
 	"syscall"
+	"time"
 
 	"github.com/evrone/go-clean-template/config"
 	amqprpc "github.com/evrone/go-clean-template/internal/controller/amqp_rpc"
@@ -31,8 +33,18 @@ import (
 	rmqRPCServer "github.com/evrone/go-clean-template/pkg/rabbitmq/rmq_rpc/server"
 	"github.com/evrone/go-clean-template/pkg/tracing"
 	"go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc"
+	"golang.org/x/sync/errgroup"
 	pbgrpc "google.golang.org/grpc"
 )
+
+const (
+	_tracingShutdownTimeout = 5 * time.Second
+)
+
+// Server represents a service that can be started and gracefully stopped.
+type Server interface {
+	Start(ctx context.Context) error
+}
 
 type useCases struct {
 	translation usecase.Translation
@@ -41,10 +53,10 @@ type useCases struct {
 }
 
 type servers struct {
-	rmq  *rmqRPCServer.Server
-	nats *natsRPCServer.Server
-	grpc *grpcserver.Server
-	http *httpserver.Server
+	rmq  Server
+	nats Server
+	grpc Server
+	http Server
 }
 
 func initUseCases(pg *postgres.Postgres, jwtManager *jwt.Manager) useCases {
@@ -99,58 +111,12 @@ func initServers(cfg *config.Config, uc useCases, jwtManager *jwt.Manager, l log
 	}
 }
 
-func (s *servers) startServers() {
-	s.rmq.Start()
-	s.nats.Start()
-	s.grpc.Start()
-	s.http.Start()
-}
-
-func (s *servers) waitForShutdown(l logger.Interface) {
-	interrupt := make(chan os.Signal, 1)
-	signal.Notify(interrupt, os.Interrupt, syscall.SIGTERM)
-
-	var err error
-
-	select {
-	case sig := <-interrupt:
-		l.Info("app - Run - signal: %s", sig.String())
-	case err = <-s.http.Notify():
-		l.Error(fmt.Errorf("app - Run - httpServer.Notify: %w", err))
-	case err = <-s.grpc.Notify():
-		l.Error(fmt.Errorf("app - Run - grpcServer.Notify: %w", err))
-	case err = <-s.rmq.Notify():
-		l.Error(fmt.Errorf("app - Run - rmqServer.Notify: %w", err))
-	case err = <-s.nats.Notify():
-		l.Error(fmt.Errorf("app - Run - natsServer.Notify: %w", err))
-	}
-
-	s.shutdownServers(l)
-}
-
-func (s *servers) shutdownServers(l logger.Interface) {
-	if err := s.http.Shutdown(); err != nil {
-		l.Error(fmt.Errorf("app - Run - httpServer.Shutdown: %w", err))
-	}
-
-	if err := s.grpc.Shutdown(); err != nil {
-		l.Error(fmt.Errorf("app - Run - grpcServer.Shutdown: %w", err))
-	}
-
-	if err := s.rmq.Shutdown(); err != nil {
-		l.Error(fmt.Errorf("app - Run - rmqServer.Shutdown: %w", err))
-	}
-
-	if err := s.nats.Shutdown(); err != nil {
-		l.Error(fmt.Errorf("app - Run - natsServer.Shutdown: %w", err))
-	}
-}
-
-// Run creates objects via constructors.
+// Run creates objects via constructors and starts the application.
 func Run(cfg *config.Config) {
 	l := logger.New(cfg.Log.Level)
 
-	ctx := context.Background()
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
 
 	// Tracing
 	shutdownTracing, err := tracing.New(ctx, tracing.Config{
@@ -165,7 +131,10 @@ func Run(cfg *config.Config) {
 		l.Fatal(fmt.Errorf("app - Run - tracing.New: %w", err))
 	}
 	defer func() {
-		if err := shutdownTracing(ctx); err != nil {
+		shutdownCtx, shutdownCancel := context.WithTimeout(context.Background(), _tracingShutdownTimeout)
+		defer shutdownCancel()
+
+		if err := shutdownTracing(shutdownCtx); err != nil {
 			l.Error(fmt.Errorf("app - Run - shutdownTracing: %w", err))
 		}
 	}()
@@ -180,8 +149,62 @@ func Run(cfg *config.Config) {
 	// JWT
 	jwtManager := jwt.New(cfg.JWT.Secret, cfg.JWT.TokenExpiry)
 
+	// Initialize use cases and servers
 	uc := initUseCases(pg, jwtManager)
-	s := initServers(cfg, uc, jwtManager, l)
-	s.startServers()
-	s.waitForShutdown(l)
+	srv := initServers(cfg, uc, jwtManager, l)
+
+	// Start all servers and wait for shutdown signal
+	runServers(ctx, cancel, srv, l)
+
+	l.Info("app - Run - application stopped gracefully")
+}
+
+func runServers(ctx context.Context, cancel context.CancelFunc, srv servers, l logger.Interface) {
+	g, gCtx := errgroup.WithContext(ctx)
+
+	g.Go(func() error {
+		l.Info("app - Run - starting HTTP server")
+
+		return srv.http.Start(gCtx)
+	})
+
+	g.Go(func() error {
+		l.Info("app - Run - starting gRPC server")
+
+		return srv.grpc.Start(gCtx)
+	})
+
+	g.Go(func() error {
+		l.Info("app - Run - starting RabbitMQ RPC server")
+
+		return srv.rmq.Start(gCtx)
+	})
+
+	g.Go(func() error {
+		l.Info("app - Run - starting NATS RPC server")
+
+		return srv.nats.Start(gCtx)
+	})
+
+	// Wait for interrupt signal
+	g.Go(func() error {
+		sigCh := make(chan os.Signal, 1)
+
+		signal.Notify(sigCh, os.Interrupt, syscall.SIGTERM)
+		defer signal.Stop(sigCh)
+
+		select {
+		case sig := <-sigCh:
+			l.Info("app - Run - received signal: %s", sig.String())
+			cancel()
+		case <-gCtx.Done():
+		}
+
+		return nil
+	})
+
+	// Wait for all servers to finish
+	if err := g.Wait(); err != nil && !errors.Is(err, context.Canceled) {
+		l.Error(fmt.Errorf("app - Run - servers stopped with error: %w", err))
+	}
 }
