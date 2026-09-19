@@ -22,7 +22,7 @@ x-backend-app-environment: &x-backend-app-environment
   LOG_LEVEL: "debug"
   # PG
   PG_POOL_MAX: "2"
-  PG_URL: "postgres://user:myAwEsOm3pa55@w0rd@db:5432/db"
+  PG_URL: "postgres://user:myAwEsOm3pa55%40w0rd@db:5432/db"
   # gRPC
   GRPC_PORT: "8081"
   # RMQ
@@ -63,7 +63,7 @@ services:
 
   rabbitmq:
     container_name: rabbitmq
-    image: rabbitmq:4.3.4-management
+    image: rabbitmq:4.3.6-management
     environment:
       <<: *x-rabbitmq-variables
     ports:
@@ -78,7 +78,7 @@ services:
 
   nats:
     container_name: nats
-    image: nats:2.14-alpine
+    image: nats:2.15-alpine
     command: [ "-m", "8222", "-sd", "/nats-data", "-user", "guest", "-pass", "guest" ]
     ports:
       - "4222:4222"
