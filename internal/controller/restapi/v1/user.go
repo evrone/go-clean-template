@@ -7,7 +7,7 @@ import (
 	"github.com/evrone/go-clean-template/internal/controller/restapi/v1/request"
 	"github.com/evrone/go-clean-template/internal/controller/restapi/v1/response"
 	"github.com/evrone/go-clean-template/internal/entity"
-	"github.com/gofiber/fiber/v2"
+	"github.com/gofiber/fiber/v3"
 )
 
 // @Summary     Register
@@ -22,10 +22,10 @@ import (
 // @Failure     409     {object} response.Error
 // @Failure     500     {object} response.Error
 // @Router      /auth/register [post]
-func (r *V1) register(ctx *fiber.Ctx) error {
+func (r *V1) register(ctx fiber.Ctx) error {
 	var body request.Register
 
-	if err := ctx.BodyParser(&body); err != nil {
+	if err := ctx.Bind().Body(&body); err != nil {
 		r.l.Error(err, "restapi - v1 - register")
 
 		return errorResponse(ctx, http.StatusBadRequest, "invalid request body")
@@ -37,7 +37,7 @@ func (r *V1) register(ctx *fiber.Ctx) error {
 		return errorResponse(ctx, http.StatusBadRequest, "invalid request body")
 	}
 
-	user, err := r.u.Register(ctx.UserContext(), body.Username, body.Email, body.Password)
+	user, err := r.u.Register(ctx.Context(), body.Username, body.Email, body.Password)
 	if err != nil {
 		r.l.Error(err, "restapi - v1 - register")
 
@@ -63,10 +63,10 @@ func (r *V1) register(ctx *fiber.Ctx) error {
 // @Failure     401     {object} response.Error
 // @Failure     500     {object} response.Error
 // @Router      /auth/login [post]
-func (r *V1) login(ctx *fiber.Ctx) error {
+func (r *V1) login(ctx fiber.Ctx) error {
 	var body request.Login
 
-	if err := ctx.BodyParser(&body); err != nil {
+	if err := ctx.Bind().Body(&body); err != nil {
 		r.l.Error(err, "restapi - v1 - login")
 
 		return errorResponse(ctx, http.StatusBadRequest, "invalid request body")
@@ -78,7 +78,7 @@ func (r *V1) login(ctx *fiber.Ctx) error {
 		return errorResponse(ctx, http.StatusBadRequest, "invalid request body")
 	}
 
-	token, err := r.u.Login(ctx.UserContext(), body.Email, body.Password)
+	token, err := r.u.Login(ctx.Context(), body.Email, body.Password)
 	if err != nil {
 		r.l.Error(err, "restapi - v1 - login")
 
@@ -103,13 +103,13 @@ func (r *V1) login(ctx *fiber.Ctx) error {
 // @Failure     500 {object} response.Error
 // @Security    BearerAuth
 // @Router      /user/profile [get]
-func (r *V1) profile(ctx *fiber.Ctx) error {
+func (r *V1) profile(ctx fiber.Ctx) error {
 	userID, ok := ctx.Locals("userID").(string)
 	if !ok {
 		return errorResponse(ctx, http.StatusUnauthorized, "unauthorized")
 	}
 
-	user, err := r.u.GetUser(ctx.UserContext(), userID)
+	user, err := r.u.GetUser(ctx.Context(), userID)
 	if err != nil {
 		r.l.Error(err, "restapi - v1 - profile")
 
@@ -122,3 +122,5 @@ func (r *V1) profile(ctx *fiber.Ctx) error {
 
 	return ctx.Status(http.StatusOK).JSON(user)
 }
+
+// fiber:context-methods migrated

@@ -8,7 +8,7 @@ import (
 
 	"github.com/evrone/go-clean-template/pkg/logger"
 	"github.com/goccy/go-json"
-	"github.com/gofiber/fiber/v2"
+	"github.com/gofiber/fiber/v3"
 	"golang.org/x/sync/errgroup"
 )
 
@@ -59,7 +59,6 @@ func New(l logger.Interface, opts ...Option) *Server {
 	}
 
 	app := fiber.New(fiber.Config{
-		Prefork:      s.prefork,
 		ReadTimeout:  s.readTimeout,
 		WriteTimeout: s.writeTimeout,
 		JSONDecoder:  json.Unmarshal,
@@ -74,7 +73,7 @@ func New(l logger.Interface, opts ...Option) *Server {
 // Start -.
 func (s *Server) Start() {
 	s.eg.Go(func() error {
-		err := s.App.Listen(s.address)
+		err := s.App.Listen(s.address, fiber.ListenConfig{EnablePrefork: s.prefork})
 		if err != nil {
 			s.notify <- err
 

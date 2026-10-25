@@ -5,7 +5,7 @@ import (
 	"strings"
 
 	"github.com/evrone/go-clean-template/pkg/jwt"
-	"github.com/gofiber/fiber/v2"
+	"github.com/gofiber/fiber/v3"
 )
 
 const _bearerParts = 2
@@ -15,8 +15,8 @@ type errorResponse struct {
 }
 
 // Auth returns a JWT authentication middleware for Fiber.
-func Auth(jwtManager *jwt.Manager) func(*fiber.Ctx) error {
-	return func(ctx *fiber.Ctx) error {
+func Auth(jwtManager *jwt.Manager) func(fiber.Ctx) error {
+	return func(ctx fiber.Ctx) error {
 		header := ctx.Get("Authorization")
 		if header == "" {
 			return ctx.Status(http.StatusUnauthorized).JSON(errorResponse{Error: "missing authorization header"})

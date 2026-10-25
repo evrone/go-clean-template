@@ -8,7 +8,7 @@ import (
 	"github.com/evrone/go-clean-template/internal/controller/restapi/v1/request"
 	"github.com/evrone/go-clean-template/internal/controller/restapi/v1/response"
 	"github.com/evrone/go-clean-template/internal/entity"
-	"github.com/gofiber/fiber/v2"
+	"github.com/gofiber/fiber/v3"
 )
 
 // @Summary     Create task
@@ -24,7 +24,7 @@ import (
 // @Failure     500     {object} response.Error
 // @Security    BearerAuth
 // @Router      /tasks [post]
-func (r *V1) createTask(ctx *fiber.Ctx) error {
+func (r *V1) createTask(ctx fiber.Ctx) error {
 	userID, ok := ctx.Locals("userID").(string)
 	if !ok {
 		return errorResponse(ctx, http.StatusUnauthorized, "unauthorized")
@@ -32,7 +32,7 @@ func (r *V1) createTask(ctx *fiber.Ctx) error {
 
 	var body request.CreateTask
 
-	if err := ctx.BodyParser(&body); err != nil {
+	if err := ctx.Bind().Body(&body); err != nil {
 		r.l.Error(err, "restapi - v1 - createTask")
 
 		return errorResponse(ctx, http.StatusBadRequest, "invalid request body")
@@ -44,7 +44,7 @@ func (r *V1) createTask(ctx *fiber.Ctx) error {
 		return errorResponse(ctx, http.StatusBadRequest, "invalid request body")
 	}
 
-	task, err := r.tk.Create(ctx.UserContext(), userID, body.Title, body.Description)
+	task, err := r.tk.Create(ctx.Context(), userID, body.Title, body.Description)
 	if err != nil {
 		r.l.Error(err, "restapi - v1 - createTask")
 
@@ -67,7 +67,7 @@ func (r *V1) createTask(ctx *fiber.Ctx) error {
 // @Failure     500    {object} response.Error
 // @Security    BearerAuth
 // @Router      /tasks [get]
-func (r *V1) listTasks(ctx *fiber.Ctx) error {
+func (r *V1) listTasks(ctx fiber.Ctx) error {
 	userID, ok := ctx.Locals("userID").(string)
 	if !ok {
 		return errorResponse(ctx, http.StatusUnauthorized, "unauthorized")
@@ -94,7 +94,7 @@ func (r *V1) listTasks(ctx *fiber.Ctx) error {
 		offset = 0
 	}
 
-	tasks, total, err := r.tk.List(ctx.UserContext(), userID, status, limit, offset)
+	tasks, total, err := r.tk.List(ctx.Context(), userID, status, limit, offset)
 	if err != nil {
 		r.l.Error(err, "restapi - v1 - listTasks")
 
@@ -120,7 +120,7 @@ func (r *V1) listTasks(ctx *fiber.Ctx) error {
 // @Failure     500 {object} response.Error
 // @Security    BearerAuth
 // @Router      /tasks/{id} [get]
-func (r *V1) getTask(ctx *fiber.Ctx) error {
+func (r *V1) getTask(ctx fiber.Ctx) error {
 	userID, ok := ctx.Locals("userID").(string)
 	if !ok {
 		return errorResponse(ctx, http.StatusUnauthorized, "unauthorized")
@@ -128,7 +128,7 @@ func (r *V1) getTask(ctx *fiber.Ctx) error {
 
 	taskID := ctx.Params("id")
 
-	task, err := r.tk.Get(ctx.UserContext(), userID, taskID)
+	task, err := r.tk.Get(ctx.Context(), userID, taskID)
 	if err != nil {
 		r.l.Error(err, "restapi - v1 - getTask")
 
@@ -162,7 +162,7 @@ func (r *V1) getTask(ctx *fiber.Ctx) error {
 // @Failure     500     {object} response.Error
 // @Security    BearerAuth
 // @Router      /tasks/{id} [put]
-func (r *V1) updateTask(ctx *fiber.Ctx) error {
+func (r *V1) updateTask(ctx fiber.Ctx) error {
 	userID, ok := ctx.Locals("userID").(string)
 	if !ok {
 		return errorResponse(ctx, http.StatusUnauthorized, "unauthorized")
@@ -172,7 +172,7 @@ func (r *V1) updateTask(ctx *fiber.Ctx) error {
 
 	var body request.UpdateTask
 
-	if err := ctx.BodyParser(&body); err != nil {
+	if err := ctx.Bind().Body(&body); err != nil {
 		r.l.Error(err, "restapi - v1 - updateTask")
 
 		return errorResponse(ctx, http.StatusBadRequest, "invalid request body")
@@ -184,7 +184,7 @@ func (r *V1) updateTask(ctx *fiber.Ctx) error {
 		return errorResponse(ctx, http.StatusBadRequest, "invalid request body")
 	}
 
-	task, err := r.tk.Update(ctx.UserContext(), userID, taskID, body.Title, body.Description)
+	task, err := r.tk.Update(ctx.Context(), userID, taskID, body.Title, body.Description)
 	if err != nil {
 		r.l.Error(err, "restapi - v1 - updateTask")
 
@@ -218,7 +218,7 @@ func (r *V1) updateTask(ctx *fiber.Ctx) error {
 // @Failure     500     {object} response.Error
 // @Security    BearerAuth
 // @Router      /tasks/{id}/status [patch]
-func (r *V1) transitionTask(ctx *fiber.Ctx) error {
+func (r *V1) transitionTask(ctx fiber.Ctx) error {
 	userID, ok := ctx.Locals("userID").(string)
 	if !ok {
 		return errorResponse(ctx, http.StatusUnauthorized, "unauthorized")
@@ -228,7 +228,7 @@ func (r *V1) transitionTask(ctx *fiber.Ctx) error {
 
 	var body request.TransitionTask
 
-	if err := ctx.BodyParser(&body); err != nil {
+	if err := ctx.Bind().Body(&body); err != nil {
 		r.l.Error(err, "restapi - v1 - transitionTask")
 
 		return errorResponse(ctx, http.StatusBadRequest, "invalid request body")
@@ -240,7 +240,7 @@ func (r *V1) transitionTask(ctx *fiber.Ctx) error {
 		return errorResponse(ctx, http.StatusBadRequest, "invalid request body")
 	}
 
-	task, err := r.tk.Transition(ctx.UserContext(), userID, taskID, body.Status)
+	task, err := r.tk.Transition(ctx.Context(), userID, taskID, body.Status)
 	if err != nil {
 		r.l.Error(err, "restapi - v1 - transitionTask")
 
@@ -273,7 +273,7 @@ func (r *V1) transitionTask(ctx *fiber.Ctx) error {
 // @Failure     500 {object} response.Error
 // @Security    BearerAuth
 // @Router      /tasks/{id} [delete]
-func (r *V1) deleteTask(ctx *fiber.Ctx) error {
+func (r *V1) deleteTask(ctx fiber.Ctx) error {
 	userID, ok := ctx.Locals("userID").(string)
 	if !ok {
 		return errorResponse(ctx, http.StatusUnauthorized, "unauthorized")
@@ -281,7 +281,7 @@ func (r *V1) deleteTask(ctx *fiber.Ctx) error {
 
 	taskID := ctx.Params("id")
 
-	err := r.tk.Delete(ctx.UserContext(), userID, taskID)
+	err := r.tk.Delete(ctx.Context(), userID, taskID)
 	if err != nil {
 		r.l.Error(err, "restapi - v1 - deleteTask")
 
@@ -294,3 +294,5 @@ func (r *V1) deleteTask(ctx *fiber.Ctx) error {
 
 	return ctx.SendStatus(http.StatusNoContent)
 }
+
+// fiber:context-methods migrated
