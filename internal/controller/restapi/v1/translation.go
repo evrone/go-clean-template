@@ -6,7 +6,7 @@ import (
 	"github.com/evrone/go-clean-template/internal/controller/restapi/v1/request"
 	_ "github.com/evrone/go-clean-template/internal/controller/restapi/v1/response" // for swaggo
 	"github.com/evrone/go-clean-template/internal/entity"
-	"github.com/gofiber/fiber/v2"
+	"github.com/gofiber/fiber/v3"
 )
 
 // @Summary     Show history
@@ -19,13 +19,13 @@ import (
 // @Failure     500 {object} response.Error
 // @Security    BearerAuth
 // @Router      /translation/history [get]
-func (r *V1) history(ctx *fiber.Ctx) error {
+func (r *V1) history(ctx fiber.Ctx) error {
 	userID, ok := ctx.Locals("userID").(string)
 	if !ok {
 		return errorResponse(ctx, http.StatusUnauthorized, "unauthorized")
 	}
 
-	translationHistory, err := r.t.History(ctx.UserContext(), userID)
+	translationHistory, err := r.t.History(ctx.Context(), userID)
 	if err != nil {
 		r.l.Error(err, "restapi - v1 - history")
 
@@ -48,7 +48,7 @@ func (r *V1) history(ctx *fiber.Ctx) error {
 // @Failure     500     {object} response.Error
 // @Security    BearerAuth
 // @Router      /translation/do-translate [post]
-func (r *V1) doTranslate(ctx *fiber.Ctx) error {
+func (r *V1) doTranslate(ctx fiber.Ctx) error {
 	userID, ok := ctx.Locals("userID").(string)
 	if !ok {
 		return errorResponse(ctx, http.StatusUnauthorized, "unauthorized")
@@ -56,7 +56,7 @@ func (r *V1) doTranslate(ctx *fiber.Ctx) error {
 
 	var body request.Translate
 
-	if err := ctx.BodyParser(&body); err != nil {
+	if err := ctx.Bind().Body(&body); err != nil {
 		r.l.Error(err, "restapi - v1 - doTranslate")
 
 		return errorResponse(ctx, http.StatusBadRequest, "invalid request body")
@@ -69,7 +69,7 @@ func (r *V1) doTranslate(ctx *fiber.Ctx) error {
 	}
 
 	translation, err := r.t.Translate(
-		ctx.UserContext(),
+		ctx.Context(),
 		userID,
 		entity.Translation{
 			Source:      body.Source,
@@ -85,3 +85,5 @@ func (r *V1) doTranslate(ctx *fiber.Ctx) error {
 
 	return ctx.Status(http.StatusOK).JSON(translation)
 }
+
+// fiber:context-methods migrated

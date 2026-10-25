@@ -5,10 +5,10 @@ import (
 	"strings"
 
 	"github.com/evrone/go-clean-template/pkg/logger"
-	"github.com/gofiber/fiber/v2"
+	"github.com/gofiber/fiber/v3"
 )
 
-func buildRequestMessage(ctx *fiber.Ctx) string {
+func buildRequestMessage(ctx fiber.Ctx) string {
 	var result strings.Builder
 
 	result.WriteString(ctx.IP())
@@ -24,8 +24,8 @@ func buildRequestMessage(ctx *fiber.Ctx) string {
 	return result.String()
 }
 
-func Logger(l logger.Interface) func(c *fiber.Ctx) error {
-	return func(ctx *fiber.Ctx) error {
+func Logger(l logger.Interface) func(c fiber.Ctx) error {
+	return func(ctx fiber.Ctx) error {
 		err := ctx.Next()
 
 		l.Info("%s", buildRequestMessage(ctx))

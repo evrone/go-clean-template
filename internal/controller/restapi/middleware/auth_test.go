@@ -9,7 +9,7 @@ import (
 
 	"github.com/evrone/go-clean-template/internal/controller/restapi/middleware"
 	"github.com/evrone/go-clean-template/pkg/jwt"
-	"github.com/gofiber/fiber/v2"
+	"github.com/gofiber/fiber/v3"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -21,7 +21,7 @@ func newTestApp(t *testing.T) (*fiber.App, *jwt.Manager) {
 
 	app := fiber.New()
 	app.Use(middleware.Auth(jwtManager))
-	app.Get("/test", func(c *fiber.Ctx) error {
+	app.Get("/test", func(c fiber.Ctx) error {
 		userID, ok := c.Locals("userID").(string)
 		if !ok {
 			return c.SendStatus(http.StatusUnauthorized)
