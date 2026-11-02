@@ -159,16 +159,16 @@ around blocks), `funlen` (65 lines / 40 statements), `gocyclo` (10), `gocognit` 
 
 ## READMEs must be updated as a set
 
-`README.md` (English) is canonical. `README_RU.md` and `README_CN.md` are full translations that
+`README.md` (English) is canonical. `README_RU.md`, `README_CN.md` and `README_zh-TW.md` are full translations that
 mirror it **section for section, table row for table row** — same headings in the same order, same
-tables, same code blocks, same links. Changing one and not the other two is the most common
+tables, same code blocks, same links. Changing one and not the others is the most common
 regression in this repo.
 
-Update all three whenever a change touches what they document:
+Update all four whenever a change touches what they document:
 
 | Change | What to update in every README |
 | --- | --- |
-| New or changed REST / gRPC endpoint | the domain table under `Domains` (`Домены` / `领域`) |
+| New or changed REST / gRPC endpoint | the domain table under `Domains` (`Домены` / `领域` / `領域`) |
 | New domain | the `Overview` bullet list, `Content` index, and a new `Domains` subsection |
 | New or renamed env var | the config table under `Observability` if tracing-related; otherwise the `config` section |
 | New transport, server, port or service URL | the `Quick start` service list |
@@ -230,7 +230,7 @@ before writing.
    added to the `V1` / controller struct in `<transport>/v1/controller.go`. gRPC also needs
    `docs/proto/v1/<domain>.proto` and `make proto-v1`.
 10. **Docs** — swagger annotations on the REST handlers, `make swag-v1`, and the README updates
-    listed above in all three languages.
+    listed above in all four READMEs.
 11. **Integration test** — `integration-test/<domain>_test.go` exercising the domain over the
     transports you exposed.
 
