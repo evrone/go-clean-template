@@ -20,7 +20,7 @@ require (
 	github.com/caarlos0/env/v11 v11.4.1
 	github.com/exaring/otelpgx v0.13.0
 	github.com/go-playground/validator/v10 v10.30.5
-	github.com/goccy/go-json v0.11.2
+	github.com/goccy/go-json v0.12.0
 	github.com/gofiber/contrib/v3/otel v1.3.1
 	github.com/gofiber/contrib/v3/prometheus v0.1.1
 	github.com/gofiber/contrib/v3/swaggo v1.0.14
